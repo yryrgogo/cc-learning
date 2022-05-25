@@ -10,6 +10,7 @@
 char *user_input;
 // 現在着目しているトークン
 Token *token;
+extern Node *code[100];
 
 // エラーを報告するための関数
 // printf と同じ引数をとる
@@ -44,6 +45,15 @@ bool consume(char *op)
 		return false;
 	token = token->next;
 	return true;
+}
+
+Token *consume_ident()
+{
+	if (token->kind != TK_IDENT)
+		return NULL;
+
+	token = token->next;
+	return token;
 }
 
 // 次のトークンが期待している記号のときには、トークンを1つ読み進めル。
@@ -112,7 +122,7 @@ Token *tokenize(char *p)
 		}
 
 		// Single-letter punctuator
-		if (strchr("+-*/()<>", *p))
+		if (strchr("+-*/()<>;", *p))
 		{
 			cur = new_token(TK_RESERVED, cur, p++, 1);
 			continue;
@@ -150,7 +160,8 @@ int main(int argc, char **argv)
 
 	user_input = argv[1];
 	token = tokenize(user_input);
-	Node *node = expr();
+
+	program();
 
 	// アセンブリの前半部分を出力
 	printf(".intel_syntax noprefix\n");
@@ -158,7 +169,7 @@ int main(int argc, char **argv)
 	printf("main:\n");
 
 	// 抽象構文木を下りながらコード生成
-	gen(node);
+	gen(code[0]);
 
 	// スタックトップに式全体の値が残っているはずなので
 	// それを RAX にロードして関数からの返り値とする

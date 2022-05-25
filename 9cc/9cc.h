@@ -15,15 +15,17 @@ typedef enum
 // Kind of Operator
 typedef enum
 {
-	ND_ADD, // +
-	ND_SUB, // -
-	ND_MUL, // *
-	ND_DIV, // /
-	ND_EQ,	// ==
-	ND_NE,	// !=
-	ND_LT,	// <
-	ND_LE,	// <=
-	ND_NUM, // 整数
+	ND_ADD,		 // +
+	ND_SUB,		 // -
+	ND_MUL,		 // *
+	ND_DIV,		 // /
+	ND_EQ,		 // ==
+	ND_NE,		 // !=
+	ND_LT,		 // <
+	ND_LE,		 // <=
+	ND_ASSIGN, // =
+	ND_LVAR,	 // ローカル変数
+	ND_NUM,		 // 整数
 } NodeKind;
 
 // トークン型
@@ -43,9 +45,13 @@ struct Node
 	Node *lhs;		 // 左辺
 	Node *rhs;		 // 右辺
 	int val;			 // kind が ND_NUM の場合のみ使う
+	int offset;		 // kind が ND_LVAR の場合のみ使う
 };
 
+Node *program();
+Node *stmt();
 Node *expr();
+Node *assign();
 Node *equality();
 Node *relational();
 Node *add();
@@ -56,6 +62,7 @@ Node *primary();
 void gen(Node *node);
 
 bool consume(char *op);
+Token *consume_ident();
 void expect(char *op);
 int expect_number();
 bool at_eof();
