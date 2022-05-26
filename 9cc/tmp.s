@@ -1,6 +1,9 @@
 .intel_syntax noprefix
 .globl main
 main:
+  push rbp
+  mov rbp, rsp
+  sub rsp, 208
   push 0
   push 0
   push 10
@@ -13,4 +16,6 @@ main:
   sub rax, rdi
   push rax
   pop rax
+  mov rsp, rbp
+  pop rbp
   ret
