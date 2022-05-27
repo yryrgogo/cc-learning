@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+Node *code[100];
+LVar *locals;
+
 Node *new_node(NodeKind kind)
 {
 	Node *node = calloc(1, sizeof(Node));
@@ -23,8 +26,6 @@ Node *new_binary(NodeKind kind, Node *lhs, Node *rhs)
 	node->rhs = rhs;
 	return node;
 }
-
-Node *code[100];
 
 Node *program()
 {
@@ -149,4 +150,12 @@ Node *primary()
 
 	// そうでなければ数値のはず
 	return new_num(expect_number());
+}
+
+LVar *find_lvar(Token *tok)
+{
+	for (LVar *var = locals; var; var = var->next)
+		if (var->len == tok->len && !memcmp(tok->str, var->name, var->len))
+			return var;
+	return NULL;
 }

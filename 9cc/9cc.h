@@ -1,8 +1,5 @@
 #include <stdbool.h>
 
-typedef struct Token Token;
-typedef struct Node Node;
-
 // Kind of Token
 typedef enum
 {
@@ -10,6 +7,7 @@ typedef enum
 	TK_IDENT,		 // 識別子
 	TK_NUM,			 // 整数トークン
 	TK_EOF,			 // 入力の終わりを表すトークン
+	TK_RETURN,	 //  return
 } TokenKind;
 
 // Kind of Operator
@@ -28,6 +26,8 @@ typedef enum
 	ND_NUM,		 // 整数
 } NodeKind;
 
+typedef struct Token Token;
+
 // トークン型
 struct Token
 {
@@ -38,6 +38,8 @@ struct Token
 	int len;				// トークンの長さ
 };
 
+typedef struct Node Node;
+
 // 抽象構文木のノードの型
 struct Node
 {
@@ -46,6 +48,17 @@ struct Node
 	Node *rhs;		 // 右辺
 	int val;			 // kind が ND_NUM の場合のみ使う
 	int offset;		 // kind が ND_LVAR の場合のみ使う
+};
+
+typedef struct LVar LVar;
+
+// ローカル変数の型
+struct LVar
+{
+	LVar *next;
+	char *name;
+	int len;
+	int offset;
 };
 
 Node *program();
@@ -58,6 +71,7 @@ Node *add();
 Node *mul();
 Node *unary();
 Node *primary();
+LVar *find_lvar(Token *tok);
 
 void gen(Node *node);
 

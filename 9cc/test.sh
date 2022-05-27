@@ -28,6 +28,7 @@ assert 90 '+10-20-(-100);'
 assert 10 '- -10;'
 assert 10 '- - +10;'
 assert 10 'a = 10;a;'
+assert 10 'abc = 10;abc;'
 assert 14 "a = 3;b = 5 * 6 - 8;a + b / 2;"
 
 echo OK
