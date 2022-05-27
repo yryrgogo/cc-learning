@@ -24,6 +24,7 @@ typedef enum
 	ND_ASSIGN, // =
 	ND_LVAR,	 // ローカル変数
 	ND_NUM,		 // 整数
+	ND_RETURN,
 } NodeKind;
 
 typedef struct Token Token;
@@ -76,6 +77,7 @@ LVar *find_lvar(Token *tok);
 void gen(Node *node);
 
 bool consume(char *op);
+bool consume_token(TokenKind tk);
 Token *consume_ident();
 void expect(char *op);
 int expect_number();

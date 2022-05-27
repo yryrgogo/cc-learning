@@ -58,3 +58,7 @@ main:
   mov rsp, rbp
   pop rbp
   ret
+  pop rax
+  mov rsp, rbp
+  pop rbp
+  ret

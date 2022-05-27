@@ -18,6 +18,8 @@ assert() {
 
 assert 0 "0;"
 assert 42 "42;"
+# error: 255 > x
+# assert 421 "421;"
 assert 21 "5+20-4;"
 assert 41 " 12 + 34 - 5 ;"
 assert 47 '5+6*7;'
@@ -30,5 +32,9 @@ assert 10 '- - +10;'
 assert 10 'a = 10;a;'
 assert 10 'abc = 10;abc;'
 assert 14 "a = 3;b = 5 * 6 - 8;a + b / 2;"
-
+assert 5 "return 5;"
+assert 55 "return 55;"
+# error: 255 > x
+# assert 555 "return 555;"
+assert 14 " a = 3; b = 5 * 6 - 8; return a + b / 2;"
 echo OK
