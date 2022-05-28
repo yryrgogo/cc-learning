@@ -2,11 +2,11 @@
 #include <stdlib.h>
 
 // 現在着目しているトークン
-Token *token;
+Token* token;
 
 // 次のトークンが期待している記号のときには、トークンを1つ読み進めて
 // 真を返す。それ以外の場合には偽を返す。
-bool consume(char *op)
+bool consume(char* op)
 {
 	if (token->kind != TK_RESERVED || strlen(op) != token->len || memcmp(token->str, op, token->len))
 		return false;
@@ -22,19 +22,19 @@ bool consume_token(TokenKind tk)
 	return true;
 }
 
-Token *consume_ident()
+Token* consume_ident()
 {
 	if (token->kind != TK_IDENT)
 		return NULL;
 
-	Token *t = token;
+	Token* t = token;
 	token = token->next;
 	return t;
 }
 
 // 次のトークンが期待している記号のときには、トークンを1つ読み進めル。
 // それ以外の場合にはエラーを報告する。
-void expect(char *op)
+void expect(char* op)
 {
 	if (token->kind != TK_RESERVED || strlen(op) != token->len || memcmp(token->str, op, token->len))
 		error_at(token->str, "expected \"%s\"", op);
@@ -58,9 +58,9 @@ bool at_eof()
 }
 
 // 新しいトークンを作成して cur に繋げる
-Token *new_token(TokenKind kind, Token *cur, char *str, int len)
+Token* new_token(TokenKind kind, Token* cur, char* str, int len)
 {
-	Token *tok = calloc(1, sizeof(Token));
+	Token* tok = calloc(1, sizeof(Token));
 	tok->kind = kind;
 	tok->str = str;
 	tok->len = len;
@@ -68,7 +68,7 @@ Token *new_token(TokenKind kind, Token *cur, char *str, int len)
 	return tok;
 }
 
-bool startswith(char *p, char *q)
+bool startswith(char* p, char* q)
 {
 	return memcmp(p, q, strlen(q) == 0);
 }
@@ -76,17 +76,17 @@ bool startswith(char *p, char *q)
 bool is_alnum(char c)
 {
 	return ('a' <= c && c <= 'z') ||
-				 ('A' <= c && c <= 'Z') ||
-				 ('0' <= c && c <= '9') ||
-				 (c == '_');
+		('A' <= c && c <= 'Z') ||
+		('0' <= c && c <= '9') ||
+		(c == '_');
 }
 
 // 入力文字列 p をトークナイズしてそれを返す
-Token *tokenize(char *p)
+Token* tokenize(char* p)
 {
 	Token head;
 	head.next = NULL;
-	Token *cur = &head;
+	Token* cur = &head;
 
 	while (*p)
 	{
@@ -128,8 +128,8 @@ Token *tokenize(char *p)
 
 		if (strncmp(p, "else", 4) == 0 && !is_alnum(p[4]))
 		{
-			cur = new_token(TK_ELSE, cur, p, 2);
-			p += 2;
+			cur = new_token(TK_ELSE, cur, p, 4);
+			p += 4;
 			continue;
 		}
 
@@ -150,7 +150,7 @@ Token *tokenize(char *p)
 		if (isdigit(*p))
 		{
 			cur = new_token(TK_NUM, cur, p, 0);
-			char *q = p;
+			char* q = p;
 			cur->val = strtol(p, &p, 10);
 			cur->len = p - q;
 			continue;

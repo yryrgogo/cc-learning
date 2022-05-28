@@ -48,16 +48,17 @@ int main(int argc, char** argv)
 	user_input = argv[1];
 	tokenize(user_input);
 
-	for (;;)
-	{
-		if (token->kind == TK_EOF) {
-			break;
-		}
-		char s[10];
-		printf("%s\n", strncpy(s, token->str, token->len));
-		token = token->next;
-	}
-	return 0;
+	// for (;;)
+	// {
+	// 	if (token->kind == TK_EOF) {
+	// 		break;
+	// 	}
+	// 	// char s[10];
+	// 	// printf("%s\n", strncpy(s, token->str, token->len));
+	// 	printf("%s\n", token->str);
+	// 	token = token->next;
+	// }
+	// return 0;
 
 	program();
 
