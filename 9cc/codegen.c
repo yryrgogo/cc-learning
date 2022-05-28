@@ -9,7 +9,7 @@ static int count(void)
 	return i++;
 }
 
-void gen_lval(Node *node)
+void gen_lval(Node* node)
 {
 	if (node->kind != ND_LVAR)
 		error_at(node, "代入の左辺値が変数ではありません。");
@@ -19,7 +19,7 @@ void gen_lval(Node *node)
 	printf("  push rax\n");
 }
 
-void gen(Node *node)
+void gen(Node* node)
 {
 	switch (node->kind)
 	{
@@ -58,7 +58,7 @@ void gen(Node *node)
 		printf("  je .L.else.%d\n", c);
 
 		gen(node->then);
-		printf("  je .L.end.%d\n", c);
+		printf("  jmp .L.end.%d\n", c);
 
 		printf(".L.else.%d:", c);
 		if (node->els)
