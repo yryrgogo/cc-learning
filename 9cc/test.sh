@@ -37,4 +37,10 @@ assert 55 "return 55;"
 # error: 255 > x
 # assert 555 "return 555;"
 assert 14 " a = 3; b = 5 * 6 - 8; return a + b / 2;"
+
+# if
+assert 11 "if (5) 11;"
+assert 64 "if (0) 11;"
+assert 5 "if (0) 11; else 5;"
+
 echo OK

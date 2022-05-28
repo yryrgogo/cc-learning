@@ -1,9 +1,13 @@
 #include "9cc.h"
 #include <stdio.h>
 
-// =============================================
-// Stack Machine Emulate
-// =============================================
+static int depth;
+
+static int count(void)
+{
+	static int i = 1;
+	return i++;
+}
 
 void gen_lval(Node *node)
 {
@@ -44,6 +48,27 @@ void gen(Node *node)
 		printf("  pop rbp\n");
 		printf("  ret\n");
 		return;
+	case ND_IF:
+	{
+		int c = count();
+		gen(node->cond);
+		printf("  pop rax\n");
+		printf("  cmp rax, 0\n");
+
+		printf("  je .L.else.%d\n", c);
+
+		gen(node->then);
+		printf("  je .L.end.%d\n", c);
+
+		printf(".L.else.%d:", c);
+		if (node->els)
+		{
+			gen(node->els);
+		}
+
+		printf(".L.end.%d:\n", c);
+		return;
+	}
 	}
 
 	gen(node->lhs);

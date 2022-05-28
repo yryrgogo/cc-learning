@@ -7,7 +7,9 @@ typedef enum
 	TK_IDENT,		 // 識別子
 	TK_NUM,			 // 整数トークン
 	TK_EOF,			 // 入力の終わりを表すトークン
-	TK_RETURN,	 //  return
+	TK_RETURN,	 // return
+	TK_IF,			 // if
+	TK_ELSE,		 // else
 } TokenKind;
 
 // Kind of Operator
@@ -24,7 +26,9 @@ typedef enum
 	ND_ASSIGN, // =
 	ND_LVAR,	 // ローカル変数
 	ND_NUM,		 // 整数
-	ND_RETURN,
+	ND_RETURN, // return
+	ND_IF,     // if
+	ND_ELSE,   // else
 } NodeKind;
 
 typedef struct Token Token;
@@ -49,6 +53,11 @@ struct Node
 	Node *rhs;		 // 右辺
 	int val;			 // kind が ND_NUM の場合のみ使う
 	int offset;		 // kind が ND_LVAR の場合のみ使う
+
+  // "if" or "for" statement
+  Node *cond;
+  Node *then;
+  Node *els;
 };
 
 typedef struct LVar LVar;

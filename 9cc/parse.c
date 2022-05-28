@@ -44,12 +44,30 @@ Node *stmt()
 		node->kind = ND_RETURN;
 		node->lhs = expr();
 	}
+	else if (consume_token(TK_IF))
+	{
+		expect("(");
+
+		node = calloc(1, sizeof(Node));
+		node->kind = ND_IF;
+		node->cond = expr();
+
+		expect(")");
+
+		node->then = stmt();
+
+		if (consume_token(TK_ELSE))
+		{
+			node->els = stmt();
+		}
+	}
 	else
 	{
 		node = expr();
 	}
 
 	expect(";");
+
 	return node;
 }
 
