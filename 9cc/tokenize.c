@@ -1,5 +1,4 @@
 #include "9cc.h"
-#include <stdlib.h>
 
 // 現在着目しているトークン
 Token* token;
@@ -8,7 +7,7 @@ Token* token;
 // 真を返す。それ以外の場合には偽を返す。
 bool consume(char* op)
 {
-	if (token->kind != TK_RESERVED || strlen(op) != token->len || memcmp(token->str, op, token->len))
+	if (token->kind != TK_PUNCT || strlen(op) != token->len || memcmp(token->str, op, token->len))
 		return false;
 	token = token->next;
 	return true;
@@ -32,11 +31,15 @@ Token* consume_ident()
 	return t;
 }
 
+bool equal(Token* tok, char* op) {
+	return memcmp(tok->loc, op, tok->len) == 0 && op[tok->len] == '\0';
+}
+
 // 次のトークンが期待している記号のときには、トークンを1つ読み進めル。
 // それ以外の場合にはエラーを報告する。
 void expect(char* op)
 {
-	if (token->kind != TK_RESERVED || strlen(op) != token->len || memcmp(token->str, op, token->len))
+	if (token->kind != TK_PUNCT || strlen(op) != token->len || memcmp(token->str, op, token->len))
 		error_at(token->str, "expected \"%s\"", op);
 	token = token->next;
 }
@@ -57,20 +60,9 @@ bool at_eof()
 	return token->kind == TK_EOF;
 }
 
-// 新しいトークンを作成して cur に繋げる
-Token* new_token(TokenKind kind, Token* cur, char* str, int len)
-{
-	Token* tok = calloc(1, sizeof(Token));
-	tok->kind = kind;
-	tok->str = str;
-	tok->len = len;
-	cur->next = tok;
-	return tok;
-}
-
 bool startswith(char* p, char* q)
 {
-	return memcmp(p, q, strlen(q) == 0);
+	return memcmp(p, q, strlen(q)) == 0;
 }
 
 bool is_alnum(char c)
@@ -80,6 +72,47 @@ bool is_alnum(char c)
 		('0' <= c && c <= '9') ||
 		(c == '_');
 }
+
+static int read_punct(char* p) {
+	static char* kw[] = {
+		"==", "!=", "<=", ">="
+	};
+
+	for (int i = 0; i < sizeof(kw) / sizeof(*kw); i++) {
+		if (startswith(p, kw[i]))
+			return strlen(kw[i]);
+	}
+
+	return ispunct(*p) ? 1 : 0;
+}
+
+static bool is_keyword(Token* tok) {
+	static HashMap map;
+
+	if (map.capacity == 0) {
+		static char* kw[] = {
+			"return", "if", "else", "for", "while"
+		};
+
+		for (int i = 0; i < sizeof(kw) / sizeof(*kw); i++)
+			hashmap_put(&map, kw[i], (void*)1);
+	}
+
+	return hashmap_get(&map, tok->loc);
+}
+
+// 新しいトークンを作成して cur に繋げる
+Token* new_token(TokenKind kind, Token* cur, char* str, int len)
+{
+	Token* tok = calloc(1, sizeof(Token));
+	tok->kind = kind;
+	tok->loc = str;
+	tok->str = str;
+	tok->len = len;
+	cur->next = tok;
+	return tok;
+}
+
 
 // 入力文字列 p をトークナイズしてそれを返す
 Token* tokenize(char* p)
@@ -100,15 +133,15 @@ Token* tokenize(char* p)
 		// Multi-letter punctuator
 		if (startswith(p, "==") || startswith(p, "!=") || startswith(p, ">=") || startswith(p, "<="))
 		{
-			cur = new_token(TK_RESERVED, cur, p, 2);
+			cur = new_token(TK_PUNCT, cur, p, 2);
 			p += 2;
 			continue;
 		}
 
 		// Single-letter punctuator
-		if (strchr("+-*/()<>=;", *p))
+		if (strchr("+-*/()<>{}=;", *p))
 		{
-			cur = new_token(TK_RESERVED, cur, p++, 1);
+			cur = new_token(TK_PUNCT, cur, p++, 1);
 			continue;
 		}
 

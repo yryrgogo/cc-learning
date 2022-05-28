@@ -1,0 +1,11 @@
+{
+	"files.associations": {
+		"*.py": "python",
+		"*.tfvars": "terraform",
+		"type_traits": "c",
+		"cctype": "c",
+		"exception": "c",
+		"cstdio": "c"
+	},
+	"C_Cpp.errorSquiggles": "Disabled"
+}

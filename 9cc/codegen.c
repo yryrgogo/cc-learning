@@ -1,5 +1,4 @@
 #include "9cc.h"
-#include <stdio.h>
 
 static int depth;
 

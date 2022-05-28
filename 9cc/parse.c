@@ -1,6 +1,4 @@
 #include "9cc.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 Node* code[100];
 LVar* locals;
@@ -184,7 +182,7 @@ Node* primary()
 LVar* find_lvar(Token* tok)
 {
 	for (LVar* var = locals; var; var = var->next)
-		if (var->len == tok->len && !memcmp(tok->str, var->name, var->len))
+		if (var->len == tok->len && !memcmp(tok->loc, var->name, var->len))
 			return var;
 	return NULL;
 }
