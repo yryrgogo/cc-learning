@@ -47,19 +47,35 @@ void gen(Node *node)
 		printf("  pop rbp\n");
 		printf("  ret\n");
 		return;
+	case ND_WHILE:
+	{
+		int c = count();
+
+		printf("  jmp .L.while.start.%d\n", c);
+
+		printf(".L.while.start.%d:\n", c);
+		gen(node->cond);
+		printf("  pop rax\n");
+		printf("  cmp rax, 0\n");
+		printf("  je .L.while.end.%d\n", c);
+		gen(node->then);
+		printf("  jmp .L.while.start.%d\n", c);
+
+		printf(".L.while.end.%d:\n", c);
+	}
+
 	case ND_IF:
 	{
 		int c = count();
 		gen(node->cond);
 		printf("  pop rax\n");
 		printf("  cmp rax, 0\n");
-
 		printf("  je .L.else.%d\n", c);
 
 		gen(node->then);
-		printf("  jmp .L.end.%d\n", c);
 
-		printf(".L.else.%d:", c);
+		printf("  jmp .L.end.%d\n", c);
+		printf(".L.else.%d:\n", c);
 		if (node->els)
 		{
 			gen(node->els);

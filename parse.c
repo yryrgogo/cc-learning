@@ -1,5 +1,6 @@
 #include "holycc.h"
 
+extern Token *token;
 Node *code[100];
 LVar *locals;
 
@@ -33,6 +34,10 @@ Node *program()
 	code[i] = NULL;
 }
 
+// stmt = expr ";"
+//        | "if" "(" expr ")" stmt("else" stmt)?
+//        | "while" "(" expr ")" stmt
+//        | "for" "(" expr ? ";" expr ? ";" expr ? ")" stmt
 Node *stmt()
 {
 	Node *node;
@@ -59,6 +64,18 @@ Node *stmt()
 		{
 			node->els = stmt();
 		}
+	}
+	else if (consume_token(TK_WHILE))
+	{
+		expect("(");
+
+		node = calloc(1, sizeof(Node));
+		node->kind = ND_WHILE;
+		node->cond = expr();
+
+		expect(")");
+
+		node->then = stmt();
 	}
 	else
 	{

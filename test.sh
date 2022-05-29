@@ -3,6 +3,7 @@ assert() {
 	expected="$1"
 	input="$2"
 
+	rm tmp.s
 	./holycc "$input" > tmp.s
 	cc -o tmp tmp.s
 	./tmp
@@ -14,6 +15,7 @@ assert() {
 	  echo "$input => $expected expected, but got $actual"
 		exit 1
 	fi
+
 }
 
 assert 0 "0;"
@@ -59,5 +61,19 @@ if (1)
   if (1) 11;
 else if (0) 2;
 else 0;"
+
+# while
+assert 6 "
+a = 0;
+while (a != 6)
+  a = a + 3;
+a;
+"
+assert 12 "
+a = 0;
+while (a != 12)
+  a = a + 3;
+a;
+"
 
 echo OK
