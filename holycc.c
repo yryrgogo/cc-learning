@@ -72,6 +72,7 @@ int main(int argc, char **argv)
 	// NOTE: これらを追加しわすれて、139が返るエラーにハマってた
 	printf("  push rbp\n");
 	printf("  mov rbp, rsp\n");
+	// alphabet 26 characters * 8byte = 208byte 確保すれば、1文字変数全て分の領域をあらかじめ確保したことになる
 	printf("  sub rsp, 208\n");
 
 	// 抽象構文木を下りながらコード生成

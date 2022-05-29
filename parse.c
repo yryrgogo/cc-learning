@@ -65,6 +65,23 @@ Node *stmt()
 			node->els = stmt();
 		}
 	}
+	else if (consume_token(TK_FOR))
+	{
+		expect("(");
+
+		node = calloc(1, sizeof(Node));
+		node->kind = ND_FOR;
+		node->init = expr();
+		expect(";");
+
+		node->cond = expr();
+		expect(";");
+
+		node->inc = expr();
+		expect(")");
+
+		node->then = stmt();
+	}
 	else if (consume_token(TK_WHILE))
 	{
 		expect("(");

@@ -56,6 +56,7 @@ assert 64 "if (0) 11;"
 assert 5 "if (0) 11; else 5;"
 assert 2 "if (0) 11; else if (1) 2; else 0;"
 assert 0 "if (0) 11; else if (0) 2; else 0;"
+assert 10 "i = 4; if (i < 5) 10;"
 assert 11 "
 if (1)
   if (1) 11;
@@ -73,6 +74,21 @@ assert 12 "
 a = 0;
 while (a != 12)
   a = a + 3;
+a;
+"
+
+# for
+assert 5 "
+a = 0;
+for (i = 0; i < 5; i = i + 1)
+  a = a + 1;
+a;
+"
+
+assert 24 "
+a = 0;
+for (i = 0; i < 12; i = i + 1)
+  a = a + 2;
 a;
 "
 

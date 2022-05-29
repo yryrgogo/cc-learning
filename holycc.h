@@ -24,6 +24,7 @@ typedef enum
 	TK_RETURN,	// return
 	TK_IF,			// if
 	TK_ELSE,		// else
+	TK_FOR,			// for
 	TK_WHILE,		// while
 } TokenKind;
 
@@ -91,7 +92,9 @@ struct Node
 	int offset;		 // kind が ND_LVAR の場合のみ使う
 
 	// "if" or "for" statement
+	Node *init;
 	Node *cond;
+	Node *inc;
 	Node *then;
 	Node *els;
 };
