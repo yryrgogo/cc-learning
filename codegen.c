@@ -1,4 +1,4 @@
-#include "9cc.h"
+#include "holycc.h"
 
 static int depth;
 
@@ -8,7 +8,7 @@ static int count(void)
 	return i++;
 }
 
-void gen_lval(Node* node)
+void gen_lval(Node *node)
 {
 	if (node->kind != ND_LVAR)
 		error_at(node, "代入の左辺値が変数ではありません。");
@@ -18,7 +18,7 @@ void gen_lval(Node* node)
 	printf("  push rax\n");
 }
 
-void gen(Node* node)
+void gen(Node *node)
 {
 	switch (node->kind)
 	{

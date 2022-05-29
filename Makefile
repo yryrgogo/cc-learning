@@ -2,18 +2,18 @@ CFLAGS=-std=c11 -g -fno-common -Wall -Wno-switch
 SRCS=$(wildcard *.c)
 OBJS=$(SRCS:.c=.o)
 
-9cc: $(OBJS)
-				$(CC) -o 9cc $(OBJS) $(LDFLAGS)
+holycc: $(OBJS)
+				$(CC) -o holycc $(OBJS) $(LDFLAGS)
 
-$(OBJS): 9cc.h
+$(OBJS): holycc.h
 
-test: 9cc
+test: holycc
 				./test.sh
 
-debug: 9cc
+debug: holycc
 				./debug.sh
 
 clean:
-				rm -rf 9cc *.o *~ tmp*
+				rm -rf holycc *.o *~ tmp*
 
 .PHONY: test clean

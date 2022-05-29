@@ -1,31 +1,31 @@
-#include "9cc.h"
+#include "holycc.h"
 
-Node* code[100];
-LVar* locals;
+Node *code[100];
+LVar *locals;
 
-Node* new_node(NodeKind kind)
+Node *new_node(NodeKind kind)
 {
-	Node* node = calloc(1, sizeof(Node));
+	Node *node = calloc(1, sizeof(Node));
 	node->kind = kind;
 	return node;
 }
 
-Node* new_num(int val)
+Node *new_num(int val)
 {
-	Node* node = new_node(ND_NUM);
+	Node *node = new_node(ND_NUM);
 	node->val = val;
 	return node;
 }
 
-Node* new_binary(NodeKind kind, Node* lhs, Node* rhs)
+Node *new_binary(NodeKind kind, Node *lhs, Node *rhs)
 {
-	Node* node = new_node(kind);
+	Node *node = new_node(kind);
 	node->lhs = lhs;
 	node->rhs = rhs;
 	return node;
 }
 
-Node* program()
+Node *program()
 {
 	int i = 0;
 	while (!at_eof())
@@ -33,9 +33,9 @@ Node* program()
 	code[i] = NULL;
 }
 
-Node* stmt()
+Node *stmt()
 {
-	Node* node;
+	Node *node;
 	if (consume_token(TK_RETURN))
 	{
 		node = calloc(1, sizeof(Node));
@@ -69,23 +69,23 @@ Node* stmt()
 	return node;
 }
 
-Node* expr()
+Node *expr()
 {
 	return assign();
 }
 
-Node* assign()
+Node *assign()
 {
-	Node* node = equality();
+	Node *node = equality();
 
 	if (consume("="))
 		node = new_binary(ND_ASSIGN, node, equality());
 	return node;
 }
 
-Node* equality()
+Node *equality()
 {
-	Node* node = relational();
+	Node *node = relational();
 
 	for (;;)
 	{
@@ -98,9 +98,9 @@ Node* equality()
 	}
 }
 
-Node* relational()
+Node *relational()
 {
-	Node* node = add();
+	Node *node = add();
 
 	for (;;)
 	{
@@ -117,9 +117,9 @@ Node* relational()
 	}
 }
 
-Node* add()
+Node *add()
 {
-	Node* node = mul();
+	Node *node = mul();
 
 	for (;;)
 	{
@@ -132,9 +132,9 @@ Node* add()
 	}
 }
 
-Node* mul()
+Node *mul()
 {
-	Node* node = unary();
+	Node *node = unary();
 
 	for (;;)
 	{
@@ -147,7 +147,7 @@ Node* mul()
 	}
 }
 
-Node* unary()
+Node *unary()
 {
 	if (consume("+"))
 		return primary();
@@ -156,20 +156,20 @@ Node* unary()
 	return primary();
 }
 
-Node* primary()
+Node *primary()
 {
 	// 次のトークンが "(" なら、"(" expr ")" のはず
 	if (consume("("))
 	{
-		Node* node = expr();
+		Node *node = expr();
 		expect(")");
 		return node;
 	}
 
-	Token* tok = consume_ident();
+	Token *tok = consume_ident();
 	if (tok)
 	{
-		Node* node = calloc(1, sizeof(Node));
+		Node *node = calloc(1, sizeof(Node));
 		node->kind = ND_LVAR;
 		node->offset = (tok->str[0] - 'a' + 1) * 8;
 		return node;
@@ -179,9 +179,9 @@ Node* primary()
 	return new_num(expect_number());
 }
 
-LVar* find_lvar(Token* tok)
+LVar *find_lvar(Token *tok)
 {
-	for (LVar* var = locals; var; var = var->next)
+	for (LVar *var = locals; var; var = var->next)
 		if (var->len == tok->len && !memcmp(tok->loc, var->name, var->len))
 			return var;
 	return NULL;

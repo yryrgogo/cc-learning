@@ -2,7 +2,7 @@
 debug() {
 	input="$1"
 
-	./9cc "$input" > out.s
+	./holycc "$input" > out.s
 	cat out.s
 }
 

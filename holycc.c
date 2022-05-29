@@ -1,4 +1,4 @@
-#include "9cc.h"
+#include "holycc.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,14 +7,14 @@
 #include <string.h>
 
 // 入力プログラム
-char* user_input;
+char *user_input;
 
-extern Token* token;
-extern Node* code[100];
+extern Token *token;
+extern Node *code[100];
 
 // エラーを報告するための関数
 // printf と同じ引数をとる
-void error(char* fmt, ...)
+void error(char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
@@ -23,7 +23,7 @@ void error(char* fmt, ...)
 	exit(1);
 }
 
-void error_at(char* loc, char* fmt, ...)
+void error_at(char *loc, char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
@@ -37,7 +37,7 @@ void error_at(char* loc, char* fmt, ...)
 	exit(1);
 }
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
 	if (argc != 2)
 	{
