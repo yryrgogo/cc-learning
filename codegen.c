@@ -47,6 +47,16 @@ void gen(Node *node)
 		printf("  pop rbp\n");
 		printf("  ret\n");
 		return;
+	case ND_BLOCK:
+	{
+		Node *cur = node->body;
+		while (cur)
+		{
+			gen(cur);
+			cur = cur->next;
+		}
+		return;
+	}
 	case ND_FOR:
 	{
 		int c = count();

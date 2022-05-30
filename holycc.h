@@ -78,6 +78,7 @@ typedef enum
 	ND_ELSE,	 // else
 	ND_FOR,		 // for
 	ND_WHILE,	 // while NOTE: NF_FOR にまとめられるらしいが今はわからんので分けている
+	ND_BLOCK,	 // {}
 } NodeKind;
 
 typedef struct Node Node;
@@ -86,6 +87,7 @@ typedef struct Node Node;
 struct Node
 {
 	NodeKind kind; // ノードの型
+	Node *next;		 // 次のノード
 	Node *lhs;		 // 左辺
 	Node *rhs;		 // 右辺
 	int val;			 // kind が ND_NUM の場合のみ使う
@@ -97,6 +99,9 @@ struct Node
 	Node *inc;
 	Node *then;
 	Node *els;
+
+	// block statement
+	Node *body;
 };
 
 typedef struct LVar LVar;

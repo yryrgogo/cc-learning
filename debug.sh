@@ -7,6 +7,7 @@ debug() {
 }
 
 # debug "if (5) 11;"
-debug "if (0) 11; else 5;"
+# debug "if (0) 11; else 5;"
+debug " a = 2; { a = a + 1; } a; "
 
 echo OK

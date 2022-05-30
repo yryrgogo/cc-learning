@@ -92,4 +92,12 @@ for (i = 0; i < 12; i = i + 1)
 a;
 "
 
+# block
+assert 3 "
+a = 2;
+{
+	a = a + 1;
+}
+a;"
+
 echo OK
