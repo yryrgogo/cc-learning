@@ -54,6 +54,13 @@ void gen(Node *node)
 		{
 			gen(cur);
 			cur = cur->next;
+			if (cur)
+			{
+				// statement の評価結果としてスタックに一つの値が残っているはずなので、
+				// スタックが溢れないようにポップしておく
+				// 最後の statement については別途ポップされるためスキップ
+				printf("  pop rax\n");
+			}
 		}
 		return;
 	}
