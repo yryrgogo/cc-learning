@@ -205,6 +205,9 @@ Node *unary()
 	return primary();
 }
 
+// primary = num
+//         | ident ("(" ")")?
+//         | "(" expr ")"
 Node *primary()
 {
 	// 次のトークンが "(" なら、"(" expr ")" のはず
@@ -216,10 +219,19 @@ Node *primary()
 	}
 
 	Token *tok = consume_ident();
-	if (tok)
+	if (tok && consume("("))
+	{
+		// 関数呼び出し
+		expect(")");
+		Node *node = calloc(1, sizeof(Node));
+		node->kind = ND_FUNC;
+		// FIXME: WIP
+	}
+	else if (tok)
 	{
 		Node *node = calloc(1, sizeof(Node));
 		node->kind = ND_LVAR;
+		// FIXME: 複数文字の変数名のオフセットを計算する
 		node->offset = (tok->str[0] - 'a' + 1) * 8;
 		return node;
 	}

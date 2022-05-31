@@ -79,6 +79,7 @@ typedef enum
 	ND_FOR,		 // for
 	ND_WHILE,	 // while NOTE: NF_FOR にまとめられるらしいが今はわからんので分けている
 	ND_BLOCK,	 // {}
+	ND_FUNC,	 // function
 } NodeKind;
 
 typedef struct Node Node;
