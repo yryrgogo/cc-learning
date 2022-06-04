@@ -11,6 +11,7 @@ char *user_input;
 
 extern Token *token;
 extern Node *code[100];
+extern LVar *locals;
 
 // エラーを報告するための関数
 // printf と同じ引数をとる
@@ -68,12 +69,12 @@ int main(int argc, char **argv)
 	printf("main:\n");
 
 	// プロローグ
-	// 変数26個分の領域を確保する
-	// NOTE: これらを追加しわすれて、139が返るエラーにハマってた
 	printf("  push rbp\n");
 	printf("  mov rbp, rsp\n");
-	// alphabet 26 characters * 8byte = 208byte 確保すれば、1文字変数全て分の領域をあらかじめ確保したことになる
-	printf("  sub rsp, 208\n");
+	int locals_count = 0;
+	for (LVar *var = locals; var; var = var->next)
+		locals_count++;
+	printf("  sub rsp, %d\n", locals_count * 8);
 
 	// 抽象構文木を下りながらコード生成
 	for (int i = 0; code[i]; i++)

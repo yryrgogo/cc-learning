@@ -1,8 +1,9 @@
 #include "holycc.h"
 
 extern Token *token;
-Node *code[100];
 LVar *locals;
+LVar *locals_head;
+Node *code[100];
 
 Node *new_node(NodeKind kind)
 {
@@ -231,8 +232,30 @@ Node *primary()
 	{
 		Node *node = calloc(1, sizeof(Node));
 		node->kind = ND_LVAR;
-		// FIXME: 複数文字の変数名のオフセットを計算する
-		node->offset = (tok->str[0] - 'a' + 1) * 8;
+
+		LVar *lvar = find_lvar(tok);
+
+		if (!lvar)
+		{
+			lvar = calloc(1, sizeof(LVar));
+			lvar->name = tok->str;
+			lvar->len = tok->len;
+			if (!locals)
+			{
+				lvar->offset = 8;
+				locals = lvar;
+				locals_head = locals;
+			}
+			else
+			{
+				lvar->offset = locals_head->offset + 8;
+				locals_head->next = lvar;
+				locals_head = lvar;
+			}
+		}
+
+		node->offset = lvar->offset;
+
 		return node;
 	}
 

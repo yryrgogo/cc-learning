@@ -9,6 +9,9 @@
 #define unreachable() \
 	error("internal error at %s:%d", __FILE__, __LINE__)
 
+#define dbg(message) \
+	error("### debug at %s, %s:%d\n", message, __FILE__, __LINE__)
+
 //
 // tokenize.c
 //
@@ -94,6 +97,9 @@ struct Node
 	int val;			 // kind が ND_NUM の場合のみ使う
 	int offset;		 // kind が ND_LVAR の場合のみ使う
 
+	// identifier
+	Node *name;
+
 	// "if" or "for" statement
 	Node *init;
 	Node *cond;
@@ -106,7 +112,6 @@ struct Node
 };
 
 typedef struct LVar LVar;
-
 // ローカル変数の型
 struct LVar
 {
@@ -152,12 +157,12 @@ typedef struct
 	int used;
 } HashMap;
 
-//
-// strings.c
-//
-char *format(char *fmt, ...);
-
 void *hashmap_get(HashMap *map, char *key);
 void hashmap_put(HashMap *map, char *key, void *val);
 void hashmap_delete(HashMap *map, char *key);
 void hashmap_test(void);
+
+//
+// strings.c
+//
+char *format(char *fmt, ...);
