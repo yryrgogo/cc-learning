@@ -97,8 +97,9 @@ struct Node
 	int val;			 // kind が ND_NUM の場合のみ使う
 	int offset;		 // kind が ND_LVAR の場合のみ使う
 
-	// identifier
+	// function
 	Node *name;
+	int len;
 
 	// "if" or "for" statement
 	Node *init;

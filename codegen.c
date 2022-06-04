@@ -100,7 +100,6 @@ void gen(Node *node)
 		printf(".L.while.end.%d:\n", c);
 		return;
 	}
-
 	case ND_IF:
 	{
 		int c = count();
@@ -119,6 +118,15 @@ void gen(Node *node)
 		}
 
 		printf(".L.end.%d:\n", c);
+		return;
+	}
+	case ND_FUNC:
+	{
+		char s[node->len];
+		memcpy(s, node->name, node->len);
+		printf("  call %s\n", s);
+		// FIXME: 暫定で stack の帳尻合わせ。gen 関数をリファクタした方が良い
+		printf("  push 0\n");
 		return;
 	}
 	}

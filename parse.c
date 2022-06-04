@@ -226,15 +226,18 @@ Node *primary()
 		expect(")");
 		Node *node = calloc(1, sizeof(Node));
 		node->kind = ND_FUNC;
-		// FIXME: WIP
+		node->name = tok->str;
+		node->len = tok->len;
+
+		return node;
 	}
 	else if (tok)
 	{
 		Node *node = calloc(1, sizeof(Node));
 		node->kind = ND_LVAR;
 
+		// LVar は今のところアクティベーションレコードの領域の計算と ND_LVAR Node のオフセットの計算にしか使っていない
 		LVar *lvar = find_lvar(tok);
-
 		if (!lvar)
 		{
 			lvar = calloc(1, sizeof(LVar));
