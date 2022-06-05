@@ -122,10 +122,19 @@ void gen(Node *node)
 	{
 		if (node->args)
 		{
+			int count = 0;
 			for (Node *argv = node->args; argv; argv = argv->next)
 			{
-				printf("  push %d\n", argv->val);
-				printf("  pop rdi\n");
+				switch (count)
+				{
+				case 0:
+					printf("  push %d\n", argv->val);
+					printf("  pop rdi\n");
+				case 1:
+					printf("  push %d\n", argv->val);
+					printf("  pop rsi\n");
+				}
+				count++;
 			}
 		}
 		char s[node->len];
