@@ -133,6 +133,18 @@ void gen(Node *node)
 				case 1:
 					printf("  push %d\n", argv->val);
 					printf("  pop rsi\n");
+				case 2:
+					printf("  push %d\n", argv->val);
+					printf("  pop rdx\n");
+				case 3:
+					printf("  push %d\n", argv->val);
+					printf("  pop rcx\n");
+				case 4:
+					printf("  push %d\n", argv->val);
+					printf("  pop r8\n");
+				case 5:
+					printf("  push %d\n", argv->val);
+					printf("  pop r9\n");
 				}
 				count++;
 			}

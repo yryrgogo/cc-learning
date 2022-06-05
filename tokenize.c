@@ -192,7 +192,7 @@ Token *tokenize(char *p)
 		if ('a' <= *p && *p <= 'z')
 		{
 			int i = 0;
-			while ('a' <= *p && *p <= 'z')
+			while (('a' <= *p && *p <= 'z') || ('0' <= *p && *p <= '9'))
 			{
 				p++;
 				i++;

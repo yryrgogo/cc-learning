@@ -113,7 +113,24 @@ int foo(){
 - x86-64 ABI calling conventions に従い実装する
 https://en.wikipedia.org/wiki/X86_calling_conventions#x86-64_calling_conventions
 
+ドキュメント通りのレジスタに引数をセットするのみのため、整数については特に苦労しない。
 
+
+[1つ目の引数をとれるようにしたコミット](https://github.com/yryrgogo/cc-learning/commit/0c08dd64cbe83b2009e8619a31373cdf66913a2)
+
+そろそろリファクタしたくなってくるが、フィボナッチ数列くらい出力できるようにしてもう少し全体感を掴んでかr検討する。
+
+### 2022/06/05
+
+Step15 の実装を始めた。
+
+
+## 注意事項
+
+### RSP
+
+https://www.sigbus.info/compilerbook#%E3%82%B9%E3%83%86%E3%83%83%E3%83%9714-%E9%96%A2%E6%95%B0%E3%81%AE%E5%91%BC%E3%81%B3%E5%87%BA%E3%81%97%E3%81%AB%E5%AF%BE%E5%BF%9C%E3%81%99%E3%82%8B
+> 関数呼び出しをする前にRSPが16の倍数になっていなければいけません。pushやpopはRSPを8バイト単位で変更するので、call命令を発行するときに必ずしもRSPが16の倍数になっているとは限りません。この約束が守られていない場合、RSPが16の倍数になっていることを前提にしている関数が、半分の確率で落ちる謎の現象に悩まされることにmなります。関数を呼ぶ前にRSPを調整するようにして、RSPを16の倍数になるように調整するようにしましょう。
 
 ## Assembler
 
