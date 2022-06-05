@@ -124,6 +124,14 @@ https://en.wikipedia.org/wiki/X86_calling_conventions#x86-64_calling_conventions
 
 Step15 の実装を始めた。
 
+関数がアセンブラでどのように書かれているのかよくわかっていないため、簡単なコードをアセンブルして確認する。
+
+`cc -c ./sample/simple.c && objdump -d simple > simple_assemble.md`
+
+ただ cc を使った影響か、`call instruction` の出力が自分の見知っている構文と異なったので結局 https://godbolt.org/ で gcc の出力を調べた。
+手元だと `callq  74 <main+0xe>` で `0000000000000000 <foo>` が呼ばれるらしいのだが、なぜ？という感じ。godbolt (gcc 12.1) だと `call foo` で `foo` が呼ばれているので大変わかりやすい。objdump の使い方が悪いのか？
+
+godbolt のおかげで関数のアセンブル方法がなんとなくわかったので、実装していく。
 
 ## 注意事項
 
