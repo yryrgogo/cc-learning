@@ -108,6 +108,11 @@ int foo(){
 3. `foo();` を自作コンパイラでコンパイルしたアセンブリ `tmp.s` を用意する（`call foo` が含まれる）
 4. `cc -o tmp.s foo.o` を実行して `tmp.s` と `foo.o` をリンクし、`foo` を実行する
 
+#### Step14 引数ありの関数をコンパイル
+
+- x86-64 ABI calling conventions に従い実装する
+https://en.wikipedia.org/wiki/X86_calling_conventions#x86-64_calling_conventions
+
 
 
 ## Assembler

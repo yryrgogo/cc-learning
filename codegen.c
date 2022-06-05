@@ -1,7 +1,5 @@
 #include "holycc.h"
 
-static int depth;
-
 static int count(void)
 {
 	static int i = 1;
@@ -11,7 +9,7 @@ static int count(void)
 void gen_lval(Node *node)
 {
 	if (node->kind != ND_LVAR)
-		error_at(node, "代入の左辺値が変数ではありません。");
+		error_at(__FILE__, "代入の左辺値が変数ではありません。");
 
 	printf("  mov rax, rbp\n");
 	printf("  sub rax, %d\n", node->offset);

@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -6,11 +7,13 @@
 #include <string.h>
 #include <assert.h>
 
+void error_at(char *loc, char *fmt, ...);
+
 #define unreachable() \
-	error("internal error at %s:%d", __FILE__, __LINE__)
+	error_at("internal error at %s:%d", __FILE__, __LINE__)
 
 #define dbg(message) \
-	error("### debug at %s, %s:%d\n", message, __FILE__, __LINE__)
+	error_at("### debug at %s, %s:%d\n", message, __FILE__, __LINE__)
 
 //
 // tokenize.c
@@ -45,7 +48,9 @@ struct Token
 	char *loc;
 };
 
+Token *tokenize(char *p);
 bool equal(Token *tok, char *op);
+bool equal_token(TokenKind tk);
 bool consume(char *op);
 bool consume_token(TokenKind tk);
 Token *consume_ident();
@@ -55,8 +60,8 @@ bool at_eof();
 Token *new_token(TokenKind kind, Token *cur, char *str, int len);
 bool startswith(char *p, char *q);
 bool is_alnum(char c);
-static bool is_keyword(Token *tok);
-static int read_punct(char *p);
+// static bool is_keyword(Token *tok);
+// static int read_punct(char *p);
 
 //
 // parse.c
@@ -100,6 +105,7 @@ struct Node
 	// function
 	Node *name;
 	int len;
+	Node *args;
 
 	// "if" or "for" statement
 	Node *init;

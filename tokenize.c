@@ -36,6 +36,13 @@ bool equal(Token *tok, char *op)
 	return memcmp(tok->loc, op, tok->len) == 0 && op[tok->len] == '\0';
 }
 
+bool equal_token(TokenKind tk)
+{
+	if (token->kind != tk)
+		return false;
+	return true;
+}
+
 // 次のトークンが期待している記号のときには、トークンを1つ読み進めル。
 // それ以外の場合にはエラーを報告する。
 void expect(char *op)
@@ -74,35 +81,35 @@ bool is_alnum(char c)
 				 (c == '_');
 }
 
-static int read_punct(char *p)
-{
-	static char *kw[] = {
-			"==", "!=", "<=", ">="};
+// static int read_punct(char *p)
+// {
+// 	static char *kw[] = {
+// 			"==", "!=", "<=", ">="};
 
-	for (int i = 0; i < sizeof(kw) / sizeof(*kw); i++)
-	{
-		if (startswith(p, kw[i]))
-			return strlen(kw[i]);
-	}
+// 	for (int i = 0; i < sizeof(kw) / sizeof(*kw); i++)
+// 	{
+// 		if (startswith(p, kw[i]))
+// 			return strlen(kw[i]);
+// 	}
 
-	return ispunct(*p) ? 1 : 0;
-}
+// 	return ispunct(*p) ? 1 : 0;
+// }
 
-static bool is_keyword(Token *tok)
-{
-	static HashMap map;
+// static bool is_keyword(Token *tok)
+// {
+// 	static HashMap map;
 
-	if (map.capacity == 0)
-	{
-		static char *kw[] = {
-				"return", "if", "else", "for", "while"};
+// 	if (map.capacity == 0)
+// 	{
+// 		static char *kw[] = {
+// 				"return", "if", "else", "for", "while"};
 
-		for (int i = 0; i < sizeof(kw) / sizeof(*kw); i++)
-			hashmap_put(&map, kw[i], (void *)1);
-	}
+// 		for (int i = 0; i < sizeof(kw) / sizeof(*kw); i++)
+// 			hashmap_put(&map, kw[i], (void *)1);
+// 	}
 
-	return hashmap_get(&map, tok->loc);
-}
+// 	return hashmap_get(&map, tok->loc);
+// }
 
 // 新しいトークンを作成して cur に繋げる
 Token *new_token(TokenKind kind, Token *cur, char *str, int len)
@@ -141,7 +148,7 @@ Token *tokenize(char *p)
 		}
 
 		// Single-letter punctuator
-		if (strchr("+-*/()<>{}=;", *p))
+		if (strchr("+-*/()<>{}=;,", *p))
 		{
 			cur = new_token(TK_PUNCT, cur, p++, 1);
 			continue;

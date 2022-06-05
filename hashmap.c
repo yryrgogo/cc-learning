@@ -75,6 +75,7 @@ static HashEntry *get_entry(HashMap *map, char *key, int keylen)
 			return NULL;
 	}
 	unreachable();
+	return NULL;
 }
 
 static HashEntry *get_or_insert_entry(HashMap *map, char *key, int keylen)
@@ -115,6 +116,7 @@ static HashEntry *get_or_insert_entry(HashMap *map, char *key, int keylen)
 		}
 	}
 	unreachable();
+	return NULL;
 }
 
 void *hashmap_get(HashMap *map, char *key)

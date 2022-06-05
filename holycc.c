@@ -1,5 +1,4 @@
 #include "holycc.h"
-#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -12,17 +11,6 @@ char *user_input;
 extern Token *token;
 extern Node *code[100];
 extern LVar *locals;
-
-// エラーを報告するための関数
-// printf と同じ引数をとる
-void error(char *fmt, ...)
-{
-	va_list ap;
-	va_start(ap, fmt);
-	vfprintf(stderr, fmt, ap);
-	fprintf(stderr, "\n");
-	exit(1);
-}
 
 void error_at(char *loc, char *fmt, ...)
 {
@@ -42,7 +30,7 @@ int main(int argc, char **argv)
 {
 	if (argc != 2)
 	{
-		error("引数の個数が正しくありません");
+		error_at(NULL, "引数の個数が正しくありません");
 		return 1;
 	}
 

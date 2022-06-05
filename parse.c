@@ -220,14 +220,38 @@ Node *primary()
 	}
 
 	Token *tok = consume_ident();
+	// 関数呼び出し
 	if (tok && consume("("))
 	{
-		// 関数呼び出し
-		expect(")");
 		Node *node = calloc(1, sizeof(Node));
 		node->kind = ND_FUNC;
 		node->name = tok->str;
 		node->len = tok->len;
+
+		Node *params_head;
+
+		for (;;)
+		{
+			// arguments
+			if (equal_token(TK_NUM))
+			{
+				Node *param = expr();
+				if (!params_head)
+				{
+					params_head = param;
+				}
+				else
+				{
+					params_head->next = param;
+					params_head = param;
+				}
+
+				consume(",");
+			}
+
+			if (consume(")"))
+				break;
+		}
 
 		return node;
 	}
