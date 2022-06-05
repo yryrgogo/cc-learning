@@ -120,6 +120,14 @@ void gen(Node *node)
 	}
 	case ND_FUNC:
 	{
+		if (node->args)
+		{
+			for (Node *argv = node->args; argv; argv = argv->next)
+			{
+				printf("  push %d\n", argv->val);
+				printf("  pop rdi\n");
+			}
+		}
 		char s[node->len];
 		memcpy(s, node->name, node->len);
 		printf("  call %s\n", s);

@@ -74,8 +74,6 @@ int main(int argc, char **argv)
 	}
 
 	// エピローグ
-	// スタックトップに式全体の値が残っているはずなので
-	// それを RAX にロードして関数からの返り値とする
 	printf("  mov rsp, rbp\n");
 	printf("  pop rbp\n");
 	printf("  ret\n");

@@ -5,7 +5,7 @@ assert() {
 
 	rm tmp.s
 	./holycc "$input" > tmp.s
-	cc -o tmp tmp.s foo.o
+	cc -o tmp tmp.s foo.o bar.o
 	./tmp
 	actual="$?"
 
@@ -111,9 +111,15 @@ assert() {
 # }
 # a;"
 
-# Function Call
+# Function Call no arguments
 assert 0 "
 foo();
+0;
+"
+
+# Function Call with arguments
+assert 0 "
+bar(555);
 0;
 "
 

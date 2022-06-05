@@ -103,7 +103,7 @@ struct Node
 	int offset;		 // kind が ND_LVAR の場合のみ使う
 
 	// function
-	Node *name;
+	char *name;
 	int len;
 	Node *args;
 
@@ -128,7 +128,7 @@ struct LVar
 	int offset;
 };
 
-Node *program();
+void program();
 Node *stmt();
 Node *expr();
 Node *assign();

@@ -27,7 +27,7 @@ Node *new_binary(NodeKind kind, Node *lhs, Node *rhs)
 	return node;
 }
 
-Node *program()
+void program()
 {
 	int i = 0;
 	while (!at_eof())
@@ -228,7 +228,8 @@ Node *primary()
 		node->name = tok->str;
 		node->len = tok->len;
 
-		Node *params_head;
+		Node *args = NULL;
+		Node *args_head;
 
 		for (;;)
 		{
@@ -236,21 +237,25 @@ Node *primary()
 			if (equal_token(TK_NUM))
 			{
 				Node *param = expr();
-				if (!params_head)
+				if (!args)
 				{
-					params_head = param;
+					args = param;
+					args_head = param;
 				}
 				else
 				{
-					params_head->next = param;
-					params_head = param;
+					args_head->next = param;
+					args_head = param;
 				}
 
 				consume(",");
 			}
 
 			if (consume(")"))
+			{
+				node->args = args;
 				break;
+			}
 		}
 
 		return node;
