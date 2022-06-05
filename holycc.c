@@ -54,15 +54,6 @@ int main(int argc, char **argv)
 	// アセンブリの前半部分を出力
 	printf(".intel_syntax noprefix\n");
 	printf(".globl main\n");
-	printf("main:\n");
-
-	// プロローグ
-	printf("  push rbp\n");
-	printf("  mov rbp, rsp\n");
-	int locals_count = 0;
-	for (LVar *var = locals; var; var = var->next)
-		locals_count++;
-	printf("  sub rsp, %d\n", locals_count * 8);
 
 	// 抽象構文木を下りながらコード生成
 	for (int i = 0; code[i]; i++)

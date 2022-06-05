@@ -118,43 +118,9 @@ void gen(Node *node)
 		printf(".L.end.%d:\n", c);
 		return;
 	}
-	case ND_FUNC:
+	case ND_FUNC_CALL_CALL:
 	{
-		if (node->args)
-		{
-			int count = 0;
-			for (Node *argv = node->args; argv; argv = argv->next)
-			{
-				switch (count)
-				{
-				case 0:
-					printf("  push %d\n", argv->val);
-					printf("  pop rdi\n");
-				case 1:
-					printf("  push %d\n", argv->val);
-					printf("  pop rsi\n");
-				case 2:
-					printf("  push %d\n", argv->val);
-					printf("  pop rdx\n");
-				case 3:
-					printf("  push %d\n", argv->val);
-					printf("  pop rcx\n");
-				case 4:
-					printf("  push %d\n", argv->val);
-					printf("  pop r8\n");
-				case 5:
-					printf("  push %d\n", argv->val);
-					printf("  pop r9\n");
-				}
-				count++;
-			}
-		}
-		char s[node->len];
-		memcpy(s, node->name, node->len);
-		printf("  call %s\n", s);
-		// FIXME: 暫定で stack の帳尻合わせ。gen 関数をリファクタした方が良い
-		printf("  push 0\n");
-		return;
+		gen_func(node);
 	}
 	}
 
@@ -201,4 +167,81 @@ void gen(Node *node)
 	}
 
 	printf("  push rax\n");
+}
+
+void gen_func(Node *node)
+{
+	printf("%s:\n", node->name);
+
+	// プロローグ
+	printf("  push rbp\n");
+	printf("  mov rbp, rsp\n");
+
+	// 引数を Stack に書き出す
+	int count = 0;
+	for (Node *argv = node->args; argv; argv = argv->next)
+	{
+		switch (count)
+		{
+		case 0:
+			printf("  push rdi\n");
+		case 1:
+			printf("  push rsi\n");
+		case 2:
+			printf("  push rdx\n");
+		case 3:
+			printf("  push rcx\n");
+		case 4:
+			printf("  push r8\n");
+		case 5:
+			printf("  push r9\n");
+		}
+		count++;
+	}
+
+	// int locals_count = 0;
+	// for (LVar *var = node->args; var; var = var->next)
+	// 	locals_count++;
+	// printf("  sub rsp, %d\n", locals_count * 8);
+
+	return;
+}
+
+void gen_func_call(Node *node)
+{
+	if (node->args)
+	{
+		int count = 0;
+		for (Node *argv = node->args; argv; argv = argv->next)
+		{
+			switch (count)
+			{
+			case 0:
+				printf("  push %d\n", argv->val);
+				printf("  pop rdi\n");
+			case 1:
+				printf("  push %d\n", argv->val);
+				printf("  pop rsi\n");
+			case 2:
+				printf("  push %d\n", argv->val);
+				printf("  pop rdx\n");
+			case 3:
+				printf("  push %d\n", argv->val);
+				printf("  pop rcx\n");
+			case 4:
+				printf("  push %d\n", argv->val);
+				printf("  pop r8\n");
+			case 5:
+				printf("  push %d\n", argv->val);
+				printf("  pop r9\n");
+			}
+			count++;
+		}
+	}
+	char s[node->len];
+	memcpy(s, node->name, node->len);
+	printf("  call %s\n", s);
+	// FIXME: 暫定で stack の帳尻合わせ。gen 関数をリファクタした方が良い
+	printf("  push 0\n");
+	return;
 }

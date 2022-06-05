@@ -224,7 +224,7 @@ Node *primary()
 	if (tok && consume("("))
 	{
 		Node *node = calloc(1, sizeof(Node));
-		node->kind = ND_FUNC;
+		node->kind = ND_FUNC_CALL;
 		node->name = tok->str;
 		node->len = tok->len;
 
