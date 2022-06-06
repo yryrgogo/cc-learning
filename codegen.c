@@ -118,9 +118,13 @@ void gen(Node *node)
 		printf(".L.end.%d:\n", c);
 		return;
 	}
-	case ND_FUNC_CALL_CALL:
+	case ND_FUNC:
 	{
 		gen_func(node);
+	}
+	case ND_FUNC_CALL:
+	{
+		gen_func_call(node);
 	}
 	}
 
@@ -199,10 +203,10 @@ void gen_func(Node *node)
 		count++;
 	}
 
-	// int locals_count = 0;
-	// for (LVar *var = node->args; var; var = var->next)
-	// 	locals_count++;
-	// printf("  sub rsp, %d\n", locals_count * 8);
+	int locals_count = 0;
+	for (LVar *var = node->locals; var; var = var->next)
+		locals_count++;
+	printf("  sub rsp, %d\n", locals_count * 8);
 
 	return;
 }

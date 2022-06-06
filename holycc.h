@@ -67,6 +67,16 @@ bool is_alnum(char c);
 // parse.c
 //
 
+typedef struct LVar LVar;
+// ローカル変数の型
+struct LVar
+{
+	LVar *next;
+	char *name;
+	int len;
+	int offset;
+};
+
 // Kind of Operator
 typedef enum
 {
@@ -107,6 +117,7 @@ struct Node
 	char *name;
 	int len;
 	Node *args;
+	LVar *locals;
 
 	// "if" or "for" statement
 	Node *init;
@@ -119,17 +130,8 @@ struct Node
 	Node *body;
 };
 
-typedef struct LVar LVar;
-// ローカル変数の型
-struct LVar
-{
-	LVar *next;
-	char *name;
-	int len;
-	int offset;
-};
-
 void program();
+Node *toplevel();
 Node *stmt();
 Node *expr();
 Node *assign();
@@ -140,6 +142,7 @@ Node *mul();
 Node *unary();
 Node *primary();
 LVar *find_lvar(Token *tok);
+Node *func_params();
 
 //
 // codegen.c

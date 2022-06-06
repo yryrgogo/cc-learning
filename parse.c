@@ -5,6 +5,8 @@ LVar *locals;
 LVar *locals_head;
 Node *code[100];
 
+int func_offset = 0;
+
 Node *new_node(NodeKind kind)
 {
 	Node *node = calloc(1, sizeof(Node));
@@ -31,8 +33,33 @@ void program()
 {
 	int i = 0;
 	while (!at_eof())
-		code[i++] = stmt();
+		code[i++] = toplevel();
 	code[i] = NULL;
+}
+
+Node *toplevel()
+{
+
+	Token *tok = consume_ident();
+	Node *node = calloc(1, sizeof(Node));
+
+	if (tok && consume("("))
+	{
+		node->name = tok->str;
+		node->len = tok->len;
+		int arg_count = 0;
+		node->args = func_params(arg_count);
+
+		expect("{");
+		node->kind = ND_FUNC;
+		locals = NULL;
+		func_offset = arg_count * 8;
+		node->body = stmt();
+		func_offset = 0;
+		node->locals = locals;
+	}
+
+	return node;
 }
 
 // stmt = expr ";"
@@ -224,39 +251,12 @@ Node *primary()
 	if (tok && consume("("))
 	{
 		Node *node = calloc(1, sizeof(Node));
-		node->kind = ND_FUNC_CALL;
 		node->name = tok->str;
 		node->len = tok->len;
+		int arg_count = 0;
+		node->args = func_params(arg_count);
 
-		Node *args = NULL;
-		Node *args_head;
-
-		for (;;)
-		{
-			// arguments
-			if (equal_token(TK_NUM))
-			{
-				Node *param = expr();
-				if (!args)
-				{
-					args = param;
-					args_head = param;
-				}
-				else
-				{
-					args_head->next = param;
-					args_head = param;
-				}
-
-				consume(",");
-			}
-
-			if (consume(")"))
-			{
-				node->args = args;
-				break;
-			}
-		}
+		node->kind = ND_FUNC_CALL;
 
 		return node;
 	}
@@ -274,7 +274,7 @@ Node *primary()
 			lvar->len = tok->len;
 			if (!locals)
 			{
-				lvar->offset = 8;
+				lvar->offset = 8 + func_offset;
 				locals = lvar;
 				locals_head = locals;
 			}
@@ -293,6 +293,32 @@ Node *primary()
 
 	// そうでなければ数値のはず
 	return new_num(expect_number());
+}
+
+Node *func_params(int *arg_count)
+{
+	Node head = {};
+	Node *cur = &head;
+
+	for (;;)
+	{
+		// arguments
+		if (equal_token(TK_NUM))
+		{
+			Node *param = expr();
+			cur = cur->next = param;
+			(*arg_count)++;
+
+			consume(",");
+		}
+
+		if (consume(")"))
+		{
+			break;
+		}
+	}
+
+	return head.next;
 }
 
 LVar *find_lvar(Token *tok)

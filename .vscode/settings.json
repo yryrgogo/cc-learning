@@ -6,7 +6,18 @@
 		"cctype": "c",
 		"exception": "c",
 		"cstdio": "c",
-		"stdio.h": "c"
+		"stdio.h": "c",
+		"cmath": "c",
+		"compare": "c",
+		"concepts": "c",
+		"cstdarg": "c",
+		"cstdlib": "c",
+		"limits": "c",
+		"new": "c",
+		"*.tcc": "c",
+		"cstdbool": "c",
+		"cstdint": "c",
+		"typeinfo": "c"
 	},
 	"C_Cpp.errorSquiggles": "Disabled"
 }
