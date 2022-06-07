@@ -33,7 +33,7 @@ Token *consume_ident()
 
 bool equal(Token *tok, char *op)
 {
-	return memcmp(tok->loc, op, tok->len) == 0 && op[tok->len] == '\0';
+	return memcmp(tok->loc, op, tok->len) == 0;
 }
 
 bool equal_token(TokenKind tk)

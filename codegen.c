@@ -121,10 +121,12 @@ void gen(Node *node)
 	case ND_FUNC:
 	{
 		gen_func(node);
+		return;
 	}
 	case ND_FUNC_CALL:
 	{
 		gen_func_call(node);
+		return;
 	}
 	}
 
@@ -175,7 +177,9 @@ void gen(Node *node)
 
 void gen_func(Node *node)
 {
-	printf("%s:\n", node->name);
+	char s[node->len];
+	memcpy(s, node->name, node->len);
+	printf("%s:\n", s);
 
 	// プロローグ
 	printf("  push rbp\n");
@@ -207,6 +211,8 @@ void gen_func(Node *node)
 	for (LVar *var = node->locals; var; var = var->next)
 		locals_count++;
 	printf("  sub rsp, %d\n", locals_count * 8);
+
+	gen(node->body);
 
 	return;
 }

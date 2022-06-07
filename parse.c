@@ -43,20 +43,27 @@ Node *toplevel()
 	Token *tok = consume_ident();
 	Node *node = calloc(1, sizeof(Node));
 
+	node->name = tok->str;
+	node->len = tok->len;
+
 	if (tok && consume("("))
 	{
-		node->name = tok->str;
-		node->len = tok->len;
 		int arg_count = 0;
 		node->args = func_params(arg_count);
 
-		expect("{");
-		node->kind = ND_FUNC;
-		locals = NULL;
-		func_offset = arg_count * 8;
-		node->body = stmt();
-		func_offset = 0;
-		node->locals = locals;
+		if (equal(token, "{"))
+		{
+			node->kind = ND_FUNC;
+			locals = NULL;
+			func_offset = arg_count * 8;
+			node->body = stmt();
+			func_offset = 0;
+			node->locals = locals;
+		}
+		else
+		{
+			error_at(token->str, "toplevel に定義できる構文になっていません。");
+		}
 	}
 
 	return node;

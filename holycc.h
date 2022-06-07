@@ -1,3 +1,4 @@
+#define __STDC_WANT_LIB_EXT1__ 1
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdbool.h>
@@ -149,6 +150,8 @@ Node *func_params();
 //
 
 void gen(Node *node);
+void gen_func(Node *node);
+void gen_func_call(Node *node);
 
 //
 // hashmap.c
