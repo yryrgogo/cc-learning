@@ -49,7 +49,7 @@ Node *toplevel()
 	if (tok && consume("("))
 	{
 		int arg_count = 0;
-		node->args = func_params(arg_count);
+		node->args = func_args_definition(&arg_count);
 
 		if (equal(token, "{"))
 		{
@@ -260,8 +260,7 @@ Node *primary()
 		Node *node = calloc(1, sizeof(Node));
 		node->name = tok->str;
 		node->len = tok->len;
-		int arg_count = 0;
-		node->args = func_params(arg_count);
+		node->args = func_call_args();
 
 		node->kind = ND_FUNC_CALL;
 
@@ -302,7 +301,33 @@ Node *primary()
 	return new_num(expect_number());
 }
 
-Node *func_params(int *arg_count)
+Node *func_args_definition(int *arg_count)
+{
+	Node head = {};
+	Node *cur = &head;
+
+	for (;;)
+	{
+		// arguments
+		if (equal_token(TK_IDENT))
+		{
+			Node *param = expr();
+			cur = cur->next = param;
+			(*arg_count)++;
+
+			consume(",");
+		}
+
+		if (consume(")"))
+		{
+			break;
+		}
+	}
+
+	return head.next;
+}
+
+Node *func_call_args()
 {
 	Node head = {};
 	Node *cur = &head;
@@ -314,7 +339,6 @@ Node *func_params(int *arg_count)
 		{
 			Node *param = expr();
 			cur = cur->next = param;
-			(*arg_count)++;
 
 			consume(",");
 		}

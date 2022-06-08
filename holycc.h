@@ -143,7 +143,8 @@ Node *mul();
 Node *unary();
 Node *primary();
 LVar *find_lvar(Token *tok);
-Node *func_params();
+Node *func_args_definition(int *arg_count);
+Node *func_call_args();
 
 //
 // codegen.c
