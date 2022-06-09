@@ -133,6 +133,58 @@ Step15 の実装を始めた。
 
 godbolt のおかげで関数のアセンブル方法がなんとなくわかったので、実装していく。
 
+### 2022/06/11
+
+関数呼び出しにおける命令と Stack がどう使われてるか理解。
+
+```
+foo() {
+  2;
+}
+
+main() {
+  foo();
+  0;
+}
+```
+
+下記のアセンブラは正常に動く。
+call から Stack を追うと、
+
+1. call foo / stack: ["return address"]
+2. push rbp / stack: ["rbp", "return address"]
+3. push 2   / stack: ["2", "rbp", "return address"]
+4. pop rax  / stack: ["rbp", "return address"]
+5. pop rbp  / stack: ["return address"]
+6. ret      / stack: []
+7. push 0 (at main)
+
+```
+.intel_syntax noprefix
+.globl main
+foo:
+  push rbp
+  mov rbp, rsp
+  sub rsp, 0
+  push 2
+  pop rax
+  pop rbp
+  ret
+main:
+  push rbp
+  mov rbp, rsp
+  sub rsp, 0
+  call foo
+  push 0
+  pop rax
+  push 0
+  pop rax
+  mov rsp, rbp
+  pop rbp
+  ret
+```
+
+
 ## 注意事項
 
 ### RSP
