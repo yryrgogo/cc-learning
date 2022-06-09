@@ -175,10 +175,16 @@ void gen(Node *node)
 	printf("  push rax\n");
 }
 
+// void get_stmt(Node *node)
+// {
+
+// }
+
 void gen_func(Node *node)
 {
-	char s[node->len];
+	char s[node->len + 1];
 	memcpy(s, node->name, node->len);
+	s[node->len] = '\0';
 	printf("%s:\n", s);
 
 	// プロローグ
@@ -213,6 +219,12 @@ void gen_func(Node *node)
 	printf("  sub rsp, %d\n", locals_count * 8);
 
 	gen(node->body);
+
+	// main 関数以外のプロローグ
+	if (memcmp(s, "main\0", 5) != 0)
+	{
+		printf("  ret\n");
+	}
 
 	return;
 }

@@ -176,4 +176,15 @@ arg6(1, 2, 3, 4, 5, 6);
 
 # Function definition
 
+assert 0 "
+foo() {
+  2;
+}
+
+main() {
+foo();
+0;
+}
+"
+
 echo OK
