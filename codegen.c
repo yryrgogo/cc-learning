@@ -20,37 +20,36 @@ void gen(Node *node)
 {
 	switch (node->kind)
 	{
-	case ND_NUM:
-		printf("  push %d\n", node->val);
-		return;
-	case ND_LVAR:
-		gen_lval(node);
-		printf("  pop rax\n");
-		printf("  mov rax, [rax]\n");
-		printf("  push rax\n");
-		return;
-	case ND_ASSIGN:
-		gen_lval(node->lhs);
-		gen(node->rhs);
+	case ND_FUNC:
+	{
+		gen_func(node);
+		break;
+	}
+	default:
+		gen_stmt(node);
+	}
 
-		printf("  pop rdi\n");
-		printf("  pop rax\n");
-		printf("  mov [rax], rdi\n");
-		printf("  push rdi\n");
-		return;
+	return;
+}
+
+void gen_stmt(Node *node)
+{
+
+	switch (node->kind)
+	{
 	case ND_RETURN:
-		gen(node->lhs);
+		gen_expr(node->lhs);
 		printf("  pop rax\n");
 		printf("  mov rsp, rbp\n");
 		printf("  pop rbp\n");
 		printf("  ret\n");
-		return;
+		break;
 	case ND_BLOCK:
 	{
 		Node *cur = node->body;
 		while (cur)
 		{
-			gen(cur);
+			gen_stmt(cur);
 			cur = cur->next;
 			if (cur)
 			{
@@ -60,7 +59,7 @@ void gen(Node *node)
 				printf("  pop rax\n");
 			}
 		}
-		return;
+		break;
 	}
 	case ND_FOR:
 	{
@@ -79,7 +78,7 @@ void gen(Node *node)
 		printf("  jmp .L.for.begin.%d\n", c);
 
 		printf(".L.for.end.%d:\n", c);
-		return;
+		break;
 	}
 	case ND_WHILE:
 	{
@@ -96,7 +95,7 @@ void gen(Node *node)
 		printf("  jmp .L.while.begin.%d\n", c);
 
 		printf(".L.while.end.%d:\n", c);
-		return;
+		break;
 	}
 	case ND_IF:
 	{
@@ -116,28 +115,53 @@ void gen(Node *node)
 		}
 
 		printf(".L.end.%d:\n", c);
-		return;
-	}
-	case ND_FUNC:
-	{
-		gen_func(node);
-		return;
+		break;
 	}
 	case ND_FUNC_CALL:
 	{
 		gen_func_call(node);
-		return;
+		break;
 	}
+	default:
+		gen_expr(node);
 	}
 
-	gen(node->lhs);
-	gen(node->rhs);
+	return;
+}
 
-	printf("  pop rdi\n");
-	printf("  pop rax\n");
+void gen_expr(Node *node)
+{
+	if (node->lhs)
+		gen_expr(node->lhs);
+	if ((node->rhs))
+		gen_expr(node->rhs);
+
+	if (node->lhs && node->rhs)
+	{
+		printf("  pop rdi\n");
+		printf("  pop rax\n");
+	}
 
 	switch (node->kind)
 	{
+	case ND_NUM:
+		printf("  push %d\n", node->val);
+		break;
+	case ND_LVAR:
+		gen_lval(node);
+		printf("  pop rax\n");
+		printf("  mov rax, [rax]\n");
+		printf("  push rax\n");
+		break;
+	case ND_ASSIGN:
+		gen_lval(node->lhs);
+		gen(node->rhs);
+
+		printf("  pop rdi\n");
+		printf("  pop rax\n");
+		printf("  mov [rax], rdi\n");
+		printf("  push rdi\n");
+		break;
 	case ND_ADD:
 		printf("  add rax, rdi\n");
 		break;
@@ -170,15 +194,14 @@ void gen(Node *node)
 		printf("  cmp rax, rdi\n");
 		printf("  setle al\n");
 		printf("  movzb rax, al\n");
+		break;
 	}
 
-	printf("  push rax\n");
+	if (node->lhs && node->rhs)
+	{
+		printf("  push rax\n");
+	}
 }
-
-// void get_stmt(Node *node)
-// {
-
-// }
 
 void gen_func(Node *node)
 {
@@ -199,16 +222,22 @@ void gen_func(Node *node)
 		{
 		case 0:
 			printf("  push rdi\n");
+			break;
 		case 1:
 			printf("  push rsi\n");
+			break;
 		case 2:
 			printf("  push rdx\n");
+			break;
 		case 3:
 			printf("  push rcx\n");
+			break;
 		case 4:
 			printf("  push r8\n");
+			break;
 		case 5:
 			printf("  push r9\n");
+			break;
 		}
 		count++;
 	}
@@ -218,13 +247,7 @@ void gen_func(Node *node)
 		locals_count++;
 	printf("  sub rsp, %d\n", locals_count * 8);
 
-	gen(node->body);
-
-	// main 関数以外のプロローグ
-	if (memcmp(s, "main\0", 5) != 0)
-	{
-		printf("  ret\n");
-	}
+	gen_stmt(node->body);
 
 	return;
 }
@@ -241,21 +264,27 @@ void gen_func_call(Node *node)
 			case 0:
 				printf("  push %d\n", argv->val);
 				printf("  pop rdi\n");
+				break;
 			case 1:
 				printf("  push %d\n", argv->val);
 				printf("  pop rsi\n");
+				break;
 			case 2:
 				printf("  push %d\n", argv->val);
 				printf("  pop rdx\n");
+				break;
 			case 3:
 				printf("  push %d\n", argv->val);
 				printf("  pop rcx\n");
+				break;
 			case 4:
 				printf("  push %d\n", argv->val);
 				printf("  pop r8\n");
+				break;
 			case 5:
 				printf("  push %d\n", argv->val);
 				printf("  pop r9\n");
+				break;
 			}
 			count++;
 		}

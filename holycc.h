@@ -151,6 +151,8 @@ Node *func_call_args();
 //
 
 void gen(Node *node);
+void gen_stmt(Node *node);
+void gen_expr(Node *node);
 void gen_func(Node *node);
 void gen_func_call(Node *node);
 
