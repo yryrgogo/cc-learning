@@ -59,9 +59,6 @@ int main(int argc, char **argv)
 	for (int i = 0; code[i]; i++)
 	{
 		gen(code[i]);
-		// statement の評価結果としてスタックに一つの値が残っているはずなので、
-		// スタックが溢れないようにポップしておく
-		printf("  pop rax\n");
 	}
 
 	// エピローグ

@@ -26,7 +26,10 @@ void gen(Node *node)
 		break;
 	}
 	default:
+	{
 		gen_stmt(node);
+		printf("  pop rax\n");
+	}
 	}
 
 	return;
@@ -51,13 +54,9 @@ void gen_stmt(Node *node)
 		{
 			gen_stmt(cur);
 			cur = cur->next;
-			if (cur)
-			{
-				// statement の評価結果としてスタックに一つの値が残っているはずなので、
-				// スタックが溢れないようにポップしておく
-				// 最後の statement については別途ポップされるためスキップ
-				printf("  pop rax\n");
-			}
+			// statement の評価結果としてスタックに一つの値が残っているはずなので、
+			// スタックが溢れないようにポップしておく
+			printf("  pop rax\n");
 		}
 		break;
 	}
@@ -65,16 +64,16 @@ void gen_stmt(Node *node)
 	{
 		int c = count();
 
-		gen(node->init);
+		gen_expr(node->init);
 		printf("  jmp .L.for.begin.%d\n", c);
 
 		printf(".L.for.begin.%d:\n", c);
-		gen(node->cond);
+		gen_expr(node->cond);
 		printf("  pop rax\n");
 		printf("  cmp rax, 0\n");
 		printf("  je .L.for.end.%d\n", c);
-		gen(node->then);
-		gen(node->inc);
+		gen_stmt(node->then);
+		gen_expr(node->inc);
 		printf("  jmp .L.for.begin.%d\n", c);
 
 		printf(".L.for.end.%d:\n", c);
@@ -87,11 +86,11 @@ void gen_stmt(Node *node)
 		printf("  jmp .L.while.begin.%d\n", c);
 
 		printf(".L.while.begin.%d:\n", c);
-		gen(node->cond);
+		gen_expr(node->cond);
 		printf("  pop rax\n");
 		printf("  cmp rax, 0\n");
 		printf("  je .L.while.end.%d\n", c);
-		gen(node->then);
+		gen_stmt(node->then);
 		printf("  jmp .L.while.begin.%d\n", c);
 
 		printf(".L.while.end.%d:\n", c);
@@ -100,18 +99,18 @@ void gen_stmt(Node *node)
 	case ND_IF:
 	{
 		int c = count();
-		gen(node->cond);
+		gen_expr(node->cond);
 		printf("  pop rax\n");
 		printf("  cmp rax, 0\n");
 		printf("  je .L.else.%d\n", c);
 
-		gen(node->then);
+		gen_stmt(node->then);
 
 		printf("  jmp .L.end.%d\n", c);
 		printf(".L.else.%d:\n", c);
 		if (node->els)
 		{
-			gen(node->els);
+			gen_stmt(node->els);
 		}
 
 		printf(".L.end.%d:\n", c);
@@ -155,7 +154,7 @@ void gen_expr(Node *node)
 		break;
 	case ND_ASSIGN:
 		gen_lval(node->lhs);
-		gen(node->rhs);
+		gen_expr(node->rhs);
 
 		printf("  pop rdi\n");
 		printf("  pop rax\n");
@@ -210,7 +209,7 @@ void gen_func(Node *node)
 	s[node->len] = '\0';
 	printf("%s:\n", s);
 
-	// プロローグ
+	// Prologue
 	printf("  push rbp\n");
 	printf("  mov rbp, rsp\n");
 
@@ -248,6 +247,8 @@ void gen_func(Node *node)
 	printf("  sub rsp, %d\n", locals_count * 8);
 
 	gen_stmt(node->body);
+
+	// Epilogue
 
 	return;
 }
