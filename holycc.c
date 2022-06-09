@@ -61,9 +61,5 @@ int main(int argc, char **argv)
 		gen(code[i]);
 	}
 
-	// エピローグ
-	printf("  mov rsp, rbp\n");
-	printf("  pop rbp\n");
-	printf("  ret\n");
 	return 0;
 }

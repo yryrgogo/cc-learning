@@ -249,6 +249,9 @@ void gen_func(Node *node)
 	gen_stmt(node->body);
 
 	// Epilogue
+	printf("  mov rsp, rbp\n");
+	printf("  pop rbp\n");
+	printf("  ret\n");
 
 	return;
 }
@@ -293,7 +296,7 @@ void gen_func_call(Node *node)
 	char s[node->len];
 	memcpy(s, node->name, node->len);
 	printf("  call %s\n", s);
-	// FIXME: 暫定で stack の帳尻合わせ。gen 関数をリファクタした方が良い
-	printf("  push 0\n");
+	// TODO: 戻り値があれば rax に入っているはずなのでとりあえず rax を push しているが適切かは？
+	printf("  push rax\n");
 	return;
 }
