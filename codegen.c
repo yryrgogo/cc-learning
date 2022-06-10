@@ -37,7 +37,6 @@ void gen(Node *node)
 
 void gen_stmt(Node *node)
 {
-
 	switch (node->kind)
 	{
 	case ND_RETURN:
@@ -116,11 +115,6 @@ void gen_stmt(Node *node)
 		printf(".L.end.%d:\n", c);
 		break;
 	}
-	case ND_FUNC_CALL:
-	{
-		gen_func_call(node);
-		break;
-	}
 	default:
 		gen_expr(node);
 	}
@@ -128,7 +122,7 @@ void gen_stmt(Node *node)
 	return;
 }
 
-void gen_expr(Node *node)
+void gen_calculator(Node *node)
 {
 	if (node->lhs)
 		gen_expr(node->lhs);
@@ -143,24 +137,6 @@ void gen_expr(Node *node)
 
 	switch (node->kind)
 	{
-	case ND_NUM:
-		printf("  push %d\n", node->val);
-		break;
-	case ND_LVAR:
-		gen_lval(node);
-		printf("  pop rax\n");
-		printf("  mov rax, [rax]\n");
-		printf("  push rax\n");
-		break;
-	case ND_ASSIGN:
-		gen_lval(node->lhs);
-		gen_expr(node->rhs);
-
-		printf("  pop rdi\n");
-		printf("  pop rax\n");
-		printf("  mov [rax], rdi\n");
-		printf("  push rdi\n");
-		break;
 	case ND_ADD:
 		printf("  add rax, rdi\n");
 		break;
@@ -196,9 +172,37 @@ void gen_expr(Node *node)
 		break;
 	}
 
-	if (node->lhs && node->rhs)
+	printf("  push rax\n");
+}
+
+void gen_expr(Node *node)
+{
+	switch (node->kind)
 	{
+	case ND_NUM:
+		printf("  push %d\n", node->val);
+		break;
+	case ND_LVAR:
+		gen_lval(node);
+		printf("  pop rax\n");
+		printf("  mov rax, [rax]\n");
 		printf("  push rax\n");
+		break;
+	case ND_ASSIGN:
+		gen_lval(node->lhs);
+		gen_expr(node->rhs);
+		printf("  pop rdi\n");
+		printf("  pop rax\n");
+		printf("  mov [rax], rdi\n");
+		printf("  push rdi\n");
+		printf("  push rax\n");
+		break;
+	case ND_FUNC_CALL:
+		gen_func_call(node);
+		break;
+	default:
+		gen_calculator(node);
+		break;
 	}
 }
 
@@ -293,8 +297,9 @@ void gen_func_call(Node *node)
 			count++;
 		}
 	}
-	char s[node->len];
+	char s[node->len + 1];
 	memcpy(s, node->name, node->len);
+	s[node->len] = '\0';
 	printf("  call %s\n", s);
 	// TODO: 戻り値があれば rax に入っているはずなのでとりあえず rax を push しているが適切かは？
 	printf("  push rax\n");

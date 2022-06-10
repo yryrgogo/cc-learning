@@ -155,6 +155,7 @@ void gen_stmt(Node *node);
 void gen_expr(Node *node);
 void gen_func(Node *node);
 void gen_func_call(Node *node);
+void gen_calculator(Node *node);
 
 //
 // hashmap.c

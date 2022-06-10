@@ -174,7 +174,9 @@ arg6(1, 2, 3, 4, 5, 6);
 }
 "
 
+# ==============================
 # Function definition
+# ==============================
 
 assert 0 "
 foo() {
@@ -184,6 +186,32 @@ foo() {
 main() {
 foo();
 0;
+}
+"
+
+assert 7 "
+foo() {
+  z = 2;
+  a = 8;
+  return a + z;
+}
+
+main() {
+  foo();
+  7;
+}
+"
+
+assert 10 "
+foo() {
+  z = 2;
+  a = 8;
+  return a + z;
+}
+
+main() {
+  r = foo();
+  r;
 }
 "
 
