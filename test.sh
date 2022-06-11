@@ -252,4 +252,63 @@ main() {
 }
 "
 
+assert 6 "
+foo(a, b) {
+  return a + b;
+}
+
+main() {
+  result = foo(1, 2);
+  55;
+  result + 3;
+}
+"
+
+assert 39 "
+foo(ab, cd, ef) {
+  return ab + cd + ef;
+}
+
+main() {
+  result = foo(1, 2, 3);
+  55;
+  result + 33;
+}
+"
+
+assert 2 "
+foo(abc, def, ghi, jkl) {
+  return abc + def + ghi - jkl;
+}
+
+main() {
+  result = foo(1, 2, 3, 4);
+  result;
+}
+"
+
+assert 5 "
+foo(a, b, c, d, e) {
+	z = a - b + c - d + e;
+  return z + 2;
+}
+
+main() {
+  result = foo(1, 2, 3, 4, 5);
+  result;
+}
+"
+
+assert 2 "
+foo(a, b, c, d, e, f) {
+	z = a - b + c - d + e - f;
+  return z + 5;
+}
+
+main() {
+  result = foo(1, 2, 3, 4, 5, 6);
+  result;
+}
+"
+
 echo OK

@@ -237,16 +237,16 @@ void gen_func(Node *node)
 			gen_arg(argv, "rsi");
 			break;
 		case 2:
-			printf("  push rdx\n");
+			gen_arg(argv, "rdx");
 			break;
 		case 3:
-			printf("  push rcx\n");
+			gen_arg(argv, "rcx");
 			break;
 		case 4:
-			printf("  push r8\n");
+			gen_arg(argv, "r8");
 			break;
 		case 5:
-			printf("  push r9\n");
+			gen_arg(argv, "r9");
 			break;
 		}
 		args_count++;
