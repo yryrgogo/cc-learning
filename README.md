@@ -6,6 +6,12 @@ The code is implemented with reference to 9cc.
 But 9cc is inactive, so the code was implemented by the author while researching.
 The code bases is no longer a 9cc transcript from the middle, so please don't refer this.
 
+## Reference
+
+- [9cc](https://github.com/rui314/9cc)
+- [chibicc](https://github.com/rui314/chibicc)
+- [低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook)
+
 ## Memo
 
 ### 2022/06/01
@@ -207,21 +213,14 @@ x86-64
 
 ### instructions
 
-#### mov
-
-- copy the value of a register
-
-#### call
-
-- push the address of the next instruction of call to stack
-- jump to the address given as the argument of call
-
-#### ret
-
-- pop one address from the stack top and jump to the address
-
-## Reference
-
-- [9cc](https://github.com/rui314/9cc)
-- [chibicc](https://github.com/rui314/chibicc)
-- [低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook)
+| instruction | explain |
+| --- | --- |
+| mov | copy the value of a register |
+| movzb | レジスタの値をゼロクリアした上で指定された値をコピーしてくる <br /> AL レジスタのように RAX の下位8ビットのみを指す8ビットレジスタを使うと、上位56ビットの値は前の値のままになるため、movzb を使ってゼロクリアする必要がある |
+| call | push the address of the next instruction of call to stack<br /> jump to the address given as the argument of call |
+| ret | pop one address from the stack top and jump to the address |
+| cmp | x86-64では比較命令の結果は「フラグレジスタ」にセットされる <br /> フラグレジスタは整数演算や比較演算命令が実行されるたびに更新されるレジスタ。結果が0かどうかや桁あふれが発生したかどうか、結果が0未満かどうかといったビットを持つ |
+| sete | `==` <br > 直前の cmp 命令で調べた2つのレジスタの値が同じだった場合に、指定されたレジスタに1をセット、それ以外の場合は0をセット <br /> 8ビットレジスタしか引数にとれない |
+| setne | `!=` <br /> |
+| setle | `<=` |
+| setl | `<` |

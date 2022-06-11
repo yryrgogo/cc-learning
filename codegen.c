@@ -115,6 +115,11 @@ void gen_stmt(Node *node)
 		printf(".L.end.%d:\n", c);
 		break;
 	}
+	case ND_NOP:
+	{
+		printf("  nop\n");
+		break;
+	}
 	default:
 		gen_expr(node);
 	}

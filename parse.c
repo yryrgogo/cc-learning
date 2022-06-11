@@ -77,7 +77,34 @@ Node *toplevel()
 Node *stmt()
 {
 	Node *node;
-	if (consume_token(TK_RETURN))
+
+	if (consume("{"))
+	{
+		node = calloc(1, sizeof(Node));
+		node->kind = ND_BLOCK;
+		Node head;
+		Node *cur = &head;
+
+		bool has_stmt = false;
+		while (!consume("}"))
+		{
+			cur->next = stmt();
+			cur = cur->next;
+			has_stmt = true;
+		}
+
+		if (has_stmt)
+		{
+			node->body = head.next;
+		}
+		else
+		{
+			Node *body = calloc(1, sizeof(Node));
+			body->kind = ND_NOP;
+			node->body = body;
+		}
+	}
+	else if (consume_token(TK_RETURN))
 	{
 		node = calloc(1, sizeof(Node));
 		node->kind = ND_RETURN;
@@ -129,20 +156,6 @@ Node *stmt()
 		expect(")");
 
 		node->then = stmt();
-	}
-	else if (consume("{"))
-	{
-		node = calloc(1, sizeof(Node));
-		node->kind = ND_BLOCK;
-		Node head;
-		Node *cur = &head;
-
-		while (!consume("}"))
-		{
-			cur->next = stmt();
-			cur = cur->next;
-		}
-		node->body = head.next;
 	}
 	else
 	{
@@ -272,7 +285,6 @@ Node *primary()
 		return node;
 	}
 
-	// そうでなければ数値のはず
 	return new_num(expect_number());
 }
 

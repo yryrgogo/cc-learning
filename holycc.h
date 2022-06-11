@@ -55,6 +55,7 @@ bool equal_token(TokenKind tk);
 bool consume(char *op);
 bool consume_token(TokenKind tk);
 Token *consume_ident();
+int consume_num();
 void expect(char *op);
 int expect_number();
 bool at_eof();
@@ -100,6 +101,7 @@ typedef enum
 	ND_BLOCK,			// {}
 	ND_FUNC,			// function
 	ND_FUNC_CALL, // function call
+	ND_NOP,				// no operation
 } NodeKind;
 
 typedef struct Node Node;
