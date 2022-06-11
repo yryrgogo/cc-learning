@@ -217,6 +217,13 @@ void gen_func(Node *node)
 	printf("  push rbp\n");
 	printf("  mov rbp, rsp\n");
 
+	void gen_arg(int count, char *register_name)
+	{
+		printf("  mov rax, rbp\n");
+		printf("  sub rax, %d\n", (count + 1) * 8);
+		printf("  mov [rax], %s\n", register_name);
+	}
+
 	// 引数を Stack に書き出す
 	int count = 0;
 	for (Node *argv = node->args; argv; argv = argv->next)
@@ -224,7 +231,7 @@ void gen_func(Node *node)
 		switch (count)
 		{
 		case 0:
-			printf("  push rdi\n");
+			gen_arg(count, "rdi");
 			break;
 		case 1:
 			printf("  push rsi\n");
@@ -247,7 +254,9 @@ void gen_func(Node *node)
 
 	int locals_count = 0;
 	for (LVar *var = node->locals; var; var = var->next)
+	{
 		locals_count++;
+	}
 	printf("  sub rsp, %d\n", locals_count * 8);
 
 	gen_stmt(node->body);

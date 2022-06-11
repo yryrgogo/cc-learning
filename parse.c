@@ -1,8 +1,9 @@
 #include "holycc.h"
 
 extern Token *token;
-LVar *locals;
-LVar *locals_head;
+static LVar *locals;
+static LVar *locals_head;
+static LVar *args;
 Node *code[100];
 
 int func_offset = 0;
@@ -49,7 +50,9 @@ Node *toplevel()
 	if (tok && consume("("))
 	{
 		int arg_count = 0;
+		args = NULL;
 		node->args = func_args_definition(&arg_count);
+		args = node->args;
 
 		if (equal(token, "{"))
 		{
@@ -268,37 +271,45 @@ Node *primary()
 	}
 	else if (tok)
 	{
-		Node *node = calloc(1, sizeof(Node));
-		node->kind = ND_LVAR;
-
-		// LVar は今のところアクティベーションレコードの領域の計算と ND_LVAR Node のオフセットの計算にしか使っていない
-		LVar *lvar = find_lvar(tok);
-		if (!lvar)
-		{
-			lvar = calloc(1, sizeof(LVar));
-			lvar->name = tok->str;
-			lvar->len = tok->len;
-			if (!locals)
-			{
-				lvar->offset = 8 + func_offset;
-				locals = lvar;
-				locals_head = locals;
-			}
-			else
-			{
-				lvar->offset = locals_head->offset + 8;
-				locals_head->next = lvar;
-				locals_head = lvar;
-			}
-		}
-
-		node->offset = lvar->offset;
-
+		Node *node = local_variable(tok);
 		return node;
 	}
 
 	// そうでなければ数値のはず
 	return new_num(expect_number());
+}
+
+Node *local_variable(Token *tok)
+{
+	Node *node = calloc(1, sizeof(Node));
+	node->kind = ND_LVAR;
+
+	// LVar は今のところアクティベーションレコードの領域の計算と ND_LVAR Node のオフセットの計算にしか使っていない
+	// Is it predefined local variable or not?
+	LVar *lvar = find_lvar(tok);
+
+	if (!lvar)
+	{
+		lvar = calloc(1, sizeof(LVar));
+		lvar->name = tok->str;
+		lvar->len = tok->len;
+
+		if (!locals)
+		{
+			lvar->offset = 8 + func_offset;
+			locals = lvar;
+			locals_head = locals;
+		}
+		else
+		{
+			lvar->offset = locals_head->offset + 8;
+			locals_head->next = lvar;
+			locals_head = lvar;
+		}
+	}
+	node->offset = lvar->offset;
+
+	return node;
 }
 
 Node *func_args_definition(int *arg_count)
@@ -311,7 +322,7 @@ Node *func_args_definition(int *arg_count)
 		// arguments
 		if (equal_token(TK_IDENT))
 		{
-			Node *param = expr();
+			Node *param = primary();
 			cur = cur->next = param;
 			(*arg_count)++;
 
@@ -355,6 +366,14 @@ Node *func_call_args()
 LVar *find_lvar(Token *tok)
 {
 	for (LVar *var = locals; var; var = var->next)
+		if (var->len == tok->len && !memcmp(tok->loc, var->name, var->len))
+			return var;
+	return NULL;
+}
+
+Node *find_args(Token *tok)
+{
+	for (Node *var = args; var; var = var->next)
 		if (var->len == tok->len && !memcmp(tok->loc, var->name, var->len))
 			return var;
 	return NULL;

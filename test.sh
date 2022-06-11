@@ -215,4 +215,29 @@ main() {
 }
 "
 
+assert 13 "
+foo() {
+  a = 2;
+  a = 8;
+  return a;
+}
+
+main() {
+  r = foo();
+  r + 5;
+}
+"
+
+assert 6 "
+foo(a) {
+  return a;
+}
+
+main() {
+  b = foo(6);
+  12;
+  b;
+}
+"
+
 echo OK
