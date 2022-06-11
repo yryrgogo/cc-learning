@@ -28,7 +28,6 @@ void gen(Node *node)
 	default:
 	{
 		gen_stmt(node);
-		printf("  pop rax\n");
 	}
 	}
 
@@ -45,7 +44,7 @@ void gen_stmt(Node *node)
 		printf("  mov rsp, rbp\n");
 		printf("  pop rbp\n");
 		printf("  ret\n");
-		break;
+		return;
 	case ND_BLOCK:
 	{
 		Node *cur = node->body;
@@ -53,11 +52,8 @@ void gen_stmt(Node *node)
 		{
 			gen_stmt(cur);
 			cur = cur->next;
-			// statement の評価結果としてスタックに一つの値が残っているはずなので、
-			// スタックが溢れないようにポップしておく
-			printf("  pop rax\n");
 		}
-		break;
+		return;
 	}
 	case ND_FOR:
 	{
@@ -76,7 +72,7 @@ void gen_stmt(Node *node)
 		printf("  jmp .L.for.begin.%d\n", c);
 
 		printf(".L.for.end.%d:\n", c);
-		break;
+		return;
 	}
 	case ND_WHILE:
 	{
@@ -93,7 +89,7 @@ void gen_stmt(Node *node)
 		printf("  jmp .L.while.begin.%d\n", c);
 
 		printf(".L.while.end.%d:\n", c);
-		break;
+		return;
 	}
 	case ND_IF:
 	{
@@ -113,12 +109,12 @@ void gen_stmt(Node *node)
 		}
 
 		printf(".L.end.%d:\n", c);
-		break;
+		return;
 	}
 	case ND_NOP:
 	{
 		printf("  nop\n");
-		break;
+		return;
 	}
 	default:
 		gen_expr(node);
@@ -199,8 +195,6 @@ void gen_expr(Node *node)
 		printf("  pop rdi\n");
 		printf("  pop rax\n");
 		printf("  mov [rax], rdi\n");
-		printf("  push rdi\n");
-		printf("  push rax\n");
 		break;
 	case ND_FUNC_CALL:
 		gen_func_call(node);
@@ -266,6 +260,7 @@ void gen_func(Node *node)
 		printf("  sub rsp, %d\n", locals_count * 8);
 
 	gen_stmt(node->body);
+	printf("  pop rax\n");
 
 	// Epilogue
 	printf("  mov rsp, rbp\n");
