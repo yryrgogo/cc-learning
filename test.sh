@@ -311,4 +311,52 @@ main() {
 }
 "
 
+# ==============================
+# Fibonacci
+# ==============================
+
+assert 55 "
+fibonacci(n){
+	a = 0;
+	b = 1;
+	if (n == 1){
+		return a;
+	}
+	while (n > 1){
+		c = b;
+		b = a + b;
+		a = c;
+		n = n - 1;
+	}
+	return b;
+}
+
+main() {
+	result = fibonacci(10);
+	result;
+}
+"
+
+assert 55 "
+foo(a, b, n)
+{
+  if (a == 0){
+    if (n == 1){
+      return a;
+    }
+  }
+  if (n == 1){
+    return b;
+  }
+	next = n - 1;
+	return next;
+}
+
+main()
+{
+  result = foo(0, 1, 10);
+  result;
+}
+"
+
 echo OK

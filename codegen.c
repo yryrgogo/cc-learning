@@ -280,28 +280,22 @@ void gen_func_call(Node *node)
 			switch (count)
 			{
 			case 0:
-				printf("  push %d\n", argv->val);
-				printf("  pop rdi\n");
+				printf("  mov rdi, %d\n", argv->val);
 				break;
 			case 1:
-				printf("  push %d\n", argv->val);
-				printf("  pop rsi\n");
+				printf("  mov rsi, %d\n", argv->val);
 				break;
 			case 2:
-				printf("  push %d\n", argv->val);
-				printf("  pop rdx\n");
+				printf("  mov rdx, %d\n", argv->val);
 				break;
 			case 3:
-				printf("  push %d\n", argv->val);
-				printf("  pop rcx\n");
+				printf("  mov rcx, %d\n", argv->val);
 				break;
 			case 4:
-				printf("  push %d\n", argv->val);
-				printf("  pop r8\n");
+				printf("  mov r8, %d\n", argv->val);
 				break;
 			case 5:
-				printf("  push %d\n", argv->val);
-				printf("  pop r9\n");
+				printf("  mov r9, %d\n", argv->val);
 				break;
 			}
 			count++;
