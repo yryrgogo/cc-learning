@@ -240,4 +240,16 @@ main() {
 }
 "
 
+assert 24 "
+foo(a) {
+  return a;
+}
+
+main() {
+  b = foo(6);
+  12;
+  b + 18;
+}
+"
+
 echo OK

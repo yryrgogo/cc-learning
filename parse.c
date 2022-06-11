@@ -3,7 +3,6 @@
 extern Token *token;
 static LVar *locals;
 static LVar *locals_head;
-static LVar *args;
 Node *code[100];
 
 int func_offset = 0;
@@ -50,14 +49,12 @@ Node *toplevel()
 	if (tok && consume("("))
 	{
 		int arg_count = 0;
-		args = NULL;
+		locals = NULL;
 		node->args = func_args_definition(&arg_count);
-		args = node->args;
 
 		if (equal(token, "{"))
 		{
 			node->kind = ND_FUNC;
-			locals = NULL;
 			func_offset = arg_count * 8;
 			node->body = stmt();
 			func_offset = 0;
@@ -366,15 +363,9 @@ Node *func_call_args()
 LVar *find_lvar(Token *tok)
 {
 	for (LVar *var = locals; var; var = var->next)
+	{
 		if (var->len == tok->len && !memcmp(tok->loc, var->name, var->len))
 			return var;
-	return NULL;
-}
-
-Node *find_args(Token *tok)
-{
-	for (Node *var = args; var; var = var->next)
-		if (var->len == tok->len && !memcmp(tok->loc, var->name, var->len))
-			return var;
+	}
 	return NULL;
 }
