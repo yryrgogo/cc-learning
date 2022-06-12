@@ -499,12 +499,24 @@ main()
 }
 "
 
-# 簡単な再帰
-assert 0 "
+assert 9 "
+bar(n)
+{
+  return n;
+}
+
+main()
+{
+  a = 10;
+  bar(a - 1);
+}
+"
+
+assert 3 "
 rec(n)
 {
-  if (n == 0){
-    return 0;
+  if (n == 5){
+    return 3;
   }
   55;
   rec(n - 1);
@@ -512,31 +524,152 @@ rec(n)
 
 main()
 {
-  result = rec(3);
+  result = rec(10);
   result;
 }
 "
 
-# assert 55 "
-# fibonacci(a, b, n)
-# {
-#   if (a == 0){
-#     if (n == 1){
-#       return a;
-#     }
-#   }
-#   if (n == 1){
-#     return b;
-#   }
-#   r = fibonacci(b, a + b, n - 1);
-#   return r;
-# }
+assert 4 "
+rec(n, acc)
+{
+  if (n == 0){
+    return 10;
+  }
+  b = acc  + 7;
+  return b - 3;
+}
 
-# main()
-# {
-#   result = fibonacci(0, 1, 10);
-#   result;
-# }
-# "
+main()
+{
+  rec(1, 0);
+}
+"
+
+assert 201 "
+rec(n)
+{
+  if (n == 0){
+    return 201;
+  }
+  return rec(n - 1);
+}
+
+main()
+{
+  rec(10);
+}
+"
+
+assert 120 "
+rec(a, b)
+{
+  if (a == 0){
+    return b;
+  }
+  return rec(a - 1, b+1);
+}
+
+main()
+{
+  rec(100, 20);
+}
+"
+
+assert 3 "
+foo(a, b, c)
+{
+  if (a == 1){
+    if (b == 2){
+      return c;
+    }
+    return b;
+  }
+  return a;
+}
+
+main()
+{
+  result = foo(1, 2, 3);
+  result;
+}
+"
+
+assert 5 "
+foo(a, b, c)
+{
+  if (a == 1){
+    if (b == 2){
+      return c;
+    }
+    return b;
+  }
+  return a;
+}
+
+main()
+{
+  result = foo(1, 5, 3);
+  result;
+}
+"
+
+assert 12 "
+foo(a, b, c)
+{
+  if (a == 1){
+    if (b == 2){
+      return c;
+    }
+    return b;
+  }
+  return a;
+}
+
+main()
+{
+  result = foo(12, 5, 3);
+  result;
+}
+"
+
+assert 16 "
+foo(a, b, c)
+{
+  if (a == 1){
+    if (b == 2){
+      return c;
+    }
+    return b;
+  }
+  r = foo(a-1, b-1, c+1);
+  return r;
+}
+
+main()
+{
+  result = foo(5, 20, 3);
+  result;
+}
+"
+
+assert 55 "
+fibonacci(a, b, n)
+{
+  if (n == 1){
+    if (a == 0){
+      return a;
+    }
+    return b;
+  }
+  r = fibonacci(b, a + b, n - 1);
+  return r;
+}
+
+main()
+{
+  result = fibonacci(0, 1, 10);
+  result;
+}
+"
 
 echo OK

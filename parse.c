@@ -231,7 +231,7 @@ Node *primary() {
     Node *node = calloc(1, sizeof(Node));
     node->name = tok->str;
     node->len = tok->len;
-    node->args = func_call_args();
+    node->args = func_call_args(node);
 
     node->kind = ND_FUNC_CALL;
 
@@ -295,15 +295,21 @@ Node *func_args_definition(int *arg_count) {
   return head.next;
 }
 
-Node *func_call_args() {
+Node *func_call_args(Node *node) {
   Node head = {};
   Node *cur = &head;
+  int count = 0;
 
   for(;;) {
     // arguments
     if(equal_token(TK_NUM) || equal_token(TK_IDENT)) {
       Node *param = expr();
-      cur = cur->next = param;
+      // cur = cur->next = param;
+      if(count > 0) {
+        param->next = cur;
+      }
+      cur = param;
+      count++;
 
       consume(",");
     }
@@ -312,8 +318,9 @@ Node *func_call_args() {
       break;
     }
   }
+  node->args_num = count;
 
-  return head.next;
+  return cur;
 }
 
 LVar *find_lvar(Token *tok) {

@@ -114,6 +114,7 @@ struct Node {
   // function
   char *name;
   int len;
+  int args_num;
   Node *args;
   LVar *locals;
 

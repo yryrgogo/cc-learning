@@ -276,30 +276,30 @@ void gen_lval(Node *node) {
 }
 
 void gen_func_call(Node *node) {
-  if(node->args) {
-    int count = 0;
+  if(node->args_num > 0) {
+    int arg_no = node->args_num;
     for(Node *argv = node->args; argv; argv = argv->next) {
-      switch(count) {
-      case 0:
-        printf("  mov rdi, %d\n", argv->val);
-        break;
+      switch(arg_no) {
       case 1:
-        printf("  mov rsi, %d\n", argv->val);
+        gen_func_call_arg(argv, "rdi");
         break;
       case 2:
-        printf("  mov rdx, %d\n", argv->val);
+        gen_func_call_arg(argv, "rsi");
         break;
       case 3:
-        printf("  mov rcx, %d\n", argv->val);
+        gen_func_call_arg(argv, "rdx");
         break;
       case 4:
-        printf("  mov r8, %d\n", argv->val);
+        gen_func_call_arg(argv, "rcx");
         break;
       case 5:
-        printf("  mov r9, %d\n", argv->val);
+        gen_func_call_arg(argv, "r8");
+        break;
+      case 6:
+        gen_func_call_arg(argv, "r9");
         break;
       }
-      count++;
+      arg_no--;
     }
   }
   char s[node->len + 1];
@@ -307,4 +307,15 @@ void gen_func_call(Node *node) {
   s[node->len] = '\0';
   printf("  call %s\n", s);
   return;
+}
+
+/**
+ * @brief 関数呼び出しにおける引数に与えられた式をアセンブラに変換
+ *
+ * @param node
+ */
+void gen_func_call_arg(Node *node, char *register_name) {
+  gen_expr(node);
+  printf("  pop rax\n");
+  printf("  mov %s, rax\n", register_name);
 }
