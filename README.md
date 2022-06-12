@@ -190,7 +190,11 @@ main:
   ret
 ```
 
-### 2022/06/11
+### 2022/06/12
+
+[低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook)の序盤は簡単のためかアドホックに `push rax` や `pop rax` の命令を generate しているため、他の命令やネスト、複数の statement 対応をする上では整理する必要があった。
+手元のテストは通っていたのだが、stack の値の処理において push, pop の対応がとれておらず、関数のエピローグにおける `pop rbp` で pop される値が、`rbp` でなくなるコードがいくつかあった (if, call, multiple statement)。
+[3ba5d03](https://github.com/yryrgogo/cc-learning/commit/3ba5d034bd040cecb700bebef46c8ee5e31dcbd3) あたりでこれを整理した。
 
 
 ## 注意事項
