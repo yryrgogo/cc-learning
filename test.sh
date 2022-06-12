@@ -248,262 +248,277 @@ main() {
 }
 "
 
-# assert 6 "
-# foo(a, b) {
-#   return a + b;
-# }
+assert 6 "
+foo(a, b) {
+  return a + b;
+}
 
-# main() {
-#   result = foo(1, 2);
-#   55;
-#   result + 3;
-# }
-# "
+main() {
+  result = foo(1, 2);
+  55;
+  result + 3;
+}
+"
 
-# assert 39 "
-# foo(ab, cd, ef) {
-#   return ab + cd + ef;
-# }
+assert 39 "
+foo(ab, cd, ef) {
+  return ab + cd + ef;
+}
 
-# main() {
-#   result = foo(1, 2, 3);
-#   55;
-#   result + 33;
-# }
-# "
+main() {
+  result = foo(1, 2, 3);
+  55;
+  result + 33;
+}
+"
 
-# assert 2 "
-# foo(abc, def, ghi, jkl) {
-#   return abc + def + ghi - jkl;
-# }
+assert 2 "
+foo(abc, def, ghi, jkl) {
+  return abc + def + ghi - jkl;
+}
 
-# main() {
-#   result = foo(1, 2, 3, 4);
-#   result;
-# }
-# "
+main() {
+  result = foo(1, 2, 3, 4);
+  result;
+}
+"
 
-# assert 5 "
-# foo(a, b, c, d, e) {
-#   z = a - b + c - d + e;
-#   return z + 2;
-# }
+assert 5 "
+foo(a, b, c, d, e) {
+  z = a - b + c - d + e;
+  return z + 2;
+}
 
-# main() {
-#   result = foo(1, 2, 3, 4, 5);
-#   result;
-# }
-# "
+main() {
+  result = foo(1, 2, 3, 4, 5);
+  result;
+}
+"
 
-# assert 2 "
-# foo(a, b, c, d, e, f) {
-#   z = a - b + c - d + e - f;
-#   return z + 5;
-# }
+assert 2 "
+foo(a, b, c, d, e, f) {
+  z = a - b + c - d + e - f;
+  return z + 5;
+}
 
-# main() {
-#   result = foo(1, 2, 3, 4, 5, 6);
-#   result;
-# }
-# "
+main() {
+  result = foo(1, 2, 3, 4, 5, 6);
+  result;
+}
+"
 
-# # ==============================
-# # Fibonacci
-# # ==============================
+# ==============================
+# Fibonacci
+# ==============================
+
+assert 55 "
+fibonacci(n){
+  a = 0;
+  b = 1;
+  if (n == 1){
+    return a;
+  }
+  while (n > 1){
+    c = b;
+    b = a + b;
+    a = c;
+    n = n - 1;
+  }
+  return b;
+}
+
+main() {
+  result = fibonacci(10);
+  result;
+}
+"
+
+# nested if
+assert 11 "
+main()
+{
+  a = 0;
+  b = 0;
+  n = 1;
+	c = 10;
+  if (a == 0){
+    if (n == 1){
+      b = 33;
+			c = 11;
+    }
+  }
+  c;
+}
+"
+
+assert 7 "
+foo(a, b, n)
+{
+  if (a == 0){
+    if (n == 1){
+      return 7;
+    }
+  }
+  return 12;
+}
+
+main()
+{
+  result = foo(0, 2, 1);
+  result;
+}
+"
+
+assert 77 "
+foo(a, b, n)
+{
+  if (a == 0){
+    if (n == 1){
+      return 7;
+    }
+    else {
+      return 77;
+		}
+  }
+  return 12;
+}
+
+main()
+{
+  result = foo(0, 2, 10);
+  result;
+}
+"
+
+assert 12 "
+foo(a, b, n)
+{
+  if (a == 0){
+    if (n == 1){
+      return 7;
+    }
+    else {
+      a = 12;
+		}
+  }
+  return a;
+}
+
+main()
+{
+  result = foo(0, 2, 10);
+  result;
+}
+"
+
+assert 14 "
+foo(a, n)
+{
+  if (a == 0){
+    if (n == 1){
+      return a;
+    }
+  }
+  x = n - 1;
+  return x;
+}
+
+main()
+{
+  result = foo(5, 15);
+  result;
+}
+"
+
+assert 5 "
+main()
+{
+  if (0 == 0){
+  }
+  5;
+}
+"
+
+assert 33 "
+foo()
+{
+  if (0 == 0){
+  }
+  5;
+}
+
+main()
+{
+  1;
+  2;
+  3;
+  33;
+}
+"
+
+assert 5 "
+bar() {
+  for (i = 0; i < 5; i = i + 1){}
+  return 5;
+}
+main() {
+  result = bar();
+  result;
+}
+"
+
+
+assert 7 "
+main()
+{
+  if (0 == 0){
+    5;
+  }else{
+  }
+  7;
+}
+"
+
+# fibonacci ではないがこれが通らなかった。push, pop の整合性が取れなくなっていた
+assert 14 "
+foo(n)
+{
+  if (0 == 0){
+    if (n == 0){
+      return 33;
+    }
+  }
+  x = n - 1;
+  return x;
+}
+
+main()
+{
+  result = foo(15);
+  result;
+}
+"
+
+# 簡単な再帰
+assert 0 "
+rec(n)
+{
+  if (n == 0){
+    return 0;
+  }
+  55;
+  rec(n - 1);
+}
+
+main()
+{
+  result = rec(3);
+  result;
+}
+"
 
 # assert 55 "
-# fibonacci(n){
-#   a = 0;
-#   b = 1;
-#   if (n == 1){
-#     return a;
-#   }
-#   while (n > 1){
-#     c = b;
-#     b = a + b;
-#     a = c;
-#     n = n - 1;
-#   }
-#   return b;
-# }
-
-# main() {
-#   result = fibonacci(10);
-#   result;
-# }
-# "
-
-# # nested if
-# assert 11 "
-# main()
-# {
-#   a = 0;
-#   b = 0;
-#   n = 1;
-# 	c = 10;
-#   if (a == 0){
-#     if (n == 1){
-#       b = 33;
-# 			c = 11;
-#     }
-#   }
-#   c;
-# }
-# "
-
-# assert 7 "
-# foo(a, b, n)
-# {
-#   if (a == 0){
-#     if (n == 1){
-#       return 7;
-#     }
-#   }
-#   return 12;
-# }
-
-# main()
-# {
-#   result = foo(0, 2, 1);
-#   result;
-# }
-# "
-
-# assert 77 "
-# foo(a, b, n)
-# {
-#   if (a == 0){
-#     if (n == 1){
-#       return 7;
-#     }
-#     else {
-#       return 77;
-# 		}
-#   }
-#   return 12;
-# }
-
-# main()
-# {
-#   result = foo(0, 2, 10);
-#   result;
-# }
-# "
-
-# assert 12 "
-# foo(a, b, n)
-# {
-#   if (a == 0){
-#     if (n == 1){
-#       return 7;
-#     }
-#     else {
-#       a = 12;
-# 		}
-#   }
-#   return a;
-# }
-
-# main()
-# {
-#   result = foo(0, 2, 10);
-#   result;
-# }
-# "
-
-# assert 14 "
-# foo(a, n)
-# {
-#   if (a == 0){
-#     if (n == 1){
-#       return a;
-#     }
-#   }
-#   x = n - 1;
-#   return x;
-# }
-
-# main()
-# {
-#   result = foo(5, 15);
-#   result;
-# }
-# "
-
-# assert 5 "
-# main()
-# {
-#   if (0 == 0){
-#   }
-#   5;
-# }
-# "
-
-# assert 33 "
-# foo()
-# {
-#   if (0 == 0){
-#   }
-#   5;
-# }
-
-# main()
-# {
-#   1;
-#   2;
-#   3;
-#   33;
-# }
-# "
-
-# assert 5 "
-# bar() {
-#   for (i = 0; i < 5; i = i + 1){}
-#   return 5;
-# }
-# main() {
-#   result = bar();
-#   result;
-# }
-# "
-
-
-# assert 7 "
-# main()
-# {
-#   if (0 == 0){
-#     5;
-#   }else{
-#   }
-#   7;
-# }
-# "
-
-# " main() { if (0 == 0){ 5; }else{ } 7; }"
-
-
-# # fibonacci ではないがこれが通らない
-# assert 14 "
-# foo(n)
-# {
-#   if (0 == 0){
-#     if (n == 0){
-#       return 33;
-#     }
-#   }
-#   x = n - 1;
-#   return x;
-# }
-
-# main()
-# {
-#   result = foo(15);
-#   result;
-# }
-# "
-
-# assert 55 "
-# foo(a, b, n)
+# fibonacci(a, b, n)
 # {
 #   if (a == 0){
 #     if (n == 1){
@@ -513,13 +528,13 @@ main() {
 #   if (n == 1){
 #     return b;
 #   }
-#   r = foo(b, a + b, n - 1);
+#   r = fibonacci(b, a + b, n - 1);
 #   return r;
 # }
 
 # main()
 # {
-#   result = foo(0, 1, 10);
+#   result = fibonacci(0, 1, 10);
 #   result;
 # }
 # "

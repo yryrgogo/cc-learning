@@ -196,6 +196,7 @@ main:
 手元のテストは通っていたのだが、stack の値の処理において push, pop の対応がとれておらず、関数のエピローグにおける `pop rbp` で pop される値が、`rbp` でなくなるコードがいくつかあった (if, call, multiple statement)。
 [3ba5d03](https://github.com/yryrgogo/cc-learning/commit/3ba5d034bd040cecb700bebef46c8ee5e31dcbd3) あたりでこれを整理した。
 
+再帰関数のコンパイルで無限ループが発生し、再帰のための実装が足りないと思ったが、関数の引数として TK_NUM 以外のトークンの処理が実装されていないだけだった。C の print デバッグにやりづらさを感じるため gdb 便利。
 
 ## 注意事項
 

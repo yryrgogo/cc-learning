@@ -301,7 +301,7 @@ Node *func_call_args() {
 
   for(;;) {
     // arguments
-    if(equal_token(TK_NUM)) {
+    if(equal_token(TK_NUM) || equal_token(TK_IDENT)) {
       Node *param = expr();
       cur = cur->next = param;
 
