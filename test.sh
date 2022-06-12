@@ -189,16 +189,25 @@ foo();
 }
 "
 
-assert 7 "
+assert 2 "
 foo() {
   z = 2;
-  a = 8;
-  return a + z;
+  return z;
 }
 
 main() {
-  foo();
-  7;
+  result = foo();
+  result;
+}
+"
+
+assert 2 "
+bar() {
+  return 2;
+}
+
+main() {
+  bar();
 }
 "
 
@@ -212,19 +221,6 @@ foo() {
 main() {
   r = foo();
   r;
-}
-"
-
-assert 13 "
-foo() {
-  a = 2;
-  a = 8;
-  return a;
-}
-
-main() {
-  r = foo();
-  r + 5;
 }
 "
 
@@ -252,223 +248,225 @@ main() {
 }
 "
 
-assert 6 "
-foo(a, b) {
-  return a + b;
-}
+# assert 6 "
+# foo(a, b) {
+#   return a + b;
+# }
 
-main() {
-  result = foo(1, 2);
-  55;
-  result + 3;
-}
-"
+# main() {
+#   result = foo(1, 2);
+#   55;
+#   result + 3;
+# }
+# "
 
-assert 39 "
-foo(ab, cd, ef) {
-  return ab + cd + ef;
-}
+# assert 39 "
+# foo(ab, cd, ef) {
+#   return ab + cd + ef;
+# }
 
-main() {
-  result = foo(1, 2, 3);
-  55;
-  result + 33;
-}
-"
+# main() {
+#   result = foo(1, 2, 3);
+#   55;
+#   result + 33;
+# }
+# "
 
-assert 2 "
-foo(abc, def, ghi, jkl) {
-  return abc + def + ghi - jkl;
-}
+# assert 2 "
+# foo(abc, def, ghi, jkl) {
+#   return abc + def + ghi - jkl;
+# }
 
-main() {
-  result = foo(1, 2, 3, 4);
-  result;
-}
-"
+# main() {
+#   result = foo(1, 2, 3, 4);
+#   result;
+# }
+# "
 
-assert 5 "
-foo(a, b, c, d, e) {
-  z = a - b + c - d + e;
-  return z + 2;
-}
+# assert 5 "
+# foo(a, b, c, d, e) {
+#   z = a - b + c - d + e;
+#   return z + 2;
+# }
 
-main() {
-  result = foo(1, 2, 3, 4, 5);
-  result;
-}
-"
+# main() {
+#   result = foo(1, 2, 3, 4, 5);
+#   result;
+# }
+# "
 
-assert 2 "
-foo(a, b, c, d, e, f) {
-  z = a - b + c - d + e - f;
-  return z + 5;
-}
+# assert 2 "
+# foo(a, b, c, d, e, f) {
+#   z = a - b + c - d + e - f;
+#   return z + 5;
+# }
 
-main() {
-  result = foo(1, 2, 3, 4, 5, 6);
-  result;
-}
-"
+# main() {
+#   result = foo(1, 2, 3, 4, 5, 6);
+#   result;
+# }
+# "
 
-# ==============================
-# Fibonacci
-# ==============================
+# # ==============================
+# # Fibonacci
+# # ==============================
 
-assert 55 "
-fibonacci(n){
-  a = 0;
-  b = 1;
-  if (n == 1){
-    return a;
-  }
-  while (n > 1){
-    c = b;
-    b = a + b;
-    a = c;
-    n = n - 1;
-  }
-  return b;
-}
+# assert 55 "
+# fibonacci(n){
+#   a = 0;
+#   b = 1;
+#   if (n == 1){
+#     return a;
+#   }
+#   while (n > 1){
+#     c = b;
+#     b = a + b;
+#     a = c;
+#     n = n - 1;
+#   }
+#   return b;
+# }
 
-main() {
-  result = fibonacci(10);
-  result;
-}
-"
+# main() {
+#   result = fibonacci(10);
+#   result;
+# }
+# "
 
-# nested if
-assert 11 "
-main()
-{
-  a = 0;
-  b = 0;
-  n = 1;
-	c = 10;
-  if (a == 0){
-    if (n == 1){
-      b = 33;
-			c = 11;
-    }
-  }
-  c;
-}
-"
+# # nested if
+# assert 11 "
+# main()
+# {
+#   a = 0;
+#   b = 0;
+#   n = 1;
+# 	c = 10;
+#   if (a == 0){
+#     if (n == 1){
+#       b = 33;
+# 			c = 11;
+#     }
+#   }
+#   c;
+# }
+# "
 
-assert 7 "
-foo(a, b, n)
-{
-  if (a == 0){
-    if (n == 1){
-      return 7;
-    }
-  }
-  return 12;
-}
+# assert 7 "
+# foo(a, b, n)
+# {
+#   if (a == 0){
+#     if (n == 1){
+#       return 7;
+#     }
+#   }
+#   return 12;
+# }
 
-main()
-{
-  result = foo(0, 2, 1);
-  result;
-}
-"
+# main()
+# {
+#   result = foo(0, 2, 1);
+#   result;
+# }
+# "
 
-assert 77 "
-foo(a, b, n)
-{
-  if (a == 0){
-    if (n == 1){
-      return 7;
-    }
-    else {
-      return 77;
-		}
-  }
-  return 12;
-}
+# assert 77 "
+# foo(a, b, n)
+# {
+#   if (a == 0){
+#     if (n == 1){
+#       return 7;
+#     }
+#     else {
+#       return 77;
+# 		}
+#   }
+#   return 12;
+# }
 
-main()
-{
-  result = foo(0, 2, 10);
-  result;
-}
-"
+# main()
+# {
+#   result = foo(0, 2, 10);
+#   result;
+# }
+# "
 
-assert 12 "
-foo(a, b, n)
-{
-  if (a == 0){
-    if (n == 1){
-      return 7;
-    }
-    else {
-      a = 12;
-		}
-  }
-  return a;
-}
+# assert 12 "
+# foo(a, b, n)
+# {
+#   if (a == 0){
+#     if (n == 1){
+#       return 7;
+#     }
+#     else {
+#       a = 12;
+# 		}
+#   }
+#   return a;
+# }
 
-main()
-{
-  result = foo(0, 2, 10);
-  result;
-}
-"
+# main()
+# {
+#   result = foo(0, 2, 10);
+#   result;
+# }
+# "
 
-assert 14 "
-foo(a, n)
-{
-  if (a == 0){
-    if (n == 1){
-      return a;
-    }
-  }
-  x = n - 1;
-  return x;
-}
+# assert 14 "
+# foo(a, n)
+# {
+#   if (a == 0){
+#     if (n == 1){
+#       return a;
+#     }
+#   }
+#   x = n - 1;
+#   return x;
+# }
 
-main()
-{
-  result = foo(5, 15);
-  result;
-}
-"
+# main()
+# {
+#   result = foo(5, 15);
+#   result;
+# }
+# "
 
-assert 5 "
-main()
-{
-  if (0 == 0){
-  }
-  5;
-}
-"
+# assert 5 "
+# main()
+# {
+#   if (0 == 0){
+#   }
+#   5;
+# }
+# "
 
-assert 33 "
-foo()
-{
-  if (0 == 0){
-  }
-  5;
-}
+# assert 33 "
+# foo()
+# {
+#   if (0 == 0){
+#   }
+#   5;
+# }
 
-main()
-{
-  foo();
-  33;
-}
-"
+# main()
+# {
+#   1;
+#   2;
+#   3;
+#   33;
+# }
+# "
 
-# for
-assert 5 "
-bar() {
-  for (i = 0; i < 5; i = i + 1){}
-  return 5;
-}
-main() {
-  result = bar();
-  result;
-}
-"
+# assert 5 "
+# bar() {
+#   for (i = 0; i < 5; i = i + 1){}
+#   return 5;
+# }
+# main() {
+#   result = bar();
+#   result;
+# }
+# "
+
 
 # assert 7 "
 # main()

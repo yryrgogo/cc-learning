@@ -60,6 +60,7 @@ void gen_stmt(Node *node)
 		int c = count();
 
 		gen_expr(node->init);
+		printf("  pop rax\n");
 		printf("  jmp .L.for.begin.%d\n", c);
 
 		printf(".L.for.begin.%d:\n", c);
@@ -69,6 +70,7 @@ void gen_stmt(Node *node)
 		printf("  je .L.for.end.%d\n", c);
 		gen_stmt(node->then);
 		gen_expr(node->inc);
+		printf("  pop rax\n");
 		printf("  jmp .L.for.begin.%d\n", c);
 
 		printf(".L.for.end.%d:\n", c);
@@ -118,6 +120,7 @@ void gen_stmt(Node *node)
 	}
 	default:
 		gen_expr(node);
+		printf("  pop rax\n");
 	}
 
 	return;
@@ -125,13 +128,10 @@ void gen_stmt(Node *node)
 
 void gen_calculator(Node *node)
 {
-	if (node->lhs)
-		gen_expr(node->lhs);
-	if ((node->rhs))
-		gen_expr(node->rhs);
-
 	if (node->lhs && node->rhs)
 	{
+		gen_expr(node->lhs);
+		gen_expr(node->rhs);
 		printf("  pop rdi\n");
 		printf("  pop rax\n");
 	}
@@ -172,8 +172,6 @@ void gen_calculator(Node *node)
 		printf("  movzb rax, al\n");
 		break;
 	}
-
-	printf("  push rax\n");
 }
 
 void gen_expr(Node *node)
@@ -182,26 +180,29 @@ void gen_expr(Node *node)
 	{
 	case ND_NUM:
 		printf("  push %d\n", node->val);
-		break;
+		return;
 	case ND_LVAR:
 		gen_lval(node);
 		printf("  pop rax\n");
 		printf("  mov rax, [rax]\n");
 		printf("  push rax\n");
-		break;
+		return;
 	case ND_ASSIGN:
 		gen_lval(node->lhs);
 		gen_expr(node->rhs);
 		printf("  pop rdi\n");
 		printf("  pop rax\n");
 		printf("  mov [rax], rdi\n");
-		break;
+		printf("  push rax\n");
+		return;
 	case ND_FUNC_CALL:
 		gen_func_call(node);
-		break;
+		printf("  push rax\n");
+		return;
 	default:
 		gen_calculator(node);
-		break;
+		printf("  push rax\n");
+		return;
 	}
 }
 
@@ -260,7 +261,6 @@ void gen_func(Node *node)
 		printf("  sub rsp, %d\n", locals_count * 8);
 
 	gen_stmt(node->body);
-	printf("  pop rax\n");
 
 	// Epilogue
 	printf("  mov rsp, rbp\n");
@@ -305,7 +305,5 @@ void gen_func_call(Node *node)
 	memcpy(s, node->name, node->len);
 	s[node->len] = '\0';
 	printf("  call %s\n", s);
-	// TODO: 戻り値があれば rax に入っているはずなのでとりあえず rax を push しているが適切かは？
-	printf("  push rax\n");
 	return;
 }
