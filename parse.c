@@ -138,6 +138,15 @@ Node *stmt() {
     expect(")");
 
     node->then = stmt();
+  } else if(consume_token(TK_TYPE)) {
+    node = primary();
+    Type *ty = calloc(1, sizeof(Type));
+    if(startswith(token->str, 'int')) {
+      ty->kind = TY_INT;
+    } else {
+      error_at(NULL, "not implemented.");
+    }
+    expect(";");
   } else {
     node = expr();
     expect(";");

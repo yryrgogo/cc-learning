@@ -15,9 +15,10 @@ void error_at(char *loc, char *fmt, ...);
 #define dbg(message)                                                           \
   error_at("### debug at %s, %s:%d\n", message, __FILE__, __LINE__)
 
-//
-// tokenize.c
-//
+typedef struct Token Token;
+typedef struct Type Type;
+typedef struct LVar LVar;
+typedef struct Node Node;
 
 // Kind of Token
 typedef enum {
@@ -31,49 +32,13 @@ typedef enum {
   TK_ELSE,    // else
   TK_FOR,     // for
   TK_WHILE,   // while
+  TK_TYPE,    // int
 } TokenKind;
 
-typedef struct Token Token;
-
-// トークン型
-struct Token {
-  TokenKind kind; // トークンの型
-  Token *next;    // 次の入力トークン
-  int val;        // kind が TK_NUM の場合、その数値
-  char *str;      // トークン文字列
-  int len;        // トークンの長さ
-
-  char *loc;
-};
-
-Token *tokenize(char *p);
-bool equal(Token *tok, char *op);
-bool equal_token(TokenKind tk);
-bool consume(char *op);
-bool consume_token(TokenKind tk);
-Token *consume_ident();
-int consume_num();
-void expect(char *op);
-int expect_number();
-bool at_eof();
-Token *new_token(TokenKind kind, Token *cur, char *str, int len);
-bool startswith(char *p, char *q);
-bool is_alnum(char c);
-// static bool is_keyword(Token *tok);
-// static int read_punct(char *p);
-
-//
-// parse.c
-//
-
-typedef struct LVar LVar;
-// ローカル変数の型
-struct LVar {
-  LVar *next;
-  char *name;
-  int len;
-  int offset;
-};
+// Kind of Type
+typedef enum {
+  TY_INT, // int
+} TypeKind;
 
 // Kind of Operator
 typedef enum {
@@ -105,7 +70,50 @@ typedef enum {
   ND_DEREF, // *
 } NodeKind;
 
-typedef struct Node Node;
+struct Token {
+  TokenKind kind; // トークンの型
+  Token *next;    // 次の入力トークン
+  int val;        // kind が TK_NUM の場合、その数値
+  char *str;      // トークン文字列
+  int len;        // トークンの長さ
+
+  char *loc;
+};
+
+struct Type {
+  TypeKind kind;
+};
+
+//
+// tokenize.c
+//
+Token *tokenize(char *p);
+bool equal(Token *tok, char *op);
+bool equal_token(TokenKind tk);
+bool consume(char *op);
+bool consume_token(TokenKind tk);
+Token *consume_ident();
+int consume_num();
+void expect(char *op);
+int expect_number();
+bool at_eof();
+Token *new_token(TokenKind kind, Token *cur, char *str, int len);
+bool startswith(char *p, char *q);
+bool is_alnum(char c);
+// static bool is_keyword(Token *tok);
+// static int read_punct(char *p);
+
+//
+// parse.c
+//
+
+// ローカル変数の型
+struct LVar {
+  LVar *next;
+  char *name;
+  int len;
+  int offset;
+};
 
 // 抽象構文木のノードの型
 struct Node {
@@ -132,6 +140,9 @@ struct Node {
 
   // block statement
   Node *body;
+
+  // type
+  Type *ty;
 };
 
 void program();
