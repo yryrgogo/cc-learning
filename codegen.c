@@ -186,13 +186,23 @@ void gen_expr(Node *node) {
     printf("  push %d\n", node->val);
     return;
   case ND_LVAR:
-    gen_lval(node);
+    gen_lval_addr(node);
+    printf("  pop rax\n");
+    printf("  mov rax, [rax]\n");
+    printf("  push rax\n");
+    return;
+  case ND_ADDR:
+    // TODO: &(*a) のような式はコンパイルできない
+    gen_lval_addr(node->lhs);
+    return;
+  case ND_DEREF:
+    gen_expr(node->lhs);
     printf("  pop rax\n");
     printf("  mov rax, [rax]\n");
     printf("  push rax\n");
     return;
   case ND_ASSIGN:
-    gen_lval(node->lhs);
+    gen_lval_addr(node->lhs);
     gen_expr(node->rhs);
     printf("  pop rdi\n");
     printf("  pop rax\n");
@@ -266,7 +276,7 @@ void gen_calculator(Node *node) {
  *
  * @param node
  */
-void gen_lval(Node *node) {
+void gen_lval_addr(Node *node) {
   if(node->kind != ND_LVAR)
     error_at(__FILE__, "代入の左辺値が変数ではありません。");
 

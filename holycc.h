@@ -89,15 +89,20 @@ typedef enum {
   ND_LVAR,   // ローカル変数
   ND_NUM,    // 整数
   ND_RETURN, // return
-  ND_IF,     // if
-  ND_ELSE,   // else
-  ND_FOR,    // for
-  ND_WHILE,  // while NOTE: NF_FOR
+
+  ND_BLOCK, // {}
+  ND_IF,    // if
+  ND_ELSE,  // else
+  ND_FOR,   // for
+  ND_WHILE, // while NOTE: NF_FOR
             // にまとめられるらしいが今はわからんので分けている
-  ND_BLOCK,     // {}
   ND_FUNC,      // function
   ND_FUNC_CALL, // function call
-  ND_NOP,       // no operation
+
+  ND_NOP, // no operation
+
+  ND_ADDR,  // &
+  ND_DEREF, // *
 } NodeKind;
 
 typedef struct Node Node;

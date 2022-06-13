@@ -672,4 +672,12 @@ main()
 }
 "
 
+assert 10 "
+main (){
+  a = 10;
+  addr = &a;
+  *addr;
+}
+"
+
 echo OK

@@ -19,6 +19,12 @@ Node *new_num(int val) {
   return node;
 }
 
+Node *new_unary(NodeKind kind, Node *lhs) {
+  Node *node = new_node(kind);
+  node->lhs = lhs;
+  return node;
+}
+
 Node *new_binary(NodeKind kind, Node *lhs, Node *rhs) {
   Node *node = new_node(kind);
   node->lhs = lhs;
@@ -206,11 +212,23 @@ Node *mul() {
   }
 }
 
+/**
+ * @brief unary =
+ * | "+"? primary
+ * | "-"? primary
+ * | "*" unary
+ * | "&" unary
+ * @return Node*
+ */
 Node *unary() {
   if(consume("+"))
     return primary();
   if(consume("-"))
     return new_binary(ND_SUB, new_num(0), unary());
+  if(consume("&"))
+    return new_unary(ND_ADDR, unary());
+  if(consume("*"))
+    return new_unary(ND_DEREF, unary());
   return primary();
 }
 
