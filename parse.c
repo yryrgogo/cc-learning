@@ -138,15 +138,6 @@ Node *stmt() {
     expect(")");
 
     node->then = stmt();
-  } else if(consume_token(TK_TYPE)) {
-    node = primary();
-    Type *ty = calloc(1, sizeof(Type));
-    if(startswith(token->str, 'int')) {
-      ty->kind = TY_INT;
-    } else {
-      error_at(NULL, "not implemented.");
-    }
-    expect(";");
   } else {
     node = expr();
     expect(";");
@@ -242,6 +233,7 @@ Node *unary() {
 }
 
 // primary = num
+//         | type ident
 //         | ident ("(" ")")?
 //         | "(" expr ")"
 Node *primary() {
@@ -250,18 +242,15 @@ Node *primary() {
     Node *node = expr();
     expect(")");
     return node;
+  } else if(equal_token(TK_TYPE)) {
+    Node *node = ident_declaration();
+    return node;
   }
 
   Token *tok = consume_ident();
   // 関数呼び出し
   if(tok && consume("(")) {
-    Node *node = calloc(1, sizeof(Node));
-    node->name = tok->str;
-    node->len = tok->len;
-    node->args = func_call_args(node);
-
-    node->kind = ND_FUNC_CALL;
-
+    Node *node = func_call(tok);
     return node;
   } else if(tok) {
     Node *node = local_variable(tok);
@@ -269,6 +258,24 @@ Node *primary() {
   }
 
   return new_num(expect_number());
+}
+
+Node *ident_declaration() {
+  Type *ty = calloc(1, sizeof(Type));
+  if(startswith(token->str, "int")) {
+    ty->kind = TY_INT;
+  } else {
+    error_at(NULL, "not implemented.");
+  }
+  consume_token(TK_TYPE);
+
+  Token *tok = consume_ident();
+  if(!tok) {
+    error_at(NULL, "TK_TYPE の後には TK_IDENT が必須です。");
+  }
+  Node *node = local_variable(tok);
+
+  return node;
 }
 
 Node *local_variable(Token *tok) {
@@ -320,6 +327,17 @@ Node *func_args_definition(int *arg_count) {
   }
 
   return head.next;
+}
+
+Node *func_call(Token *tok) {
+  Node *node = calloc(1, sizeof(Node));
+  node->name = tok->str;
+  node->len = tok->len;
+  node->args = func_call_args(node);
+
+  node->kind = ND_FUNC_CALL;
+
+  return node;
 }
 
 Node *func_call_args(Node *node) {

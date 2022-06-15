@@ -158,8 +158,10 @@ Node *unary();
 Node *primary();
 LVar *find_lvar(Token *tok);
 Node *func_args_definition(int *arg_count);
-Node *func_call_args();
+Node *func_call(Token *tok);
+Node *func_call_args(Node *node);
 Node *local_variable(Token *tok);
+Node *ident_declaration();
 
 //
 // codegen.c
