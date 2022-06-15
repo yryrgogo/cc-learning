@@ -40,12 +40,17 @@ void program() {
 }
 
 Node *toplevel() {
+  Type *ty = consume_type();
+  if(!ty) {
+    error_at(NULL, "TK_TYPE が必須です。");
+  }
 
   Token *tok = consume_ident();
   Node *node = calloc(1, sizeof(Node));
 
   node->name = tok->str;
   node->len = tok->len;
+  node->ty = ty;
 
   if(tok && consume("(")) {
     int arg_count = 0;
@@ -313,12 +318,15 @@ Node *func_args_definition(int *arg_count) {
 
   for(;;) {
     // arguments
-    if(equal_token(TK_IDENT)) {
+    if(equal_token(TK_TYPE)) {
       Node *param = primary();
       cur = cur->next = param;
       (*arg_count)++;
-
       consume(",");
+    } else if(consume(")")) {
+      break;
+    } else {
+      error_at(NULL, "TK_TYPE が必須です。");
     }
 
     if(consume(")")) {

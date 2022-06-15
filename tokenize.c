@@ -29,6 +29,15 @@ Token *consume_ident() {
   return t;
 }
 
+Token *consume_type() {
+  if(token->kind != TK_TYPE)
+    return NULL;
+
+  Token *t = token;
+  token = token->next;
+  return t;
+}
+
 bool equal(Token *tok, char *op) { return memcmp(tok->loc, op, tok->len) == 0; }
 
 bool equal_token(TokenKind tk) {

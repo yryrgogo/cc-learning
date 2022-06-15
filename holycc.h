@@ -93,6 +93,7 @@ bool equal_token(TokenKind tk);
 bool consume(char *op);
 bool consume_token(TokenKind tk);
 Token *consume_ident();
+Token *consume_type();
 int consume_num();
 void expect(char *op);
 int expect_number();

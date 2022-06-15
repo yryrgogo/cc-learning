@@ -681,7 +681,7 @@ assert() {
 # "
 
 assert 5 "
-main (){
+int main (){
   int a;
   a = 5;
   a;
@@ -689,7 +689,7 @@ main (){
 "
 
 assert 21 "
-main (){
+int main() {
   int a;
   int b;
   a = 13;
@@ -697,6 +697,36 @@ main (){
   int c;
   c = a + b;
   c;
+}
+"
+
+assert 8 "
+int foo() {
+  int a;
+  a = 3;
+  return a;
+}
+
+int main() {
+  int a;
+  a = 5;
+  int b;
+  b = foo();
+  a + b;
+}
+"
+
+assert 8 "
+int foo(int a) {
+  return a;
+}
+
+int main() {
+  int a;
+  a = 5;
+  int b;
+  b = foo(3);
+  a + b;
 }
 "
 
