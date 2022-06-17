@@ -3,6 +3,13 @@ assert() {
   expected="$1"
   input="$2"
 
+  # make_graph="1"
+  # if [ "$make_graph" = "1" ]; then
+  #   rm -f ast_graph.md
+  #   ./holycc "$input" > ast_graph.md
+  #   exit 0
+  # fi
+
   rm tmp.s
   ./holycc "$input" > tmp.s
   cc -o tmp tmp.s call_func.o
@@ -779,17 +786,17 @@ int main() {
 }
 "
 
-assert 7 "
-int main() {
-  int x;
-  int *y;
+# assert 7 "
+# int main() {
+#   int x;
+#   int *y;
 
-  y = &x;
-  *y = 7;
-  x;
-}
-"
+#   y = &x;
+#   *y = 7;
+#   x;
+# }
+# "
 
-"int main() { int x; int *y; y = &x; *y = 7; x; }"
+# "int main() { int x; int *y; y = &x; *y = 7; x; }"
 
 echo OK

@@ -34,16 +34,34 @@ int main(int argc, char **argv) {
   user_input = argv[1];
   tokenize(user_input);
 
-  // for(;;) {
-  //   if(token->kind == TK_EOF) {
-  //     break;
-  //   }
-  //   printf("%s\n", token->str);
-  //   token = token->next;
-  // }
-  // return 0;
+  bool check_token = false;
+  bool check_node = false;
+
+  if(check_token) {
+    for(;;) {
+      if(token->kind == TK_EOF) {
+        break;
+      }
+      printf("%s\n", token->str);
+      token = token->next;
+    }
+    return 0;
+  }
 
   program();
+
+  if(check_node) {
+    printf("```mermaid\n");
+    printf("flowchart LR\n");
+
+    for(int i = 0; code[i]; i++) {
+      gen_graph(code[i]);
+    }
+
+    printf("```\n");
+
+    return 0;
+  }
 
   // アセンブリの前半部分を出力
   printf(".intel_syntax noprefix\n");

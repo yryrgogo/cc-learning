@@ -174,6 +174,8 @@ void gen_stmt(Node *node);
 void gen_expr(Node *node);
 void gen_func(Node *node);
 void gen_func_call(Node *node);
+void gen_func_call_arg(Node *node, char *name);
+void gen_lvar_addr(Node *node);
 void gen_calculator(Node *node);
 
 //
@@ -201,3 +203,12 @@ void hashmap_test(void);
 // strings.c
 //
 char *format(char *fmt, ...);
+
+//
+// graphgen.c
+//
+void gen_graph(Node *node);
+void gen_graph_func(Node *node);
+void gen_graph_stmt(Node *node, char *name);
+void get_no(char *no);
+void *node_name(char *name, char *no);
