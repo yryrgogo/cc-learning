@@ -277,8 +277,9 @@ void gen_calculator(Node *node) {
  * @param node
  */
 void gen_lval_addr(Node *node) {
-  if(node->kind != ND_LVAR)
-    error_at(__FILE__, "代入の左辺値が変数ではありません。");
+  if(node->kind != ND_LVAR) {
+    printf("%s 代入の左辺値が変数ではありません。", __FILE__);
+  }
 
   printf("  mov rax, rbp\n");
   printf("  sub rax, %d\n", node->offset);

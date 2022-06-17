@@ -11,7 +11,6 @@
 void error_at(char *loc, char *fmt, ...);
 
 #define unreachable() error_at("internal error at %s:%d", __FILE__, __LINE__)
-
 #define dbg(message)                                                           \
   error_at("### debug at %s, %s:%d\n", message, __FILE__, __LINE__)
 
@@ -38,6 +37,7 @@ typedef enum {
 // Kind of Type
 typedef enum {
   TY_INT, // int
+  TY_PTR, // pointer
 } TypeKind;
 
 // Kind of Operator
@@ -82,6 +82,7 @@ struct Token {
 
 struct Type {
   TypeKind kind;
+  Type *ptr_to;
 };
 
 //

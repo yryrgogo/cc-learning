@@ -274,6 +274,12 @@ Node *ident_declaration() {
   }
   consume_token(TK_TYPE);
 
+  while(consume("*")) {
+    ty->kind = TY_PTR;
+    Type *ty = calloc(1, sizeof(Type));
+    // ty->ptr_to = ;
+  }
+
   Token *tok = consume_ident();
   if(!tok) {
     error_at(NULL, "TK_TYPE の後には TK_IDENT が必須です。");
