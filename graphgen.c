@@ -24,14 +24,9 @@ void gen_graph(Node *node) {
   }
   default: {
     printf("%%%% gen_graph\n");
+    printf("\n");
   }
   }
-}
-
-void gen_edge(char *parent_name, char *name) {
-  printf("%s[%s]\n", name, name);
-  printf("%s --> %s\n", parent_name, name);
-  printf("\n");
 }
 
 void gen_func_node(Node *node) {
@@ -41,6 +36,12 @@ void gen_func_node(Node *node) {
   printf("%s[%s]\n", name, name);
 
   gen_graph_stmt(node->body, name);
+}
+
+void gen_edge(char *parent_name, char *name) {
+  printf("%s[%s]\n", name, name);
+  printf("%s --> %s\n", parent_name, name);
+  printf("\n");
 }
 
 void gen_block_edge(char *new_name, char *parent_name) {
@@ -67,6 +68,22 @@ void gen_num_edge(char *new_name, char *parent_name) {
   gen_edge(parent_name, name);
 }
 
+void gen_lvar_edge(char *new_name, char *parent_name) {
+  char name[12] = "lvar";
+  node_name(name);
+  strcpy(new_name, name);
+
+  gen_edge(parent_name, name);
+}
+
+void gen_assign_edge(char *new_name, char *parent_name) {
+  char name[12] = "assign";
+  node_name(name);
+  strcpy(new_name, name);
+
+  gen_edge(parent_name, name);
+}
+
 void gen_graph_stmt(Node *node, char *parent_name) {
   char name[12] = "";
   switch(node->kind) {
@@ -84,7 +101,8 @@ void gen_graph_stmt(Node *node, char *parent_name) {
     return;
   }
   default: {
-    printf("%% gen_graph_stmt\n");
+    gen_graph_expr(node, parent_name);
+    printf("\n");
   }
     // case ND_FOR: {
     //   printf("\n");
@@ -133,5 +151,12 @@ void gen_graph_expr(Node *node, char *parent_name) {
   case ND_NUM:
     gen_num_edge(name, parent_name);
     return;
+  case ND_LVAR:
+    gen_lvar_edge(name, parent_name);
+    return;
+  case ND_ASSIGN:
+    gen_assign_edge(name, parent_name);
+    gen_graph_expr(node->lhs, name);
+    gen_graph_expr(node->rhs, name);
   }
 }

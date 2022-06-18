@@ -9,5 +9,7 @@ graph() {
 
 graph "
 int main() {
-	return 5;
+	int a;
+	a = 5;
+	return a;
 }"

@@ -48,9 +48,11 @@ int main(int argc, char **argv) {
   if(check_node) {
     printf("```mermaid\n");
     printf("flowchart TB\n");
+    printf("\n");
 
     for(int i = 0; code[i]; i++) {
       gen_graph(code[i]);
+      printf("\n");
     }
 
     printf("```\n");

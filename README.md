@@ -210,6 +210,46 @@ main:
 Step18. のポインタ型実装を開始。`struct Type` を実装するようアドバイスがあるが、この用途をいまいちわかっていないので整理中。
 
 code 生成する際の AST を可視化できた方がデバッグがはかどると思っていたものの面倒で着手していなかったが、やっぱあったほうがよいと思い、脱線して実装を始めた。
+下記ぐらいは出力可能になったので、あとはコンパイラの実装をしながら必要に応じて機能追加・改善する。Node の通し番号を振っているが、変数名とか値とかがあってもよいかも。
+
+```
+int main() {
+	int a;
+	a = 5;
+	return a;
+}
+```
+
+```mermaid
+flowchart TB
+
+func1[func1]
+block2[block2]
+func1 --> block2
+
+lvar3[lvar3]
+block2 --> lvar3
+
+
+assign4[assign4]
+block2 --> assign4
+
+lvar5[lvar5]
+assign4 --> lvar5
+
+num6[num6]
+assign4 --> num6
+
+
+return7[return7]
+block2 --> return7
+
+lvar8[lvar8]
+return7 --> lvar8
+
+%% gen_graph
+```
+
 
 ## 注意事項
 
