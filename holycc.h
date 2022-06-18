@@ -208,7 +208,7 @@ char *format(char *fmt, ...);
 // graphgen.c
 //
 void gen_graph(Node *node);
-void gen_graph_func(Node *node);
+void gen_func_node(Node *node);
 void gen_graph_stmt(Node *node, char *name);
 void get_no(char *no);
-void *node_name(char *name, char *no);
+void *node_name(char *name);

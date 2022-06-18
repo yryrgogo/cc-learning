@@ -13,6 +13,9 @@ test: holycc
 debug: holycc
 				./debug.sh
 
+graph: holycc
+				./graph.sh
+
 clean:
 				rm -rf holycc *.o *~ tmp*
 

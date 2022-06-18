@@ -1,9 +1,4 @@
 #include "holycc.h"
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 // 入力プログラム
 char *user_input;
@@ -35,7 +30,7 @@ int main(int argc, char **argv) {
   tokenize(user_input);
 
   bool check_token = false;
-  bool check_node = false;
+  bool check_node = true;
 
   if(check_token) {
     for(;;) {
@@ -52,7 +47,7 @@ int main(int argc, char **argv) {
 
   if(check_node) {
     printf("```mermaid\n");
-    printf("flowchart LR\n");
+    printf("flowchart TB\n");
 
     for(int i = 0; code[i]; i++) {
       gen_graph(code[i]);
