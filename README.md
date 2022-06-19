@@ -250,6 +250,35 @@ return7 --> lvar8
 %% gen_graph
 ```
 
+### 2022/06/19
+
+switch の break 忘れてバグらせハマりがち。
+ND_DEREF の codegen は左辺と右辺で異なるため、その対応を行った。これにより `*y = 5;` のようなポインタ型への代入もコンパイル可能になった。
+
+ポインタ型を実装することでコンパイル可能にしたいのは下記のようなコード。
+
+```
+#include <stdio.h>
+
+int main() {
+
+  int x = 5;
+  int *y = &x;
+
+  *y = 10;
+  printf("%d\n", x);   // 10
+  printf("%d\n", y);   // 1286778196
+  printf("%d\n", *y);  // 10
+
+  int **z = &y;
+  printf("%d\n", z);   // 1286778184
+  printf("%d\n", *z);  // 1286778196
+  printf("%d\n", **z); // 10
+
+  return 0;
+}
+```
+
 
 ## 注意事項
 

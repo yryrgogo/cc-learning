@@ -1,7 +1,7 @@
 #!/bin/bash
 
 graph() {
-  ./holycc "$1" > ast_graph.md
+  ./holycc "$1" "1" > ast_graph.md
 	cat ast_graph.md
 	exit 0
 }

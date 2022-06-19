@@ -202,7 +202,14 @@ void gen_expr(Node *node) {
     printf("  push rax\n");
     return;
   case ND_ASSIGN:
-    gen_lvar_addr(node->lhs);
+    switch(node->lhs->kind) {
+    case ND_LVAR:
+      gen_lvar_addr(node->lhs);
+      break;
+    case ND_DEREF:
+      gen_lhs_deref(node->lhs);
+      break;
+    }
     gen_expr(node->rhs);
     printf("  pop rdi\n");
     printf("  pop rax\n");
@@ -329,4 +336,23 @@ void gen_func_call_arg(Node *node, char *register_name) {
   gen_expr(node);
   printf("  pop rax\n");
   printf("  mov %s, rax\n", register_name);
+}
+
+/**
+ * @brief ポインタ型への代入式における左辺のコード生成（右辺とは異なる）
+ *
+ * @param node
+ */
+void gen_lhs_deref(Node *node) {
+  switch(node->kind) {
+  case ND_LVAR:
+    gen_lvar_addr(node);
+    printf("  pop rax\n");
+    printf("  mov rax, [rax]\n");
+    printf("  push rax\n");
+    break;
+  case ND_DEREF:
+    gen_lhs_deref(node->lhs);
+    break;
+  }
 }

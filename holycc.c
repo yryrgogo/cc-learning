@@ -21,7 +21,7 @@ void error_at(char *loc, char *fmt, ...) {
 }
 
 int main(int argc, char **argv) {
-  if(argc != 2) {
+  if(argc != 3) {
     error_at(NULL, "引数の個数が正しくありません");
     return 1;
   }
@@ -30,7 +30,6 @@ int main(int argc, char **argv) {
   tokenize(user_input);
 
   bool check_token = false;
-  bool check_node = true;
 
   if(check_token) {
     for(;;) {
@@ -45,7 +44,7 @@ int main(int argc, char **argv) {
 
   program();
 
-  if(check_node) {
+  if(startswith(argv[2], "1")) {
     printf("```mermaid\n");
     printf("flowchart TB\n");
     printf("\n");

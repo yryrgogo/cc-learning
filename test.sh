@@ -3,7 +3,7 @@ assert() {
   expected="$1"
   input="$2"
   rm tmp.s
-  ./holycc "$input" > tmp.s
+  ./holycc "$input" "0" > tmp.s
   cc -o tmp tmp.s call_func.o
   ./tmp
   actual="$?"
@@ -502,267 +502,152 @@ assert() {
 # }
 # "
 
+assert 7 "
+int main()
+{
+  if (0 == 0){
+    5;
+  }else{
+  }
+  7;
+}
+"
 
-# assert 7 "
-# int main()
-# {
-#   if (0 == 0){
-#     5;
-#   }else{
-#   }
-#   7;
-# }
-# "
+# fibonacci ではないがこれが通らなかった。push, pop の整合性が取れなくなっていた
+assert 14 "
+int foo(int n)
+{
+  if (0 == 0){
+    if (n == 0){
+      return 33;
+    }
+  }
+  int x;
+  x = n - 1;
+  return x;
+}
 
-# # fibonacci ではないがこれが通らなかった。push, pop の整合性が取れなくなっていた
-# assert 14 "
-# int foo(int n)
-# {
-#   if (0 == 0){
-#     if (n == 0){
-#       return 33;
-#     }
-#   }
-#   int x;
-#   x = n - 1;
-#   return x;
-# }
+int main()
+{
+  int result;
+  result = foo(15);
+  result;
+}
+"
 
-# int main()
-# {
-#   int result;
-#   result = foo(15);
-#   result;
-# }
-# "
+assert 9 "
+int bar(int n)
+{
+  return n;
+}
 
-# assert 9 "
-# int bar(int n)
-# {
-#   return n;
-# }
+int main()
+{
+  int a;
+  a = 10;
+  bar(a - 1);
+}
+"
 
-# int main()
-# {
-#   int a;
-#   a = 10;
-#   bar(a - 1);
-# }
-# "
+assert 201 "
+int rec(int n)
+{
+  if (n == 0){
+    return 201;
+  }
+  return rec(n - 1);
+}
 
-# assert 3 "
-# int rec(int n)
-# {
-#   if (n == 5){
-#     return 3;
-#   }
-#   55;
-#   rec(n - 1);
-# }
+int main()
+{
+  rec(10);
+}
+"
 
-# int main()
-# {
-#   result = rec(10);
-#   result;
-# }
-# "
+assert 120 "
+int rec(int a, int b)
+{
+  if (a == 0){
+    return b;
+  }
+  return rec(a - 1, b+1);
+}
 
-# assert 4 "
-# int rec(int n, int acc)
-# {
-#   if (n == 0){
-#     return 10;
-#   }
-#   int b;
-#   b = acc  + 7;
-#   return b - 3;
-# }
+int main()
+{
+  rec(100, 20);
+}
+"
 
-# int main()
-# {
-#   rec(1, 0);
-# }
-# "
+assert 16 "
+int foo(int a, int b, int c)
+{
+  if (a == 1){
+    if (b == 2){
+      return c;
+    }
+    return b;
+  }
+  int r;
+  r = foo(a-1, b-1, c+1);
+  return r;
+}
 
-# assert 201 "
-# int rec(int n)
-# {
-#   if (n == 0){
-#     return 201;
-#   }
-#   return rec(n - 1);
-# }
+int main()
+{
+  int result;
+  result = foo(5, 20, 3);
+  result;
+}
+"
 
-# int main()
-# {
-#   rec(10);
-# }
-# "
+assert 55 "
+int fibonacci(int a, int b, int n)
+{
+  if (n == 1){
+    if (a == 0){
+      return a;
+    }
+    return b;
+  }
+  int r;
+  r = fibonacci(b, a + b, n - 1);
+  return r;
+}
 
-# assert 120 "
-# int rec(int a, int b)
-# {
-#   if (a == 0){
-#     return b;
-#   }
-#   return rec(a - 1, b+1);
-# }
+int main()
+{
+  int result;
+  result = fibonacci(0, 1, 10);
+  result;
+}
+"
 
-# int main()
-# {
-#   rec(100, 20);
-# }
-# "
+assert 10 "
+int main (){
+  int a;
+  a = 10;
+  int addr;
+  addr = &a;
+  *addr;
+}
+"
 
-# assert 3 "
-# int foo(int a, int b, int c)
-# {
-#   if (a == 1){
-#     if (b == 2){
-#       return c;
-#     }
-#     return b;
-#   }
-#   return a;
-# }
+assert 8 "
+int foo() {
+  int a;
+  a = 3;
+  return a;
+}
 
-# int main()
-# {
-#   int result;
-#   result = foo(1, 2, 3);
-#   result;
-# }
-# "
-
-# assert 5 "
-# int foo(int a, int b, int c)
-# {
-#   if (a == 1){
-#     if (b == 2){
-#       return c;
-#     }
-#     return b;
-#   }
-#   return a;
-# }
-
-# int main()
-# {
-#   int result;
-#   result = foo(1, 5, 3);
-#   result;
-# }
-# "
-
-# assert 12 "
-# int foo(int a, int b, int c)
-# {
-#   if (a == 1){
-#     if (b == 2){
-#       return c;
-#     }
-#     return b;
-#   }
-#   return a;
-# }
-
-# int main()
-# {
-#   int result;
-#   result = foo(12, 5, 3);
-#   result;
-# }
-# "
-
-# assert 16 "
-# int foo(int a, int b, int c)
-# {
-#   if (a == 1){
-#     if (b == 2){
-#       return c;
-#     }
-#     return b;
-#   }
-#   int r;
-#   r = foo(a-1, b-1, c+1);
-#   return r;
-# }
-
-# int main()
-# {
-#   int result;
-#   result = foo(5, 20, 3);
-#   result;
-# }
-# "
-
-# assert 55 "
-# int fibonacci(int a, int b, int n)
-# {
-#   if (n == 1){
-#     if (a == 0){
-#       return a;
-#     }
-#     return b;
-#   }
-#   int r;
-#   r = fibonacci(b, a + b, n - 1);
-#   return r;
-# }
-
-# int main()
-# {
-#   int result;
-#   result = fibonacci(0, 1, 10);
-#   result;
-# }
-# "
-
-# assert 10 "
-# int main (){
-#   int a;
-#   a = 10;
-#   int addr;
-#   addr = &a;
-#   *addr;
-# }
-# "
-
-# assert 5 "
-# int main (){
-#   int a;
-#   a = 5;
-#   a;
-# }
-# "
-
-# assert 21 "
-# int main() {
-#   int a;
-#   int b;
-#   a = 13;
-#   b = 8;
-#   int c;
-#   c = a + b;
-#   c;
-# }
-# "
-
-# assert 8 "
-# int foo() {
-#   int a;
-#   a = 3;
-#   return a;
-# }
-
-# int main() {
-#   int a;
-#   a = 5;
-#   int b;
-#   b = foo();
-#   a + b;
-# }
-# "
+int main() {
+  int a;
+  a = 5;
+  int b;
+  b = foo();
+  a + b;
+}
+"
 
 assert 8 "
 int foo(int a) {
@@ -778,17 +663,41 @@ int main() {
 }
 "
 
-# assert 7 "
-# int main() {
-#   int x;
-#   int *y;
+assert 7 "
+int main() {
+  int x;
+  int *y;
 
-#   y = &x;
-#   *y = 7;
-#   x;
-# }
-# "
+  y = &x;
+  *y = 7;
+  x;
+}
+"
 
-# "int main() { int x; int *y; y = &x; *y = 7; x; }"
+assert 3 "
+int main(){
+  int x;
+  int *y;
+  y = &x;
+  *y = 3;
+  return x;
+}
+"
+
+assert 13 "
+int main() {
+
+  int x;
+  x = 5;
+  int *y;
+  y = &x;
+  *y = 13;
+
+  int **z;
+  z = &y;
+
+  **z;
+}
+"
 
 echo OK
