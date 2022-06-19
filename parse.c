@@ -195,12 +195,13 @@ Node *add() {
   Node *node = mul();
 
   for(;;) {
-    if(consume("+"))
+    if(consume("+")) {
       node = new_binary(ND_ADD, node, mul());
-    else if(consume("-"))
+    } else if(consume("-")) {
       node = new_binary(ND_SUB, node, mul());
-    else
+    } else {
       return node;
+    }
   }
 }
 
@@ -258,7 +259,7 @@ Node *primary() {
     Node *node = func_call(tok);
     return node;
   } else if(tok) {
-    Node *node = local_variable(tok);
+    Node *node = local_variable(tok, NULL);
     return node;
   }
 
@@ -266,6 +267,7 @@ Node *primary() {
 }
 
 Node *ident_declaration() {
+  Type *cur;
   Type *ty = calloc(1, sizeof(Type));
   if(startswith(token->str, "int")) {
     ty->kind = TY_INT;
@@ -275,21 +277,27 @@ Node *ident_declaration() {
   consume_token(TK_TYPE);
 
   while(consume("*")) {
-    ty->kind = TY_PTR;
-    Type *ty = calloc(1, sizeof(Type));
-    // ty->ptr_to = ;
+    Type *ptr_ty = calloc(1, sizeof(Type));
+    ptr_ty->kind = TY_PTR;
+    if(!cur) {
+      ptr_ty->ptr_to = ty;
+      cur = ptr_ty;
+    } else {
+      ptr_ty->ptr_to = cur;
+      cur = ptr_ty;
+    }
   }
 
   Token *tok = consume_ident();
   if(!tok) {
     error_at(NULL, "TK_TYPE の後には TK_IDENT が必須です。");
   }
-  Node *node = local_variable(tok);
+  Node *node = local_variable(tok, cur);
 
   return node;
 }
 
-Node *local_variable(Token *tok) {
+Node *local_variable(Token *tok, Type *ty) {
   Node *node = calloc(1, sizeof(Node));
   node->kind = ND_LVAR;
 
@@ -302,6 +310,7 @@ Node *local_variable(Token *tok) {
     lvar = calloc(1, sizeof(LVar));
     lvar->name = tok->str;
     lvar->len = tok->len;
+    lvar->ty = ty;
 
     if(!locals) {
       lvar->offset = 8 + func_offset;
@@ -314,6 +323,7 @@ Node *local_variable(Token *tok) {
     }
   }
   node->offset = lvar->offset;
+  node->ty = lvar->ty;
 
   return node;
 }
@@ -361,19 +371,19 @@ Node *func_call_args(Node *node) {
 
   for(;;) {
     // arguments
-    if(equal_token(TK_NUM) || equal_token(TK_IDENT)) {
+    if(equal_token(TK_NUM) || equal_token(TK_IDENT) || equal(token, "&")) {
       Node *param = expr();
-      // cur = cur->next = param;
       if(count > 0) {
+        // この繋ぎ方が肝で、1->2->3,,,でなく3->2->1のように前に繋がれていく
         param->next = cur;
       }
       cur = param;
       count++;
 
       consume(",");
-    }
-
-    if(consume(")")) {
+    } else if(consume(")")) {
+      break;
+    } else {
       break;
     }
   }

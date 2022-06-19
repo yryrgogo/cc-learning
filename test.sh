@@ -4,7 +4,7 @@ assert() {
   input="$2"
   rm tmp.s
   ./holycc "$input" "0" > tmp.s
-  cc -o tmp tmp.s call_func.o
+  cc -o tmp tmp.s call_func.o pointer_calc.o
   ./tmp
   actual="$?"
 
@@ -697,6 +697,14 @@ int main() {
   z = &y;
 
   **z;
+}
+"
+
+assert 8 "
+int main(){
+  int *p;
+  alloc4(&p, 1, 2, 4, 8);
+  *(p+8);
 }
 "
 
