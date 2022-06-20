@@ -697,12 +697,24 @@ int main() {
 }
 "
 
-assert 8 "
+assert 6 "
 int main(){
+  int a;
+  a = 5;
+  int q;
+  q = 3;
+  int r;
+  r = 6;
+
   int *p;
-  alloc4(&p, 1, 2, 4, 8);
-  *(p+8);
+  p = &a;
+
+  p = p + 2;
+
+  *p;
 }
 "
 
 echo OK
+
+# alloc4(&p, 1, 2, 4, 8);

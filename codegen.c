@@ -192,6 +192,7 @@ void gen_expr(Node *node) {
     printf("  mov rax, [rax]\n");
     printf("  push rax\n");
     return;
+
   case ND_ADDR:
     // TODO: &(*a) のような式はコンパイルできない
     gen_lvar_addr(node->lhs);
@@ -241,16 +242,28 @@ void gen_calculator(Node *node) {
     is_ptr = true;
   }
   gen_expr(node->lhs);
+  if(is_ptr && node->rhs->kind == ND_NUM) {
+    node->rhs->val = node->rhs->val * 8;
+  }
   gen_expr(node->rhs);
+
   printf("  pop rdi\n");
   printf("  pop rax\n");
 
   switch(node->kind) {
   case ND_ADD:
-    printf("  add rax, rdi\n");
+    if(is_ptr && node->rhs->kind == ND_NUM) {
+      printf("  sub rax, rdi\n");
+    } else {
+      printf("  add rax, rdi\n");
+    }
     break;
   case ND_SUB:
-    printf("  sub rax, rdi\n");
+    if(is_ptr && node->rhs->kind == ND_NUM) {
+      printf("  add rax, rdi\n");
+    } else {
+      printf("  sub rax, rdi\n");
+    }
     break;
   case ND_MUL:
     printf("  imul rax, rdi\n");
