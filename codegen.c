@@ -170,6 +170,7 @@ void gen_stmt(Node *node) {
   default:
     gen_expr(node);
     printf("  pop rax\n");
+    return;
   }
 
   return;
@@ -221,8 +222,10 @@ void gen_expr(Node *node) {
     printf("  push rax\n");
     return;
   default:
-    gen_calculator(node);
-    printf("  push rax\n");
+    if(node->lhs && node->rhs) {
+      gen_calculator(node);
+      printf("  push rax\n");
+    }
     return;
   }
 }
@@ -233,12 +236,14 @@ void gen_expr(Node *node) {
  * @param node
  */
 void gen_calculator(Node *node) {
-  if(node->lhs && node->rhs) {
-    gen_expr(node->lhs);
-    gen_expr(node->rhs);
-    printf("  pop rdi\n");
-    printf("  pop rax\n");
+  bool is_ptr = false;
+  if(node->lhs->kind == ND_LVAR && node->lhs->ty->kind == TY_PTR) {
+    is_ptr = true;
   }
+  gen_expr(node->lhs);
+  gen_expr(node->rhs);
+  printf("  pop rdi\n");
+  printf("  pop rax\n");
 
   switch(node->kind) {
   case ND_ADD:

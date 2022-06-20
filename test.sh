@@ -517,21 +517,18 @@ int main()
 assert 14 "
 int foo(int n)
 {
-  if (0 == 0){
-    if (n == 0){
-      return 33;
-    }
-  }
-  int x;
-  x = n - 1;
-  return x;
+  return 14;
 }
 
 int main()
 {
-  int result;
-  result = foo(15);
-  result;
+  int n;
+  n = 10;
+  if (0 == 0){
+    if (n == 0){
+    }
+  }
+  14;
 }
 "
 

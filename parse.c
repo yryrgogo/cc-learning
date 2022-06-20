@@ -267,8 +267,8 @@ Node *primary() {
 }
 
 Node *ident_declaration() {
-  Type *cur;
   Type *ty = calloc(1, sizeof(Type));
+  Type *cur = ty;
   if(startswith(token->str, "int")) {
     ty->kind = TY_INT;
   } else {
