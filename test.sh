@@ -697,6 +697,9 @@ int main() {
 }
 "
 
+# stack は下方向（マイナス方向）にアドレスを確保するため、先に定義された変数を参照するにはアドレスを減算する
+# ただ、malloc はプラス方向に確保するので逆になる。
+# stack は 8byte 単位で確保されるため、a を0として -16 の位置に r がある。int pointer の -4 = -4 * 4 としているためこの計算になる
 assert 6 "
 int main(){
   int a;
@@ -708,12 +711,17 @@ int main(){
 
   int *p;
   p = &a;
-
-  p = p + 2;
+  p = p - 4;
 
   *p;
 }
 "
+
+assert 11 " int main(){ int *p; alloc4(&p, 11, 22, 44, 88); *(p + 0); } "
+assert 22 " int main(){ int *p; alloc4(&p, 11, 22, 44, 88); *(p + 1); } "
+assert 44 " int main(){ int *p; alloc4(&p, 11, 22, 44, 88); *(p + 2); } "
+assert 88 " int main(){ int *p; alloc4(&p, 11, 22, 44, 88); *(p + 3); } "
+assert 22 " int main(){ int *p; alloc4(&p, 11, 22, 44, 88); p=p+3; *(p - 2); } "
 
 echo OK
 

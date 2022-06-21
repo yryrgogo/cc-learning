@@ -243,7 +243,7 @@ void gen_calculator(Node *node) {
   }
   gen_expr(node->lhs);
   if(is_ptr && node->rhs->kind == ND_NUM) {
-    node->rhs->val = node->rhs->val * 8;
+    node->rhs->val = node->rhs->val * 4;
   }
   gen_expr(node->rhs);
 
@@ -252,18 +252,10 @@ void gen_calculator(Node *node) {
 
   switch(node->kind) {
   case ND_ADD:
-    if(is_ptr && node->rhs->kind == ND_NUM) {
-      printf("  sub rax, rdi\n");
-    } else {
-      printf("  add rax, rdi\n");
-    }
+    printf("  add rax, rdi\n");
     break;
   case ND_SUB:
-    if(is_ptr && node->rhs->kind == ND_NUM) {
-      printf("  add rax, rdi\n");
-    } else {
-      printf("  sub rax, rdi\n");
-    }
+    printf("  sub rax, rdi\n");
     break;
   case ND_MUL:
     printf("  imul rax, rdi\n");
