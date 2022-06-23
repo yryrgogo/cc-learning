@@ -32,6 +32,7 @@ typedef enum {
   TK_FOR,     // for
   TK_WHILE,   // while
   TK_TYPE,    // int
+  TK_SIZEOF,  // sizeof
 } TokenKind;
 
 // Kind of Type

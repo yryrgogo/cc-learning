@@ -723,6 +723,9 @@ assert 44 " int main(){ int *p; alloc4(&p, 11, 22, 44, 88); *(p + 2); } "
 assert 88 " int main(){ int *p; alloc4(&p, 11, 22, 44, 88); *(p + 3); } "
 assert 22 " int main(){ int *p; alloc4(&p, 11, 22, 44, 88); p=p+3; *(p - 2); } "
 
+# assert 500 "int main(){500;}"
+
 echo OK
 
 # alloc4(&p, 1, 2, 4, 8);
+
