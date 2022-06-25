@@ -74,13 +74,13 @@ Node *toplevel() {
   node->ty = ty;
 
   if(tok && consume("(")) {
-    int arg_count = 0;
+    int args_offset_total = 0;
     locals = NULL;
-    node->args = func_args_definition(&arg_count);
+    node->args = func_args_definition(&args_offset_total);
 
     if(equal(token, "{")) {
       node->kind = ND_FUNC;
-      func_offset = arg_count * 8;
+      func_offset = args_offset_total;
       node->body = stmt();
       func_offset = 0;
       node->locals = locals;
@@ -399,7 +399,7 @@ Node *local_variable(Token *tok, Type *ty) {
   return node;
 }
 
-Node *func_args_definition(int *arg_count) {
+Node *func_args_definition(int *args_offset_total) {
   Node head = {};
   Node *cur = &head;
 
@@ -408,7 +408,7 @@ Node *func_args_definition(int *arg_count) {
     if(equal_token(TK_TYPE)) {
       Node *param = primary();
       cur = cur->next = param;
-      (*arg_count)++;
+      args_offset_total += param->offset;
       consume(",");
     } else if(consume(")")) {
       break;
