@@ -36,6 +36,22 @@ Node *new_binary(NodeKind kind, Node *lhs, Node *rhs) {
   return node;
 }
 
+Type *new_type(Token *tok, Type *ptr_to, size_t array_size) {
+  Type *ty = calloc(1, sizeof(Type));
+
+  if(startswith(token->str, "int")) {
+    ty->kind = TY_INT;
+  }
+
+  if(ptr_to) {
+    ty->ptr_to = ptr_to;
+  }
+  if(array_size) {
+    ty->array_size = array_size;
+  }
+  return ty;
+}
+
 void program() {
   int i = 0;
   while(!at_eof())
@@ -44,12 +60,14 @@ void program() {
 }
 
 Node *toplevel() {
-  Type *ty = consume_type();
-  if(!ty) {
+  Token *tok;
+  tok = consume_type();
+  if(!tok) {
     error_at(NULL, "TK_TYPE が必須です。");
   }
+  Type *ty = new_type(tok, NULL, 0);
 
-  Token *tok = consume_ident();
+  tok = consume_ident();
   Node *node = calloc(1, sizeof(Node));
 
   node->name = tok->str;
@@ -287,6 +305,7 @@ Node *primary() {
 Node *ident_declaration() {
   Type *ty = calloc(1, sizeof(Type));
   Type *cur = ty;
+
   if(startswith(token->str, "int")) {
     ty->kind = TY_INT;
   } else {
@@ -295,24 +314,38 @@ Node *ident_declaration() {
   consume_token(TK_TYPE);
 
   while(consume("*")) {
-    Type *ptr_ty = calloc(1, sizeof(Type));
-    ptr_ty->kind = TY_PTR;
-    if(!cur) {
-      ptr_ty->ptr_to = ty;
-      cur = ptr_ty;
-    } else {
-      ptr_ty->ptr_to = cur;
-      cur = ptr_ty;
-    }
+    cur = pointer_type(ty, cur);
   }
 
   Token *tok = consume_ident();
   if(!tok) {
     error_at(NULL, "TK_TYPE の後には TK_IDENT が必須です。");
   }
+
   Node *node = local_variable(tok, cur);
 
+  // array
+  if(consume("[")) {
+    Node *size = unary();
+    expect("]");
+    ty->kind = TY_ARRAY;
+    ty->array_size = size->val;
+  }
+
   return node;
+}
+
+Type *pointer_type(Type *ty, Type *cur) {
+  Type *ptr_ty = calloc(1, sizeof(Type));
+  ptr_ty->kind = TY_PTR;
+  if(!cur) {
+    ptr_ty->ptr_to = ty;
+    cur = ptr_ty;
+  } else {
+    ptr_ty->ptr_to = cur;
+    cur = ptr_ty;
+  }
+  return cur;
 }
 
 Node *local_variable(Token *tok, Type *ty) {
@@ -340,6 +373,7 @@ Node *local_variable(Token *tok, Type *ty) {
       locals_head = lvar;
     }
   }
+
   node->offset = lvar->offset;
   node->ty = lvar->ty;
 

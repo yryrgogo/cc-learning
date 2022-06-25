@@ -37,8 +37,9 @@ typedef enum {
 
 // Kind of Type
 typedef enum {
-  TY_INT, // int
-  TY_PTR, // pointer
+  TY_INT,   // int
+  TY_PTR,   // pointer
+  TY_ARRAY, // array
 } TypeKind;
 
 // Kind of Operator
@@ -84,6 +85,7 @@ struct Token {
 struct Type {
   TypeKind kind;
   Type *ptr_to;
+  size_t array_size;
 };
 
 //
@@ -101,6 +103,7 @@ void expect(char *op);
 int expect_number();
 bool at_eof();
 Token *new_token(TokenKind kind, Token *cur, char *str, int len);
+Type *new_type(Token *tok, Type *ptr_to, size_t array_size);
 bool startswith(char *p, char *q);
 bool is_alnum(char c);
 // static bool is_keyword(Token *tok);
@@ -167,6 +170,7 @@ Node *func_call(Token *tok);
 Node *func_call_args(Node *node);
 Node *local_variable(Token *tok, Type *ty);
 Node *ident_declaration();
+Type *pointer_type(Type *ty, Type *cur);
 
 //
 // codegen.c
@@ -180,6 +184,7 @@ void gen_func_call(Node *node);
 void gen_func_call_arg(Node *node, char *name);
 void gen_lvar_addr(Node *node);
 void gen_calculator(Node *node);
+void gen_lhs_deref(Node *node);
 
 //
 // hashmap.c
@@ -213,5 +218,6 @@ char *format(char *fmt, ...);
 void gen_graph(Node *node);
 void gen_func_node(Node *node);
 void gen_graph_stmt(Node *node, char *name);
+void gen_graph_expr(Node *node, char *name);
 void get_no(char *no);
-void *node_name(char *name);
+void node_name(char *name);

@@ -17,6 +17,10 @@ assert() {
   echo ""
 }
 
+# assert 7 "int main() {
+#   int a[10];
+# }"
+
 # assert 0 "int main() { 0; }"
 # assert 42 "int main() {42;}"
 # # error: 255 > x

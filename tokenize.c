@@ -137,7 +137,7 @@ Token *tokenize(char *p) {
     }
 
     // Single-letter punctuator
-    if(strchr("+-*/()<>{}=;,&", *p)) {
+    if(strchr("+-*/()<>{}[]=;,&", *p)) {
       cur = new_token(TK_PUNCT, cur, p++, 1);
       continue;
     }

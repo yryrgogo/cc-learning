@@ -11,7 +11,7 @@ void get_no(char *no) {
   no[3] = '\0';
 }
 
-void *node_name(char *name) {
+void node_name(char *name) {
   char no[4];
   get_no(no);
   strcat(name, no);
