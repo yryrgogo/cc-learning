@@ -6,8 +6,8 @@ Token *token;
 // 次のトークンが期待している記号のときには、トークンを1つ読み進めて
 // 真を返す。それ以外の場合には偽を返す。
 bool consume(char *op) {
-  if(token->kind != TK_PUNCT || strlen(op) != token->len ||
-     memcmp(token->str, op, token->len))
+  if((token->kind != TK_PUNCT && token->kind != TK_SIZEOF) ||
+     strlen(op) != token->len || memcmp(token->str, op, token->len))
     return false;
   token = token->next;
   return true;
@@ -51,7 +51,7 @@ bool equal_token(TokenKind tk) {
 void expect(char *op) {
   if(token->kind != TK_PUNCT || strlen(op) != token->len ||
      memcmp(token->str, op, token->len))
-    error_at(token->str, "expected \"%s\"", op);
+    error_at(token->str, "expected \"%s\"");
   token = token->next;
 }
 
@@ -149,7 +149,7 @@ Token *tokenize(char *p) {
       continue;
     }
 
-    if (strncmp(p, "sizeof", 6) == 0 && !is_alnum(p[6])) {
+    if(strncmp(p, "sizeof", 6) == 0 && !is_alnum(p[6])) {
       cur = new_token(TK_SIZEOF, cur, p, 6);
       p += 6;
       continue;

@@ -723,6 +723,11 @@ assert 44 " int main(){ int *p; alloc4(&p, 11, 22, 44, 88); *(p + 2); } "
 assert 88 " int main(){ int *p; alloc4(&p, 11, 22, 44, 88); *(p + 3); } "
 assert 22 " int main(){ int *p; alloc4(&p, 11, 22, 44, 88); p=p+3; *(p - 2); } "
 
+assert 4 "int main() { sizeof 4;}"
+assert 4 "int main() { int a; a = 10; sizeof a;}"
+assert 8 "int main() { int x; x = 10; int *y; y = &x; sizeof y;}"
+assert 8 "int main() { int x; x = 10; int *y; y = &x; sizeof(y);}"
+
 # assert 500 "int main(){500;}"
 
 echo OK

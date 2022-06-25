@@ -15,7 +15,11 @@ Node *new_node(NodeKind kind) {
 
 Node *new_num(int val) {
   Node *node = new_node(ND_NUM);
+  Type *ty = calloc(1, sizeof(Type));
+  ty->kind = TY_INT;
+
   node->val = val;
+  node->ty = ty;
   return node;
 }
 
@@ -245,6 +249,7 @@ Node *unary() {
     } else {
       error_at(token->str,
                "sizeof は int と ptr のサイズを返すことができます。");
+      return node;
     }
   }
 

@@ -30,7 +30,6 @@ int main(int argc, char **argv) {
   tokenize(user_input);
 
   bool check_token = false;
-
   if(check_token) {
     for(;;) {
       if(token->kind == TK_EOF) {
