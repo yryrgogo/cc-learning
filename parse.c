@@ -261,8 +261,13 @@ Node *unary() {
     Node *node = unary();
     if(node->ty->kind == TY_INT) {
       return new_num(4);
-    } else if(node->ty->kind == TY_PTR) {
+    } else if(node->ty->kind == TY_PTR && !node->ty->array_size) {
       return new_num(8);
+    } else if(node->ty->kind == TY_PTR && node->ty->array_size) {
+      return new_num(node->ty->array_size * 8);
+    } else if(node->ty->kind == TY_ARRAY) {
+      return new_num(node->ty->array_size *
+                     (node->ty->ptr_to->kind == TY_INT ? 4 : 8));
     } else {
       error_at(token->str,
                "sizeof は int と ptr のサイズを返すことができます。");
@@ -333,11 +338,14 @@ Node *ident_declaration() {
     Node *size = unary();
     expect("]");
     Type *array_ty = calloc(1, sizeof(Type));
-    if(ty->kind == TY_INT) {
+    if(cur->kind == TY_INT) {
       array_ty->kind = TY_INT;
+    } else if(cur->kind == TY_PTR) {
+      array_ty->kind = TY_PTR;
     }
     ty->kind = TY_ARRAY;
     ty->array_size = size->val;
+    cur->array_size = size->val;
     ty->ptr_to = array_ty;
     node->offset = node->offset + (ty->array_size - 1) * 8;
     locals_head->offset = node->offset;

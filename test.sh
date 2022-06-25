@@ -735,6 +735,16 @@ assert 15 "int main() {
   a[1] + a[2];
 }"
 
+assert 40 "int main() {
+  int a[10];
+  sizeof a;
+}"
+
+assert 80 "int main() {
+  int *a[10];
+  sizeof a;
+}"
+
 # assert 500 "int main(){500;}"
 
 echo OK
