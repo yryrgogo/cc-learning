@@ -8,14 +8,17 @@ static int count(void) {
 int size_of_type(Type *ty) {
   if(ty->kind == TY_INT) {
     return 4;
-  }
-  if(ty->kind == TY_PTR) {
+  } else if(ty->kind == TY_PTR && !ty->array_size) {
     return 8;
-  }
-  if(ty->kind == TY_ARRAY) {
+  } else if(ty->kind == TY_PTR && ty->array_size) {
+    return ty->array_size * 8;
+  } else if(ty->kind == TY_ARRAY) {
     return ty->array_size * size_of_type(ty->ptr_to);
+  } else {
+    error_at(NULL, "sizeof は int, ptr, array のサイズを返すことができます。");
+    exit(1);
+    return -1;
   }
-  return 0;
 }
 
 /**

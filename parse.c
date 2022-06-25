@@ -259,20 +259,7 @@ Node *unary() {
     return new_unary(ND_DEREF, unary());
   if(consume("sizeof")) {
     Node *node = unary();
-    if(node->ty->kind == TY_INT) {
-      return new_num(4);
-    } else if(node->ty->kind == TY_PTR && !node->ty->array_size) {
-      return new_num(8);
-    } else if(node->ty->kind == TY_PTR && node->ty->array_size) {
-      return new_num(node->ty->array_size * 8);
-    } else if(node->ty->kind == TY_ARRAY) {
-      return new_num(node->ty->array_size *
-                     (node->ty->ptr_to->kind == TY_INT ? 4 : 8));
-    } else {
-      error_at(token->str,
-               "sizeof は int と ptr のサイズを返すことができます。");
-      return node;
-    }
+    return new_num(size_of_type(node->ty));
   }
 
   return primary();
