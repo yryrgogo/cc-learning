@@ -728,10 +728,11 @@ assert 4 "int main() { int a; a = 10; sizeof a;}"
 assert 8 "int main() { int x; x = 10; int *y; y = &x; sizeof y;}"
 assert 8 "int main() { int x; x = 10; int *y; y = &x; sizeof(y);}"
 
-assert 7 "int main() {
+assert 15 "int main() {
   int a[10];
-  int b;
-  7;
+  a[1] = 7;
+  a[2] = 8;
+  a[1] + a[2];
 }"
 
 # assert 500 "int main(){500;}"

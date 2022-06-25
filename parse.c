@@ -295,6 +295,11 @@ Node *primary() {
     return node;
   } else if(tok) {
     Node *node = local_variable(tok, NULL);
+    if(consume("[")) {
+      int num = expect_number();
+      node->offset = node->offset - (num * 8);
+      expect("]");
+    }
     return node;
   }
 
