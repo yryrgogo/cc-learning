@@ -17,10 +17,6 @@ assert() {
   echo ""
 }
 
-# assert 7 "int main() {
-#   int a[10];
-# }"
-
 # assert 0 "int main() { 0; }"
 # assert 42 "int main() {42;}"
 # # error: 255 > x
@@ -506,220 +502,220 @@ assert() {
 # }
 # "
 
-assert 7 "
-int main()
-{
-  if (0 == 0){
-    5;
-  }else{
-  }
-  7;
-}
-"
+# assert 7 "
+# int main()
+# {
+#   if (0 == 0){
+#     5;
+#   }else{
+#   }
+#   7;
+# }
+# "
 
-# fibonacci ではないがこれが通らなかった。push, pop の整合性が取れなくなっていた
-assert 14 "
-int foo(int n)
-{
-  return 14;
-}
+# # fibonacci ではないがこれが通らなかった。push, pop の整合性が取れなくなっていた
+# assert 14 "
+# int foo(int n)
+# {
+#   return 14;
+# }
 
-int main()
-{
-  int n;
-  n = 10;
-  if (0 == 0){
-    if (n == 0){
-    }
-  }
-  14;
-}
-"
+# int main()
+# {
+#   int n;
+#   n = 10;
+#   if (0 == 0){
+#     if (n == 0){
+#     }
+#   }
+#   14;
+# }
+# "
 
-assert 9 "
-int bar(int n)
-{
-  return n;
-}
+# assert 9 "
+# int bar(int n)
+# {
+#   return n;
+# }
 
-int main()
-{
-  int a;
-  a = 10;
-  bar(a - 1);
-}
-"
+# int main()
+# {
+#   int a;
+#   a = 10;
+#   bar(a - 1);
+# }
+# "
 
-assert 201 "
-int rec(int n)
-{
-  if (n == 0){
-    return 201;
-  }
-  return rec(n - 1);
-}
+# assert 201 "
+# int rec(int n)
+# {
+#   if (n == 0){
+#     return 201;
+#   }
+#   return rec(n - 1);
+# }
 
-int main()
-{
-  rec(10);
-}
-"
+# int main()
+# {
+#   rec(10);
+# }
+# "
 
-assert 120 "
-int rec(int a, int b)
-{
-  if (a == 0){
-    return b;
-  }
-  return rec(a - 1, b+1);
-}
+# assert 120 "
+# int rec(int a, int b)
+# {
+#   if (a == 0){
+#     return b;
+#   }
+#   return rec(a - 1, b+1);
+# }
 
-int main()
-{
-  rec(100, 20);
-}
-"
+# int main()
+# {
+#   rec(100, 20);
+# }
+# "
 
-assert 16 "
-int foo(int a, int b, int c)
-{
-  if (a == 1){
-    if (b == 2){
-      return c;
-    }
-    return b;
-  }
-  int r;
-  r = foo(a-1, b-1, c+1);
-  return r;
-}
+# assert 16 "
+# int foo(int a, int b, int c)
+# {
+#   if (a == 1){
+#     if (b == 2){
+#       return c;
+#     }
+#     return b;
+#   }
+#   int r;
+#   r = foo(a-1, b-1, c+1);
+#   return r;
+# }
 
-int main()
-{
-  int result;
-  result = foo(5, 20, 3);
-  result;
-}
-"
+# int main()
+# {
+#   int result;
+#   result = foo(5, 20, 3);
+#   result;
+# }
+# "
 
-assert 55 "
-int fibonacci(int a, int b, int n)
-{
-  if (n == 1){
-    if (a == 0){
-      return a;
-    }
-    return b;
-  }
-  int r;
-  r = fibonacci(b, a + b, n - 1);
-  return r;
-}
+# assert 55 "
+# int fibonacci(int a, int b, int n)
+# {
+#   if (n == 1){
+#     if (a == 0){
+#       return a;
+#     }
+#     return b;
+#   }
+#   int r;
+#   r = fibonacci(b, a + b, n - 1);
+#   return r;
+# }
 
-int main()
-{
-  int result;
-  result = fibonacci(0, 1, 10);
-  result;
-}
-"
+# int main()
+# {
+#   int result;
+#   result = fibonacci(0, 1, 10);
+#   result;
+# }
+# "
 
-assert 10 "
-int main (){
-  int a;
-  a = 10;
-  int addr;
-  addr = &a;
-  *addr;
-}
-"
+# assert 10 "
+# int main (){
+#   int a;
+#   a = 10;
+#   int addr;
+#   addr = &a;
+#   *addr;
+# }
+# "
 
-assert 8 "
-int foo() {
-  int a;
-  a = 3;
-  return a;
-}
+# assert 8 "
+# int foo() {
+#   int a;
+#   a = 3;
+#   return a;
+# }
 
-int main() {
-  int a;
-  a = 5;
-  int b;
-  b = foo();
-  a + b;
-}
-"
+# int main() {
+#   int a;
+#   a = 5;
+#   int b;
+#   b = foo();
+#   a + b;
+# }
+# "
 
-assert 8 "
-int foo(int a) {
-  return a;
-}
+# assert 8 "
+# int foo(int a) {
+#   return a;
+# }
 
-int main() {
-  int a;
-  a = 5;
-  int b;
-  b = foo(3);
-  a + b;
-}
-"
+# int main() {
+#   int a;
+#   a = 5;
+#   int b;
+#   b = foo(3);
+#   a + b;
+# }
+# "
 
-assert 7 "
-int main() {
-  int x;
-  int *y;
+# assert 7 "
+# int main() {
+#   int x;
+#   int *y;
 
-  y = &x;
-  *y = 7;
-  x;
-}
-"
+#   y = &x;
+#   *y = 7;
+#   x;
+# }
+# "
 
-assert 3 "
-int main(){
-  int x;
-  int *y;
-  y = &x;
-  *y = 3;
-  return x;
-}
-"
+# assert 3 "
+# int main(){
+#   int x;
+#   int *y;
+#   y = &x;
+#   *y = 3;
+#   return x;
+# }
+# "
 
-assert 13 "
-int main() {
+# assert 13 "
+# int main() {
 
-  int x;
-  x = 5;
-  int *y;
-  y = &x;
-  *y = 13;
+#   int x;
+#   x = 5;
+#   int *y;
+#   y = &x;
+#   *y = 13;
 
-  int **z;
-  z = &y;
+#   int **z;
+#   z = &y;
 
-  **z;
-}
-"
+#   **z;
+# }
+# "
 
-# stack は下方向（マイナス方向）にアドレスを確保するため、先に定義された変数を参照するにはアドレスを減算する
-# ただ、malloc はプラス方向に確保するので逆になる。
-# stack は 8byte 単位で確保されるため、a を0として -16 の位置に r がある。int pointer の -4 = -4 * 4 としているためこの計算になる
-assert 6 "
-int main(){
-  int a;
-  a = 5;
-  int q;
-  q = 3;
-  int r;
-  r = 6;
+# # stack は下方向（マイナス方向）にアドレスを確保するため、先に定義された変数を参照するにはアドレスを減算する
+# # ただ、malloc はプラス方向に確保するので逆になる。
+# # stack は 8byte 単位で確保されるため、a を0として -16 の位置に r がある。int pointer の -4 = -4 * 4 としているためこの計算になる
+# assert 6 "
+# int main(){
+#   int a;
+#   a = 5;
+#   int q;
+#   q = 3;
+#   int r;
+#   r = 6;
 
-  int *p;
-  p = &a;
-  p = p - 4;
+#   int *p;
+#   p = &a;
+#   p = p - 4;
 
-  *p;
-}
-"
+#   *p;
+# }
+# "
 
 assert 11 " int main(){ int *p; alloc4(&p, 11, 22, 44, 88); *(p + 0); } "
 assert 22 " int main(){ int *p; alloc4(&p, 11, 22, 44, 88); *(p + 1); } "
@@ -731,6 +727,12 @@ assert 4 "int main() { sizeof 4;}"
 assert 4 "int main() { int a; a = 10; sizeof a;}"
 assert 8 "int main() { int x; x = 10; int *y; y = &x; sizeof y;}"
 assert 8 "int main() { int x; x = 10; int *y; y = &x; sizeof(y);}"
+
+assert 7 "int main() {
+  int a[10];
+  int b;
+  7;
+}"
 
 # assert 500 "int main(){500;}"
 

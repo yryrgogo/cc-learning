@@ -221,3 +221,8 @@ void gen_graph_stmt(Node *node, char *name);
 void gen_graph_expr(Node *node, char *name);
 void get_no(char *no);
 void node_name(char *name);
+
+//
+// utils.c
+//
+int max(int a, int b);

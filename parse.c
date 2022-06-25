@@ -42,7 +42,6 @@ Type *new_type(Token *tok, Type *ptr_to, size_t array_size) {
   if(startswith(token->str, "int")) {
     ty->kind = TY_INT;
   }
-
   if(ptr_to) {
     ty->ptr_to = ptr_to;
   }
@@ -328,8 +327,15 @@ Node *ident_declaration() {
   if(consume("[")) {
     Node *size = unary();
     expect("]");
+    Type *array_ty = calloc(1, sizeof(Type));
+    if(ty->kind == TY_INT) {
+      array_ty->kind = TY_INT;
+    }
     ty->kind = TY_ARRAY;
     ty->array_size = size->val;
+    ty->ptr_to = array_ty;
+    node->offset = node->offset + (ty->array_size - 1) * 8;
+    locals_head->offset = node->offset;
   }
 
   return node;

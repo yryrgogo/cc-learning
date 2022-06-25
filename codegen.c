@@ -5,6 +5,19 @@ static int count(void) {
   return i++;
 }
 
+int size_of_type(Type *ty) {
+  if(ty->kind == TY_INT) {
+    return 4;
+  }
+  if(ty->kind == TY_PTR) {
+    return 8;
+  }
+  if(ty->kind == TY_ARRAY) {
+    return ty->array_size * size_of_type(ty->ptr_to);
+  }
+  return 0;
+}
+
 /**
  * @brief コードの top level にある Node を処理する
  *
@@ -66,12 +79,12 @@ void gen_func(Node *node) {
     args_count++;
   }
 
-  int locals_count = 0;
+  int total_offset = 0;
   for(LVar *var = node->locals; var; var = var->next) {
-    locals_count++;
+    total_offset = max(total_offset, var->offset);
   }
-  if(locals_count > 0)
-    printf("  sub rsp, %d\n", locals_count * 8);
+  if(total_offset > 0)
+    printf("  sub rsp, %d\n", total_offset);
 
   gen_stmt(node->body);
 
@@ -296,6 +309,9 @@ void gen_calculator(Node *node) {
 void gen_lvar_addr(Node *node) {
   if(node->kind != ND_LVAR) {
     printf("%s 代入の左辺値が変数ではありません。", __FILE__);
+  }
+  if(node->ty->kind == TY_ARRAY) {
+    size_of_type(node->ty);
   }
 
   printf("  mov rax, rbp\n");
