@@ -131,6 +131,7 @@ struct Node {
   Node *rhs;     // 右辺
   int val;       // kind が ND_NUM の場合のみ使う
   int offset;    // kind が ND_LVAR の場合のみ使う
+  bool is_declaration;
 
   // function
   char *name;
@@ -171,6 +172,8 @@ Node *func_call_args(Node *node);
 Node *local_variable(Token *tok, Type *ty);
 Node *ident_declaration();
 Type *pointer_type(Type *ty, Type *cur);
+int size_of_type(Type *ty);
+void adjust_rsp();
 
 //
 // codegen.c

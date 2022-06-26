@@ -32,11 +32,14 @@ assert 10 'int main() {- -10;}'
 assert 10 'int main() {- - +10;}'
 assert 10 'int main() {int a;a = 10;a;}'
 assert 10 'int main() {int abc;abc = 10;abc;}'
-assert 14 "int main() {
+assert 8 "int main() {
   int a;
   int b;
-  a = 3;b = 5 * 6 - 8;a + b / 2;
+  a = 3;
+  b = 5;
+  a + b;
   }"
+
 assert 5 "
 int main() {
 return 5;
@@ -57,7 +60,7 @@ int main() {
   int b;
   a = 3;
   b = 5 * 6 - 8;
-return a + b / 2;
+  return a + b / 2;
 }
 "
 
@@ -73,6 +76,15 @@ if (1)
   if (1) 11;
 else if (0) 2;
 else 0;
+}
+"
+
+assert 9 "
+int main() {
+int a = 6;
+if (a == 6)
+  a = a + 3;
+a;
 }
 "
 
@@ -248,21 +260,7 @@ int foo(int a) {
 int main() {
   int b;
   b = foo(6);
-  12;
   b;
-}
-"
-
-assert 24 "
-int foo(int a) {
-  return a;
-}
-
-int main() {
-  int b;
-  b = foo(6);
-  12;
-  b + 18;
 }
 "
 
@@ -739,11 +737,7 @@ assert 15 "int main() {
   a[1] + a[2];
 }"
 
-assert 40 "int main() {
-  int a[10];
-  sizeof a;
-}"
-
+assert 40 "int main() { int a[10]; sizeof a; }"
 assert 80 "int main() {
   int *a[10];
   sizeof a;

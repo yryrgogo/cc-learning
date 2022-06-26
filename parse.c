@@ -289,7 +289,7 @@ Node *primary() {
     Node *node = local_variable(tok, NULL);
     if(consume("[")) {
       int num = expect_number();
-      node->offset = node->offset - (num * 8);
+      node->offset = node->offset - (num * size_of_type(node->ty->ptr_to));
       expect("]");
     }
     return node;
@@ -319,24 +319,7 @@ Node *ident_declaration() {
   }
 
   Node *node = local_variable(tok, cur);
-
-  // array
-  if(consume("[")) {
-    Node *size = unary();
-    expect("]");
-    Type *array_ty = calloc(1, sizeof(Type));
-    if(cur->kind == TY_INT) {
-      array_ty->kind = TY_INT;
-    } else if(cur->kind == TY_PTR) {
-      array_ty->kind = TY_PTR;
-    }
-    ty->kind = TY_ARRAY;
-    ty->array_size = size->val;
-    cur->array_size = size->val;
-    ty->ptr_to = array_ty;
-    node->offset = node->offset + (ty->array_size - 1) * 8;
-    locals_head->offset = node->offset;
-  }
+  node->is_declaration = true;
 
   return node;
 }
@@ -369,12 +352,23 @@ Node *local_variable(Token *tok, Type *ty) {
     lvar->len = tok->len;
     lvar->ty = ty;
 
+    // array
+    if(consume("[")) {
+      Node *size = unary();
+      expect("]");
+      Type *array_ty = calloc(1, sizeof(Type));
+      array_ty->kind = TY_ARRAY;
+      array_ty->array_size = size->val;
+      array_ty->ptr_to = ty;
+      lvar->ty = array_ty;
+    }
+
     if(!locals) {
-      lvar->offset = 8 + func_offset;
+      lvar->offset = size_of_type(lvar->ty) + func_offset;
       locals = lvar;
       locals_head = locals;
     } else {
-      lvar->offset = locals_head->offset + 8;
+      lvar->offset = locals_head->offset + size_of_type(lvar->ty);
       locals_head->next = lvar;
       locals_head = lvar;
     }
@@ -456,4 +450,20 @@ LVar *find_lvar(Token *tok) {
       return var;
   }
   return NULL;
+}
+
+int size_of_type(Type *ty) {
+  if(ty->kind == TY_INT) {
+    return 4;
+  } else if(ty->kind == TY_PTR && !ty->array_size) {
+    return 8;
+  } else if(ty->kind == TY_PTR && ty->array_size) {
+    return ty->array_size * 8;
+  } else if(ty->kind == TY_ARRAY) {
+    return ty->array_size * size_of_type(ty->ptr_to);
+  } else {
+    error_at(NULL, "sizeof は int, ptr, array のサイズを返すことができます。");
+    exit(1);
+    return -1;
+  }
 }
