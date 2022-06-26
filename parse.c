@@ -26,6 +26,10 @@ Node *new_num(int val) {
 Node *new_unary(NodeKind kind, Node *lhs) {
   Node *node = new_node(kind);
   node->lhs = lhs;
+  if(!node->ty)
+    node->ty = new_type(NULL, NULL, -1);
+  if(!node->lhs->ty)
+    node->lhs->ty = new_type(NULL, NULL, -1);
   return node;
 }
 
@@ -256,7 +260,7 @@ Node *unary() {
   if(consume("&"))
     return new_unary(ND_ADDR, unary());
   if(consume("*"))
-    return new_unary(ND_DEREF, unary());
+    return new_unary(ND_DEREF, add());
   if(consume("sizeof")) {
     Node *node = unary();
     return new_num(size_of_type(node->ty));

@@ -249,6 +249,11 @@ void gen_expr(Node *node) {
     return;
   case ND_DEREF:
     gen_expr(node->lhs);
+
+    if(node->lhs->ty->kind == TY_ARRAY) {
+      return;
+    }
+
     printf("  pop rax\n");
     printf("  mov rax, [rax]\n");
     printf("  push rax\n");
@@ -320,6 +325,7 @@ void gen_calculator(Node *node) {
     is_ptr = true;
   }
   gen_expr(node->lhs);
+
   if(is_ptr && node->rhs->kind == ND_NUM) {
     node->rhs->val = node->rhs->val * 4;
   }
@@ -327,6 +333,18 @@ void gen_calculator(Node *node) {
 
   printf("  pop rdi\n");
   printf("  pop rax\n");
+
+  if(is_ptr && node->rhs->kind == ND_NUM) {
+    switch(node->kind) {
+    case ND_ADD:
+      printf("  sub rax, rdi\n");
+      break;
+    case ND_SUB:
+      printf("  add rax, rdi\n");
+      break;
+    }
+    return;
+  }
 
   switch(node->kind) {
   case ND_ADD:
@@ -375,9 +393,6 @@ void gen_lvar_addr(Node *node) {
   if(node->kind != ND_LVAR) {
     printf("%s 代入の左辺値が変数ではありません。", __FILE__);
   }
-  if(node->ty->kind == TY_ARRAY) {
-    size_of_type(node->ty);
-  }
   if(node->ty->kind == TY_INT && node->is_declaration) {
     rsp_offset += 4;
   }
@@ -385,6 +400,12 @@ void gen_lvar_addr(Node *node) {
   printf("  mov rax, rbp\n");
   printf("  sub rax, %d\n", node->offset);
   printf("  push rax\n");
+
+  if(node->ty->kind == TY_ARRAY && node->is_declaration) {
+    printf("  pop rdi\n");
+    printf("  mov [rax], rdi\n");
+    printf("  push rax\n");
+  }
 }
 
 void gen_func_call(Node *node) {
