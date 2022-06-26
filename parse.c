@@ -467,3 +467,12 @@ int size_of_type(Type *ty) {
     return -1;
   }
 }
+
+Type *pointed_type(Type *ty) {
+  if(ty->ptr_to) {
+    Type *last_ty = pointed_type(ty->ptr_to);
+    return last_ty;
+  } else {
+    return ty;
+  }
+}

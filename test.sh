@@ -626,62 +626,14 @@ assert 10 "
 int main (){
   int a;
   a = 10;
-  int addr;
+  int *addr;
   addr = &a;
   *addr;
 }
 "
 
-assert 8 "
-int foo() {
-  int a;
-  a = 3;
-  return a;
-}
-
-int main() {
-  int a;
-  a = 5;
-  int b;
-  b = foo();
-  a + b;
-}
-"
-
-assert 8 "
-int foo(int a) {
-  return a;
-}
-
-int main() {
-  int a;
-  a = 5;
-  int b;
-  b = foo(3);
-  a + b;
-}
-"
-
-assert 7 "
-int main() {
-  int x;
-  int *y;
-
-  y = &x;
-  *y = 7;
-  x;
-}
-"
-
-assert 3 "
-int main(){
-  int x;
-  int *y;
-  y = &x;
-  *y = 3;
-  return x;
-}
-"
+assert 7 " int main() { int x; int *y; y = &x; *y = 7; x;} "
+assert 3 " int main(){ int x; int *y; y = &x; *y = 3; return x; } "
 
 assert 13 "
 int main() {
@@ -705,15 +657,15 @@ int main() {
 assert 6 "
 int main(){
   int a;
+  int b;
+  int c;
   a = 5;
-  int q;
-  q = 3;
-  int r;
-  r = 6;
+  b = 3;
+  c = 6;
 
   int *p;
   p = &a;
-  p = p - 4;
+  p = p - 2;
 
   *p;
 }

@@ -253,39 +253,49 @@ void gen_expr(Node *node) {
     printf("  mov rax, [rax]\n");
     printf("  push rax\n");
     return;
-  case ND_ASSIGN:
+  case ND_ASSIGN: {
+    Type *ty = calloc(1, sizeof(Type));
     switch(node->lhs->kind) {
     case ND_LVAR:
       gen_lvar_addr(node->lhs);
       break;
-    case ND_DEREF:
-      gen_lhs_deref(node->lhs);
+    case ND_DEREF: {
+      Type *ty = gen_lhs_deref(node->lhs);
       break;
+    }
     }
     gen_expr(node->rhs);
 
+    void set_reg(Type * ty, char **reg, char **prefix) {
+      switch(ty->kind) {
+      case TY_INT:
+        *prefix = "DWORD PTR";
+        *reg = "edi";
+        break;
+      case TY_PTR:
+        *prefix = "";
+        *reg = "rdi";
+        break;
+      case TY_ARRAY:
+        set_reg(pointed_type(ty), reg, prefix);
+        break;
+      }
+    }
+
     char *prefix = "";
-    if(size_of_type(node->lhs->ty) == 4) {
-      prefix = "DWORD PTR";
-      reg = "edi";
-    } else if(size_of_type(node->lhs->ty) == 8) {
-      prefix = "";
-      reg = "rdi";
+    if(node->lhs->kind == ND_DEREF) {
+      set_reg(ty, &reg, &prefix);
     } else {
-      error_at(NULL, "invalid type");
+      set_reg(node->lhs->ty, &reg, &prefix);
     }
 
     printf("  pop rdi\n");
     printf("  pop rax\n");
     printf("  mov %s [rax], %s\n", prefix, reg);
 
-    if(strlen(prefix) > 0) {
-      // printf("  movzb rax, [rax]\n");
-      // printf("  sub rsp, 4\n");
-    }
-
     printf("  push rax\n");
     return;
+  }
   case ND_FUNC_CALL:
     gen_func_call(node);
     printf("  push rax\n");
@@ -427,7 +437,7 @@ void gen_func_call_arg(Node *node, char *register_name) {
  *
  * @param node
  */
-void gen_lhs_deref(Node *node) {
+Type *gen_lhs_deref(Node *node) {
   switch(node->kind) {
   case ND_LVAR:
     gen_lvar_addr(node);
@@ -439,6 +449,8 @@ void gen_lhs_deref(Node *node) {
     gen_lhs_deref(node->lhs);
     break;
   }
+
+  return node->ty;
 }
 
 void adjust_rsp() {

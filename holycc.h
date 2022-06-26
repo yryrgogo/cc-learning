@@ -174,6 +174,7 @@ Node *ident_declaration();
 Type *pointer_type(Type *ty, Type *cur);
 int size_of_type(Type *ty);
 void adjust_rsp();
+Type *pointed_type(Type *ty);
 
 //
 // codegen.c
@@ -187,7 +188,7 @@ void gen_func_call(Node *node);
 void gen_func_call_arg(Node *node, char *name);
 void gen_lvar_addr(Node *node);
 void gen_calculator(Node *node);
-void gen_lhs_deref(Node *node);
+Type *gen_lhs_deref(Node *node);
 
 //
 // hashmap.c
