@@ -30,6 +30,9 @@ Node *new_unary(NodeKind kind, Node *lhs) {
     node->ty = new_type(NULL, NULL, -1);
   if(!node->lhs->ty)
     node->lhs->ty = new_type(NULL, NULL, -1);
+  if(kind == ND_DEREF) {
+    node->lhs->is_derefernce = true;
+  }
   return node;
 }
 
@@ -260,7 +263,7 @@ Node *unary() {
   if(consume("&"))
     return new_unary(ND_ADDR, unary());
   if(consume("*"))
-    return new_unary(ND_DEREF, add());
+    return new_unary(ND_DEREF, unary());
   if(consume("sizeof")) {
     Node *node = unary();
     return new_num(size_of_type(node->ty));
@@ -295,6 +298,7 @@ Node *primary() {
       int num = expect_number();
       node->offset = node->offset - (num * size_of_type(node->ty->ptr_to));
       expect("]");
+      node->has_index = num;
     }
     return node;
   }

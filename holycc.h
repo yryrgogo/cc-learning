@@ -132,6 +132,8 @@ struct Node {
   int val;       // kind が ND_NUM の場合のみ使う
   int offset;    // kind が ND_LVAR の場合のみ使う
   bool is_declaration;
+  bool is_derefernce;
+  int has_index;
 
   // function
   char *name;

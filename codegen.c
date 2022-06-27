@@ -232,6 +232,11 @@ void gen_expr(Node *node) {
     return;
   case ND_LVAR:
     gen_lvar_addr(node);
+
+    if(node->ty->kind == TY_ARRAY && node->has_index == NULL) {
+      return;
+    }
+
     if(node->ty->kind == TY_INT) {
       reg = "eax";
     } else {
@@ -250,16 +255,14 @@ void gen_expr(Node *node) {
   case ND_DEREF:
     gen_expr(node->lhs);
 
-    if(node->lhs->ty->kind == TY_ARRAY) {
-      return;
-    }
-
     printf("  pop rax\n");
     printf("  mov rax, [rax]\n");
     printf("  push rax\n");
     return;
   case ND_ASSIGN: {
     Type *ty = calloc(1, sizeof(Type));
+
+    // TODO: switch のネストをリファクタ
     switch(node->lhs->kind) {
     case ND_LVAR:
       gen_lvar_addr(node->lhs);
@@ -320,13 +323,20 @@ void gen_expr(Node *node) {
  * @param node
  */
 void gen_calculator(Node *node) {
-  bool is_ptr = false;
-  if(node->lhs->kind == ND_LVAR && node->lhs->ty->kind == TY_PTR) {
-    is_ptr = true;
+  // TODO: このやり方だと () でネストされた式をポインタと判定しないため要修正
+  bool is_lhs_ptr = false;
+  if(node->lhs->kind == ND_LVAR) {
+    if(node->lhs->ty->kind == TY_PTR) {
+      is_lhs_ptr = true;
+    }
+    if(node->lhs->ty->kind == TY_ARRAY && node->lhs->has_index == NULL) {
+      is_lhs_ptr = true;
+    }
   }
+
   gen_expr(node->lhs);
 
-  if(is_ptr && node->rhs->kind == ND_NUM) {
+  if((is_lhs_ptr) && node->rhs->kind == ND_NUM) {
     node->rhs->val = node->rhs->val * 4;
   }
   gen_expr(node->rhs);
@@ -334,7 +344,8 @@ void gen_calculator(Node *node) {
   printf("  pop rdi\n");
   printf("  pop rax\n");
 
-  if(is_ptr && node->rhs->kind == ND_NUM) {
+  if(is_lhs_ptr && node->rhs->kind == ND_NUM &&
+     node->lhs->ty->kind != TY_ARRAY) {
     switch(node->kind) {
     case ND_ADD:
       printf("  sub rax, rdi\n");
@@ -343,43 +354,42 @@ void gen_calculator(Node *node) {
       printf("  add rax, rdi\n");
       break;
     }
-    return;
-  }
-
-  switch(node->kind) {
-  case ND_ADD:
-    printf("  add rax, rdi\n");
-    break;
-  case ND_SUB:
-    printf("  sub rax, rdi\n");
-    break;
-  case ND_MUL:
-    printf("  imul rax, rdi\n");
-    break;
-  case ND_DIV:
-    printf("  cqo\n");
-    printf("  idiv rdi\n");
-    break;
-  case ND_EQ:
-    printf("  cmp rax, rdi\n");
-    printf("  sete al\n");
-    printf("  movzb rax, al\n");
-    break;
-  case ND_NE:
-    printf("  cmp rax, rdi\n");
-    printf("  setne al\n");
-    printf("  movzb rax, al\n");
-    break;
-  case ND_LT:
-    printf("  cmp rax, rdi\n");
-    printf("  setl al\n");
-    printf("  movzb rax, al\n");
-    break;
-  case ND_LE:
-    printf("  cmp rax, rdi\n");
-    printf("  setle al\n");
-    printf("  movzb rax, al\n");
-    break;
+  } else {
+    switch(node->kind) {
+    case ND_ADD:
+      printf("  add rax, rdi\n");
+      break;
+    case ND_SUB:
+      printf("  sub rax, rdi\n");
+      break;
+    case ND_MUL:
+      printf("  imul rax, rdi\n");
+      break;
+    case ND_DIV:
+      printf("  cqo\n");
+      printf("  idiv rdi\n");
+      break;
+    case ND_EQ:
+      printf("  cmp rax, rdi\n");
+      printf("  sete al\n");
+      printf("  movzb rax, al\n");
+      break;
+    case ND_NE:
+      printf("  cmp rax, rdi\n");
+      printf("  setne al\n");
+      printf("  movzb rax, al\n");
+      break;
+    case ND_LT:
+      printf("  cmp rax, rdi\n");
+      printf("  setl al\n");
+      printf("  movzb rax, al\n");
+      break;
+    case ND_LE:
+      printf("  cmp rax, rdi\n");
+      printf("  setle al\n");
+      printf("  movzb rax, al\n");
+      break;
+    }
   }
 }
 
@@ -462,12 +472,19 @@ Type *gen_lhs_deref(Node *node) {
   switch(node->kind) {
   case ND_LVAR:
     gen_lvar_addr(node);
+    if(node->ty->kind == TY_ARRAY) {
+      return;
+    }
     printf("  pop rax\n");
     printf("  mov rax, [rax]\n");
     printf("  push rax\n");
     break;
   case ND_DEREF:
     gen_lhs_deref(node->lhs);
+    break;
+  case ND_ADD:
+    gen_calculator(node);
+    printf("  push rax\n");
     break;
   }
 
