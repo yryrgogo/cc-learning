@@ -44,6 +44,7 @@ int main(int argc, char **argv) {
   program();
 
   if(startswith(argv[2], "1")) {
+    return 0;
     printf("```mermaid\n");
     printf("flowchart TB\n");
     printf("\n");
@@ -54,8 +55,6 @@ int main(int argc, char **argv) {
     }
 
     printf("```\n");
-
-    return 0;
   }
 
   // アセンブリの前半部分を出力

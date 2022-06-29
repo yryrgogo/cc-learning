@@ -63,8 +63,8 @@ typedef enum {
   ND_FOR,   // for
   ND_WHILE, // while NOTE: NF_FOR
             // にまとめられるらしいが今はわからんので分けている
-  ND_FUNC,      // function
-  ND_FUNC_CALL, // function call
+  ND_FUNC, // function
+  ND_CALL, // function call
 
   ND_NOP, // no operation
 
@@ -131,6 +131,7 @@ struct Node {
   Node *rhs;     // 右辺
   int val;       // kind が ND_NUM の場合のみ使う
   int offset;    // kind が ND_LVAR の場合のみ使う
+
   bool is_declaration;
   bool is_derefernce;
   int has_index;
@@ -232,3 +233,5 @@ void node_name(char *name);
 // utils.c
 //
 int max(int a, int b);
+char *node_kind_name(NodeKind kind);
+void walk_nodes(Node *node);

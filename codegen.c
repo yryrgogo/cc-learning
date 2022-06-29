@@ -304,7 +304,7 @@ void gen_expr(Node *node) {
     printf("  push rax\n");
     return;
   }
-  case ND_FUNC_CALL:
+  case ND_CALL:
     gen_func_call(node);
     printf("  push rax\n");
     return;

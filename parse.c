@@ -6,6 +6,7 @@ static LVar *locals_head;
 Node *code[100];
 
 int func_offset = 0;
+int lvar_count = 0;
 
 Node *new_node(NodeKind kind) {
   Node *node = calloc(1, sizeof(Node));
@@ -60,8 +61,11 @@ Type *new_type(Token *tok, Type *ptr_to, size_t array_size) {
 
 void program() {
   int i = 0;
-  while(!at_eof())
-    code[i++] = toplevel();
+  while(!at_eof()) {
+    Node *node = toplevel();
+    code[i++] = node;
+    // walk_nodes(node);
+  }
   code[i] = NULL;
 }
 
@@ -380,6 +384,7 @@ Node *local_variable(Token *tok, Type *ty) {
       locals_head->next = lvar;
       locals_head = lvar;
     }
+    lvar_count++;
   }
 
   node->offset = lvar->offset;
@@ -419,7 +424,7 @@ Node *func_call(Token *tok) {
   node->len = tok->len;
   node->args = func_call_args(node);
 
-  node->kind = ND_FUNC_CALL;
+  node->kind = ND_CALL;
 
   return node;
 }
