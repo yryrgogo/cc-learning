@@ -70,6 +70,7 @@ void program() {
 }
 
 Node *toplevel() {
+  HashMap lvar_map = {};
   Token *tok;
   tok = consume_type();
   if(!tok) {
@@ -87,12 +88,12 @@ Node *toplevel() {
   if(tok && consume("(")) {
     int args_offset_total = 0;
     locals = NULL;
-    node->args = func_args_definition(&args_offset_total);
+    node->args = func_args_definition(&args_offset_total, &lvar_map);
 
     if(equal(token, "{")) {
       node->kind = ND_FUNC;
       func_offset = args_offset_total;
-      node->body = stmt();
+      node->body = stmt(&lvar_map);
       func_offset = 0;
       node->locals = locals;
     } else {
@@ -108,7 +109,7 @@ Node *toplevel() {
 //        | "if" "(" expr ")" stmt("else" stmt)?
 //        | "while" "(" expr ")" stmt
 //        | "for" "(" expr ? ";" expr ? ";" expr ? ")" stmt
-Node *stmt() {
+Node *stmt(HashMap *lvar_map) {
   Node *node;
 
   if(consume("{")) {
@@ -119,7 +120,7 @@ Node *stmt() {
 
     bool has_stmt = false;
     while(!consume("}")) {
-      cur->next = stmt();
+      cur->next = stmt(lvar_map);
       cur = cur->next;
       has_stmt = true;
     }
@@ -134,117 +135,117 @@ Node *stmt() {
   } else if(consume_token(TK_RETURN)) {
     node = calloc(1, sizeof(Node));
     node->kind = ND_RETURN;
-    node->lhs = expr();
+    node->lhs = expr(lvar_map);
     expect(";");
   } else if(consume_token(TK_IF)) {
     expect("(");
 
     node = calloc(1, sizeof(Node));
     node->kind = ND_IF;
-    node->cond = expr();
+    node->cond = expr(lvar_map);
 
     expect(")");
 
-    node->then = stmt();
+    node->then = stmt(lvar_map);
 
     if(consume_token(TK_ELSE)) {
-      node->els = stmt();
+      node->els = stmt(lvar_map);
     }
   } else if(consume_token(TK_FOR)) {
     expect("(");
 
     node = calloc(1, sizeof(Node));
     node->kind = ND_FOR;
-    node->init = expr();
+    node->init = expr(lvar_map);
     expect(";");
 
-    node->cond = expr();
+    node->cond = expr(lvar_map);
     expect(";");
 
-    node->inc = expr();
+    node->inc = expr(lvar_map);
     expect(")");
 
-    node->then = stmt();
+    node->then = stmt(lvar_map);
   } else if(consume_token(TK_WHILE)) {
     expect("(");
 
     node = calloc(1, sizeof(Node));
     node->kind = ND_WHILE;
-    node->cond = expr();
+    node->cond = expr(lvar_map);
 
     expect(")");
 
-    node->then = stmt();
+    node->then = stmt(lvar_map);
   } else {
-    node = expr();
+    node = expr(lvar_map);
     expect(";");
   }
 
   return node;
 }
 
-Node *expr() { return assign(); }
+Node *expr(HashMap *lvar_map) { return assign(lvar_map); }
 
-Node *assign() {
-  Node *node = equality();
+Node *assign(HashMap *lvar_map) {
+  Node *node = equality(lvar_map);
 
   if(consume("="))
-    node = new_binary(ND_ASSIGN, node, equality());
+    node = new_binary(ND_ASSIGN, node, equality(lvar_map));
   return node;
 }
 
-Node *equality() {
-  Node *node = relational();
+Node *equality(HashMap *lvar_map) {
+  Node *node = relational(lvar_map);
 
   for(;;) {
     if(consume("=="))
-      node = new_binary(ND_EQ, node, relational());
+      node = new_binary(ND_EQ, node, relational(lvar_map));
     else if(consume("!="))
-      node = new_binary(ND_NE, node, relational());
+      node = new_binary(ND_NE, node, relational(lvar_map));
     else
       return node;
   }
 }
 
-Node *relational() {
-  Node *node = add();
+Node *relational(HashMap *lvar_map) {
+  Node *node = add(lvar_map);
 
   for(;;) {
     if(consume("<="))
-      node = new_binary(ND_LE, node, add());
+      node = new_binary(ND_LE, node, add(lvar_map));
     else if(consume(">="))
-      node = new_binary(ND_LE, add(), node);
+      node = new_binary(ND_LE, add(lvar_map), node);
     else if(consume("<"))
-      node = new_binary(ND_LT, node, add());
+      node = new_binary(ND_LT, node, add(lvar_map));
     else if(consume(">"))
-      node = new_binary(ND_LT, add(), node);
+      node = new_binary(ND_LT, add(lvar_map), node);
     else
       return node;
   }
 }
 
-Node *add() {
-  Node *node = mul();
+Node *add(HashMap *lvar_map) {
+  Node *node = mul(lvar_map);
 
   for(;;) {
     if(consume("+")) {
-      node = new_binary(ND_ADD, node, mul());
+      node = new_binary(ND_ADD, node, mul(lvar_map));
     } else if(consume("-")) {
-      node = new_binary(ND_SUB, node, mul());
+      node = new_binary(ND_SUB, node, mul(lvar_map));
     } else {
       return node;
     }
   }
 }
 
-Node *mul() {
-  Node *node = unary();
+Node *mul(HashMap *lvar_map) {
+  Node *node = unary(lvar_map);
 
   for(;;) {
     if(consume("*"))
-      node = new_binary(ND_MUL, node, unary());
+      node = new_binary(ND_MUL, node, unary(lvar_map));
     else if(consume("/"))
-      node = new_binary(ND_DIV, node, unary());
+      node = new_binary(ND_DIV, node, unary(lvar_map));
     else
       return node;
   }
@@ -259,45 +260,45 @@ Node *mul() {
  * | sizeof unary
  * @return Node*
  */
-Node *unary() {
+Node *unary(HashMap *lvar_map) {
   if(consume("+"))
-    return primary();
+    return primary(lvar_map);
   if(consume("-"))
-    return new_binary(ND_SUB, new_num(0), unary());
+    return new_binary(ND_SUB, new_num(0), unary(lvar_map));
   if(consume("&"))
-    return new_unary(ND_ADDR, unary());
+    return new_unary(ND_ADDR, unary(lvar_map));
   if(consume("*"))
-    return new_unary(ND_DEREF, unary());
+    return new_unary(ND_DEREF, unary(lvar_map));
   if(consume("sizeof")) {
-    Node *node = unary();
+    Node *node = unary(lvar_map);
     return new_num(size_of_type(node->ty));
   }
 
-  return primary();
+  return primary(lvar_map);
 }
 
 // primary = num
 //         | type ident
 //         | ident ("(" ")")?
 //         | "(" expr ")"
-Node *primary() {
+Node *primary(HashMap *lvar_map) {
   // 次のトークンが "(" なら、"(" expr ")" のはず
   if(consume("(")) {
-    Node *node = expr();
+    Node *node = expr(lvar_map);
     expect(")");
     return node;
   } else if(equal_token(TK_TYPE)) {
-    Node *node = ident_declaration();
+    Node *node = ident_declaration(lvar_map);
     return node;
   }
 
   Token *tok = consume_ident();
   // 関数呼び出し
   if(tok && consume("(")) {
-    Node *node = func_call(tok);
+    Node *node = func_call(tok, lvar_map);
     return node;
   } else if(tok) {
-    Node *node = local_variable(tok, NULL);
+    Node *node = local_variable(tok, NULL, lvar_map);
     if(consume("[")) {
       int num = expect_number();
       node->offset = node->offset - (num * size_of_type(node->ty->ptr_to));
@@ -310,7 +311,7 @@ Node *primary() {
   return new_num(expect_number());
 }
 
-Node *ident_declaration() {
+Node *ident_declaration(HashMap *lvar_map) {
   Type *ty = calloc(1, sizeof(Type));
   Type *cur = ty;
 
@@ -330,7 +331,7 @@ Node *ident_declaration() {
     error_at(NULL, "TK_TYPE の後には TK_IDENT が必須です。");
   }
 
-  Node *node = local_variable(tok, cur);
+  Node *node = local_variable(tok, cur, lvar_map);
   node->is_declaration = true;
 
   return node;
@@ -349,7 +350,7 @@ Type *pointer_type(Type *ty, Type *cur) {
   return cur;
 }
 
-Node *local_variable(Token *tok, Type *ty) {
+Node *local_variable(Token *tok, Type *ty, HashMap *lvar_map) {
   Node *node = calloc(1, sizeof(Node));
   node->kind = ND_LVAR;
 
@@ -366,7 +367,7 @@ Node *local_variable(Token *tok, Type *ty) {
 
     // array
     if(consume("[")) {
-      Node *size = unary();
+      Node *size = unary(lvar_map);
       expect("]");
       Type *array_ty = calloc(1, sizeof(Type));
       array_ty->kind = TY_ARRAY;
@@ -385,6 +386,13 @@ Node *local_variable(Token *tok, Type *ty) {
       locals_head = lvar;
     }
     lvar_count++;
+
+    char key[tok->len + 1];
+    memcpy(key, tok->str, tok->len);
+    key[tok->len] = '\0';
+    int size =
+        lvar->ty->array_size ? lvar->ty->array_size : size_of_type(lvar->ty);
+    hashmap_put(lvar_map, key, &size);
   }
 
   node->offset = lvar->offset;
@@ -393,14 +401,14 @@ Node *local_variable(Token *tok, Type *ty) {
   return node;
 }
 
-Node *func_args_definition(int *args_offset_total) {
+Node *func_args_definition(int *args_offset_total, HashMap *lvar_map) {
   Node head = {};
   Node *cur = &head;
 
   for(;;) {
     // arguments
     if(equal_token(TK_TYPE)) {
-      Node *param = primary();
+      Node *param = primary(lvar_map);
       cur = cur->next = param;
       args_offset_total += param->offset;
       consume(",");
@@ -418,18 +426,18 @@ Node *func_args_definition(int *args_offset_total) {
   return head.next;
 }
 
-Node *func_call(Token *tok) {
+Node *func_call(Token *tok, HashMap *lvar_map) {
   Node *node = calloc(1, sizeof(Node));
   node->name = tok->str;
   node->len = tok->len;
-  node->args = func_call_args(node);
+  node->args = func_call_args(node, lvar_map);
 
   node->kind = ND_CALL;
 
   return node;
 }
 
-Node *func_call_args(Node *node) {
+Node *func_call_args(Node *node, HashMap *lvar_map) {
   Node head = {};
   Node *cur = &head;
   int count = 0;
@@ -437,7 +445,7 @@ Node *func_call_args(Node *node) {
   for(;;) {
     // arguments
     if(equal_token(TK_NUM) || equal_token(TK_IDENT) || equal(token, "&")) {
-      Node *param = expr();
+      Node *param = expr(lvar_map);
       if(count > 0) {
         // この繋ぎ方が肝で、1->2->3,,,でなく3->2->1のように前に繋がれていく
         param->next = cur;

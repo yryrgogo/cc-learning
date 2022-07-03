@@ -18,6 +18,16 @@ typedef struct Token Token;
 typedef struct Type Type;
 typedef struct LVar LVar;
 typedef struct Node Node;
+typedef struct {
+  char *key;
+  int keylen;
+  void *val;
+} HashEntry;
+typedef struct {
+  HashEntry *buckets;
+  int capacity;
+  int used;
+} HashMap;
 
 // Kind of Token
 typedef enum {
@@ -159,21 +169,21 @@ struct Node {
 
 void program();
 Node *toplevel();
-Node *stmt();
-Node *expr();
-Node *assign();
-Node *equality();
-Node *relational();
-Node *add();
-Node *mul();
-Node *unary();
-Node *primary();
+Node *stmt(HashMap *lvar_map);
+Node *expr(HashMap *lvar_map);
+Node *assign(HashMap *lvar_map);
+Node *equality(HashMap *lvar_map);
+Node *relational(HashMap *lvar_map);
+Node *add(HashMap *lvar_map);
+Node *mul(HashMap *lvar_map);
+Node *unary(HashMap *lvar_map);
+Node *primary(HashMap *lvar_map);
 LVar *find_lvar(Token *tok);
-Node *func_args_definition(int *arg_count);
-Node *func_call(Token *tok);
-Node *func_call_args(Node *node);
-Node *local_variable(Token *tok, Type *ty);
-Node *ident_declaration();
+Node *func_args_definition(int *arg_count, HashMap *lvar_map);
+Node *func_call(Token *tok, HashMap *lvar_map);
+Node *func_call_args(Node *node, HashMap *lvar_map);
+Node *local_variable(Token *tok, Type *ty, HashMap *lvar_map);
+Node *ident_declaration(HashMap *lvar_map);
 Type *pointer_type(Type *ty, Type *cur);
 int size_of_type(Type *ty);
 void adjust_rsp();
@@ -196,18 +206,6 @@ Type *gen_lhs_deref(Node *node);
 //
 // hashmap.c
 //
-
-typedef struct {
-  char *key;
-  int keylen;
-  void *val;
-} HashEntry;
-
-typedef struct {
-  HashEntry *buckets;
-  int capacity;
-  int used;
-} HashMap;
 
 void *hashmap_get(HashMap *map, char *key);
 void hashmap_put(HashMap *map, char *key, void *val);
