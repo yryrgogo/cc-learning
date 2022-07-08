@@ -18,16 +18,8 @@ typedef struct Token Token;
 typedef struct Type Type;
 typedef struct LVar LVar;
 typedef struct Node Node;
-typedef struct {
-  char *key;
-  int keylen;
-  void *val;
-} HashEntry;
-typedef struct {
-  HashEntry *buckets;
-  int capacity;
-  int used;
-} HashMap;
+typedef struct HashEntry HashEntry;
+typedef struct HashMap HashMap;
 
 // Kind of Token
 typedef enum {
@@ -146,8 +138,7 @@ struct Node {
   bool is_derefernce;
   int has_index;
 
-  // function
-  char *name;
+  char *name;  // function, variable, parameter の名前
   int len;
   int args_num;
   Node *args;
@@ -206,9 +197,20 @@ Type *gen_lhs_deref(Node *node);
 //
 // hashmap.c
 //
+struct HashEntry {
+  char *key;
+  int keylen;
+  int val;
+};
 
-void *hashmap_get(HashMap *map, char *key);
-void hashmap_put(HashMap *map, char *key, void *val);
+struct HashMap {
+  HashEntry *buckets;
+  int capacity;
+  int used;
+};
+
+int hashmap_get(HashMap *map, char *key);
+void hashmap_put(HashMap *map, char *key, int val);
 void hashmap_delete(HashMap *map, char *key);
 void hashmap_test(void);
 

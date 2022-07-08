@@ -22,21 +22,33 @@ void walk_nodes(Node *node) {
 }
 
 // update local var offset
-void update_lvar_offset(Node *node, int lvar_count) {
+void update_lvar_offset(Node *node, HashMap *lvar_map, int max_offset) {
   // TODO: 変数番号とその byte サイズのマップを作るのが良さげ
   if(!node) {
     return;
+  } else {
+    if(node->kind && node->kind != ND_CALL && node->name) {
+      int val = hashmap_get(lvar_map, node->name);
+      if(val >= 0) {
+        // printf("before name: %s %d\n", node->name, node->offset);
+        int new_offset = max_offset - node->offset + val;
+        node->offset = new_offset;
+        // printf("after name: %s %d\n", node->name, node->offset);
+      }
+    }
   }
-  update_lvar_offset(node->lhs, lvar_count);
-  update_lvar_offset(node->rhs, lvar_count);
-  update_lvar_offset(node->init, lvar_count);
-  update_lvar_offset(node->cond, lvar_count);
-  update_lvar_offset(node->inc, lvar_count);
-  update_lvar_offset(node->then, lvar_count);
-  update_lvar_offset(node->els, lvar_count);
-  update_lvar_offset(node->body, lvar_count);
-  update_lvar_offset(node->args, lvar_count);
-  update_lvar_offset(node->next, lvar_count);
+  // printf("name: %s %d\n", node->name, node->offset);
+
+  update_lvar_offset(node->lhs, lvar_map, max_offset);
+  update_lvar_offset(node->rhs, lvar_map, max_offset);
+  update_lvar_offset(node->init, lvar_map, max_offset);
+  update_lvar_offset(node->cond, lvar_map, max_offset);
+  update_lvar_offset(node->inc, lvar_map, max_offset);
+  update_lvar_offset(node->then, lvar_map, max_offset);
+  update_lvar_offset(node->els, lvar_map, max_offset);
+  update_lvar_offset(node->body, lvar_map, max_offset);
+  update_lvar_offset(node->args, lvar_map, max_offset);
+  update_lvar_offset(node->next, lvar_map, max_offset);
 }
 
 char *node_kind_name(NodeKind kind) {

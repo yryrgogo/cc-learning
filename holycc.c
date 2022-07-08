@@ -29,17 +29,20 @@ int main(int argc, char **argv) {
   user_input = argv[1];
   tokenize(user_input);
 
-  bool check_token = false;
-  if(check_token) {
-    for(;;) {
-      if(token->kind == TK_EOF) {
-        break;
-      }
-      printf("%s\n", token->str);
-      token = token->next;
-    }
-    return 0;
-  }
+  // bool check_token = false;
+  // if(check_token) {
+  //   for(;;) {
+  //     if(token->kind == TK_EOF) {
+  //       break;
+  //     }
+  //     printf("%s\n", token->str);
+  //     token = token->next;
+  //   }
+  //   return 0;
+  // }
+
+  // hashmap_test();
+  // return 0;
 
   program();
 

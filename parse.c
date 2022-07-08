@@ -70,7 +70,7 @@ void program() {
 }
 
 Node *toplevel() {
-  HashMap lvar_map = {};
+  HashMap *lvar_map = calloc(1, sizeof(HashMap));
   Token *tok;
   tok = consume_type();
   if(!tok) {
@@ -88,18 +88,24 @@ Node *toplevel() {
   if(tok && consume("(")) {
     int args_offset_total = 0;
     locals = NULL;
-    node->args = func_args_definition(&args_offset_total, &lvar_map);
+    node->args = func_args_definition(&args_offset_total, lvar_map);
 
     if(equal(token, "{")) {
       node->kind = ND_FUNC;
       func_offset = args_offset_total;
-      node->body = stmt(&lvar_map);
+      node->body = stmt(lvar_map);
       func_offset = 0;
       node->locals = locals;
     } else {
       error_at(token->str, "toplevel に定義できる構文になっていません。");
     }
   }
+
+  int max_offset = 0;
+  for(LVar *var = locals; var; var = var->next) {
+    max_offset = max(max_offset, var->offset);
+  }
+  update_lvar_offset(node->body, lvar_map, max_offset);
 
   return node;
 }
@@ -117,6 +123,9 @@ Node *stmt(HashMap *lvar_map) {
     node->kind = ND_BLOCK;
     Node head;
     Node *cur = &head;
+
+    int i = 13;
+    hashmap_put(lvar_map, "aa", i);
 
     bool has_stmt = false;
     while(!consume("}")) {
@@ -359,6 +368,10 @@ Node *local_variable(Token *tok, Type *ty, HashMap *lvar_map) {
   // not?
   LVar *lvar = find_lvar(tok);
 
+  char *lvar_key = calloc(1, sizeof(char) * (tok->len + 1));
+  memcpy(lvar_key, tok->str, tok->len);
+  lvar_key[tok->len] = '\0';
+
   if(!lvar) {
     lvar = calloc(1, sizeof(LVar));
     lvar->name = tok->str;
@@ -387,14 +400,10 @@ Node *local_variable(Token *tok, Type *ty, HashMap *lvar_map) {
     }
     lvar_count++;
 
-    char key[tok->len + 1];
-    memcpy(key, tok->str, tok->len);
-    key[tok->len] = '\0';
-    int size =
-        lvar->ty->array_size ? lvar->ty->array_size : size_of_type(lvar->ty);
-    hashmap_put(lvar_map, key, &size);
+    hashmap_put(lvar_map, lvar_key, size_of_type(lvar->ty));
   }
 
+  node->name = lvar_key;
   node->offset = lvar->offset;
   node->ty = lvar->ty;
 
@@ -438,8 +447,7 @@ Node *func_call(Token *tok, HashMap *lvar_map) {
 }
 
 Node *func_call_args(Node *node, HashMap *lvar_map) {
-  Node head = {};
-  Node *cur = &head;
+  Node *cur = calloc(1, sizeof(Node));
   int count = 0;
 
   for(;;) {
