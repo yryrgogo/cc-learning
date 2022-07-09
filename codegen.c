@@ -44,11 +44,12 @@ void gen_func(Node *node) {
   }
 
   // 引数を Stack に書き出す
-  int args_count = 0;
+  int args_count = node->args_num;
   for(Node *argv = node->args; argv; argv = argv->next) {
     char *reg = "";
+
     switch(args_count) {
-    case 0:
+    case 1:
       if(argv->ty->kind == TY_INT) {
         reg = "edi";
       } else {
@@ -56,7 +57,7 @@ void gen_func(Node *node) {
       }
       gen_arg(argv, reg);
       break;
-    case 1:
+    case 2:
       if(argv->ty->kind == TY_INT) {
         reg = "esi";
       } else {
@@ -64,7 +65,7 @@ void gen_func(Node *node) {
       }
       gen_arg(argv, reg);
       break;
-    case 2:
+    case 3:
       if(argv->ty->kind == TY_INT) {
         reg = "edx";
       } else {
@@ -72,7 +73,7 @@ void gen_func(Node *node) {
       }
       gen_arg(argv, reg);
       break;
-    case 3:
+    case 4:
       if(argv->ty->kind == TY_INT) {
         reg = "ecx";
       } else {
@@ -80,7 +81,7 @@ void gen_func(Node *node) {
       }
       gen_arg(argv, reg);
       break;
-    case 4:
+    case 5:
       if(argv->ty->kind == TY_INT) {
         reg = "r8d";
       } else {
@@ -88,7 +89,7 @@ void gen_func(Node *node) {
       }
       gen_arg(argv, reg);
       break;
-    case 5:
+    case 6:
       if(argv->ty->kind == TY_INT) {
         reg = "r9d";
       } else {
@@ -97,7 +98,7 @@ void gen_func(Node *node) {
       gen_arg(argv, reg);
       break;
     }
-    args_count++;
+    args_count--;
   }
 
   int total_offset = 0;
@@ -233,7 +234,7 @@ void gen_expr(Node *node) {
   case ND_LVAR:
     gen_lvar_addr(node);
 
-    if(node->ty->kind == TY_ARRAY && node->has_index == NULL) {
+    if(node->ty->kind == TY_ARRAY && !node->has_index) {
       return;
     }
 
@@ -268,7 +269,7 @@ void gen_expr(Node *node) {
       gen_lvar_addr(node->lhs);
       break;
     case ND_DEREF: {
-      Type *ty = gen_lhs_deref(node->lhs);
+      gen_lhs_deref(node->lhs);
       break;
     }
     }
@@ -329,7 +330,7 @@ void gen_calculator(Node *node) {
     if(node->lhs->ty->kind == TY_PTR) {
       is_lhs_ptr = true;
     }
-    if(node->lhs->ty->kind == TY_ARRAY && node->lhs->has_index == NULL) {
+    if(node->lhs->ty->kind == TY_ARRAY && !node->lhs->has_index) {
       is_lhs_ptr = true;
     }
   }
@@ -473,7 +474,7 @@ Type *gen_lhs_deref(Node *node) {
   case ND_LVAR:
     gen_lvar_addr(node);
     if(node->ty->kind == TY_ARRAY) {
-      return;
+      return NULL;
     }
     printf("  pop rax\n");
     printf("  mov rax, [rax]\n");

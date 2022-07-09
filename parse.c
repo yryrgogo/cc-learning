@@ -87,8 +87,11 @@ Node *toplevel() {
 
   if(tok && consume("(")) {
     int args_offset_total = 0;
+    int args_count = 0;
     locals = NULL;
-    node->args = func_args_definition(&args_offset_total, lvar_map);
+    node->args =
+        func_args_definition(&args_count, &args_offset_total, lvar_map);
+    node->args_num = args_count;
 
     if(equal(token, "{")) {
       node->kind = ND_FUNC;
@@ -105,7 +108,7 @@ Node *toplevel() {
   for(LVar *var = locals; var; var = var->next) {
     max_offset = max(max_offset, var->offset);
   }
-  update_lvar_offset(node->body, lvar_map, max_offset);
+  update_lvar_offset(node, lvar_map, max_offset);
 
   return node;
 }
@@ -410,16 +413,18 @@ Node *local_variable(Token *tok, Type *ty, HashMap *lvar_map) {
   return node;
 }
 
-Node *func_args_definition(int *args_offset_total, HashMap *lvar_map) {
-  Node head = {};
-  Node *cur = &head;
+Node *func_args_definition(int *args_count, int *args_offset_total,
+                           HashMap *lvar_map) {
+  Node *cur = calloc(1, sizeof(Node));
 
   for(;;) {
     // arguments
     if(equal_token(TK_TYPE)) {
+      (*args_count)++;
       Node *param = primary(lvar_map);
-      cur = cur->next = param;
+      param->next = cur;
       args_offset_total += param->offset;
+      cur = param;
       consume(",");
     } else if(consume(")")) {
       break;
@@ -432,7 +437,7 @@ Node *func_args_definition(int *args_offset_total, HashMap *lvar_map) {
     }
   }
 
-  return head.next;
+  return cur;
 }
 
 Node *func_call(Token *tok, HashMap *lvar_map) {
@@ -472,6 +477,31 @@ Node *func_call_args(Node *node, HashMap *lvar_map) {
 
   return cur;
 }
+
+// Node *func_call_args(Node *node, HashMap *lvar_map) {
+//   Node head = {};
+//   Node *cur = &head;
+//   int count = 0;
+
+//   for(;;) {
+//     // arguments
+//     if(equal_token(TK_NUM) || equal_token(TK_IDENT) || equal(token, "&")) {
+//       Node *param = expr(lvar_map);
+//       cur->next = param;
+//       cur = param;
+//       count++;
+
+//       consume(",");
+//     } else if(consume(")")) {
+//       break;
+//     } else {
+//       break;
+//     }
+//   }
+//   node->args_num = count;
+
+//   return head.next;
+// }
 
 LVar *find_lvar(Token *tok) {
   for(LVar *var = locals; var; var = var->next) {

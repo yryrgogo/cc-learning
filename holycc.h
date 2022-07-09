@@ -138,7 +138,7 @@ struct Node {
   bool is_derefernce;
   int has_index;
 
-  char *name;  // function, variable, parameter の名前
+  char *name; // function, variable, parameter の名前
   int len;
   int args_num;
   Node *args;
@@ -170,7 +170,8 @@ Node *mul(HashMap *lvar_map);
 Node *unary(HashMap *lvar_map);
 Node *primary(HashMap *lvar_map);
 LVar *find_lvar(Token *tok);
-Node *func_args_definition(int *arg_count, HashMap *lvar_map);
+Node *func_args_definition(int *args_count, int *args_offset_total,
+                           HashMap *lvar_map);
 Node *func_call(Token *tok, HashMap *lvar_map);
 Node *func_call_args(Node *node, HashMap *lvar_map);
 Node *local_variable(Token *tok, Type *ty, HashMap *lvar_map);
