@@ -188,12 +188,12 @@ Type *pointed_type(Type *ty);
 
 void gen(Node *node);
 void gen_stmt(Node *node);
-void gen_expr(Node *node);
+void gen_expr(Node *node, bool is_dereference);
 void gen_func(Node *node);
 void gen_func_call(Node *node);
 void gen_func_call_arg(Node *node, char *name);
 void gen_lvar_addr(Node *node);
-void gen_calculator(Node *node);
+void gen_calculator(Node *node, bool is_dereference);
 Type *gen_lhs_deref(Node *node);
 
 //

@@ -16,17 +16,17 @@ assert() {
   echo ""
 }
 
-# assert 0 "int main() { 0; }"
-# assert 42 "int main() {42;}"
-# assert 21 "int main() {5+20-4;}"
-# assert 41 "int main() { 12 + 34 - 5 ;}"
-# assert 47 'int main() {5+6*7;}'
-# assert 15 'int main() {5*(9-6);}'
-# assert 4 'int main() {(3+5)/2;}'
-# assert 10 'int main() {-10+20;}'
-# assert 90 'int main() {+10-20-(-100);}'
-# assert 10 'int main() {- -10;}'
-# assert 10 'int main() {- - +10;}'
+assert 0 "int main() { 0; }"
+assert 42 "int main() {42;}"
+assert 21 "int main() {5+20-4;}"
+assert 41 "int main() { 12 + 34 - 5 ;}"
+assert 47 'int main() {5+6*7;}'
+assert 15 'int main() {5*(9-6);}'
+assert 4 'int main() {(3+5)/2;}'
+assert 10 'int main() {-10+20;}'
+assert 90 'int main() {+10-20-(-100);}'
+assert 10 'int main() {- -10;}'
+assert 10 'int main() {- - +10;}'
 assert 10 'int main() {int a;a = 10;a;}'
 assert 10 'int main() {int abc;abc = 10;abc;}'
 assert 8 "int main() {

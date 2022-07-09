@@ -123,7 +123,7 @@ void gen_func(Node *node) {
 void gen_stmt(Node *node) {
   switch(node->kind) {
   case ND_RETURN:
-    gen_expr(node->lhs);
+    gen_expr(node->lhs, false);
     printf("  pop rax\n");
     printf("  mov rsp, rbp\n");
     printf("  pop rbp\n");
@@ -140,13 +140,13 @@ void gen_stmt(Node *node) {
   case ND_FOR: {
     int c = count();
 
-    gen_expr(node->init);
+    gen_expr(node->init, false);
     printf("  pop rax\n");
     adjust_rsp();
     printf("  jmp .L.for.begin.%d\n", c);
 
     printf(".L.for.begin.%d:\n", c);
-    gen_expr(node->cond);
+    gen_expr(node->cond, false);
     printf("  pop rax\n");
     printf("  cmp rax, 0\n");
     adjust_rsp();
@@ -154,7 +154,7 @@ void gen_stmt(Node *node) {
 
     gen_stmt(node->then);
 
-    gen_expr(node->inc);
+    gen_expr(node->inc, false);
     printf("  pop rax\n");
     adjust_rsp();
     printf("  jmp .L.for.begin.%d\n", c);
@@ -168,7 +168,7 @@ void gen_stmt(Node *node) {
     adjust_rsp();
     printf("  jmp .L.while.begin.%d\n", c);
     printf(".L.while.begin.%d:\n", c);
-    gen_expr(node->cond);
+    gen_expr(node->cond, false);
     printf("  pop rax\n");
     printf("  cmp rax, 0\n");
     adjust_rsp();
@@ -183,7 +183,7 @@ void gen_stmt(Node *node) {
   }
   case ND_IF: {
     int c = count();
-    gen_expr(node->cond);
+    gen_expr(node->cond, false);
     printf("  pop rax\n");
     printf("  cmp rax, 0\n");
 
@@ -207,7 +207,7 @@ void gen_stmt(Node *node) {
     return;
   }
   default:
-    gen_expr(node);
+    gen_expr(node, false);
     printf("  pop rax\n");
     return;
   }
@@ -220,7 +220,7 @@ void gen_stmt(Node *node) {
  *
  * @param node
  */
-void gen_expr(Node *node) {
+void gen_expr(Node *node, bool is_dereference) {
   char *reg = "";
   switch(node->kind) {
   case ND_NUM:
@@ -229,7 +229,8 @@ void gen_expr(Node *node) {
   case ND_LVAR:
     gen_lvar_addr(node);
 
-    if(node->ty->kind == TY_ARRAY && !(node->has_index >= 0)) {
+    if(node->ty->kind == TY_ARRAY &&
+       (is_dereference || node->is_derefernce || !(node->has_index >= 0))) {
       return;
     }
 
@@ -249,7 +250,7 @@ void gen_expr(Node *node) {
     gen_lvar_addr(node->lhs);
     return;
   case ND_DEREF:
-    gen_expr(node->lhs);
+    gen_expr(node->lhs, true);
 
     printf("  pop rax\n");
     printf("  mov rax, [rax]\n");
@@ -268,7 +269,7 @@ void gen_expr(Node *node) {
       break;
     }
     }
-    gen_expr(node->rhs);
+    gen_expr(node->rhs, is_dereference);
 
     void set_reg(Type * ty, char **reg, char **prefix) {
       switch(ty->kind) {
@@ -306,7 +307,7 @@ void gen_expr(Node *node) {
     return;
   default:
     if(node->lhs && node->rhs) {
-      gen_calculator(node);
+      gen_calculator(node, is_dereference);
       printf("  push rax\n");
     }
     return;
@@ -318,7 +319,7 @@ void gen_expr(Node *node) {
  *
  * @param node
  */
-void gen_calculator(Node *node) {
+void gen_calculator(Node *node, bool is_dereference) {
   // TODO: このやり方だと () でネストされた式をポインタと判定しないため要修正
   bool is_lhs_ptr = false;
   if(node->lhs->kind == ND_LVAR) {
@@ -330,12 +331,12 @@ void gen_calculator(Node *node) {
     }
   }
 
-  gen_expr(node->lhs);
+  gen_expr(node->lhs, is_dereference);
 
   if((is_lhs_ptr) && node->rhs->kind == ND_NUM) {
     node->rhs->val = node->rhs->val * 4;
   }
-  gen_expr(node->rhs);
+  gen_expr(node->rhs, is_dereference);
 
   printf("  pop rdi\n");
   printf("  pop rax\n");
@@ -442,7 +443,7 @@ void gen_func_call(Node *node) {
  * @param node
  */
 void gen_func_call_arg(Node *node, char *register_name) {
-  gen_expr(node);
+  gen_expr(node, false);
   printf("  pop rax\n");
   printf("  mov %s, rax\n", register_name);
 }
@@ -467,7 +468,7 @@ Type *gen_lhs_deref(Node *node) {
     gen_lhs_deref(node->lhs);
     break;
   case ND_ADD:
-    gen_calculator(node);
+    gen_calculator(node, true);
     printf("  push rax\n");
     break;
   }
