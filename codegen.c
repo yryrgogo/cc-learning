@@ -37,6 +37,8 @@ void gen_func(Node *node) {
   printf("  push rbp\n");
   printf("  mov rbp, rsp\n");
 
+  printf("  sub rsp, %d\n", node->total_offset);
+
   void gen_arg(Node * argv, char *register_name) {
     printf("  mov rax, rbp\n");
     printf("  sub rax, %d\n", argv->offset);
@@ -100,13 +102,6 @@ void gen_func(Node *node) {
     }
     args_count--;
   }
-
-  int total_offset = 0;
-  for(LVar *var = node->locals; var; var = var->next) {
-    total_offset = max(total_offset, var->offset);
-  }
-  if(total_offset > 0)
-    printf("  sub rsp, %d\n", total_offset);
 
   gen_stmt(node->body);
 
@@ -234,7 +229,7 @@ void gen_expr(Node *node) {
   case ND_LVAR:
     gen_lvar_addr(node);
 
-    if(node->ty->kind == TY_ARRAY && !node->has_index) {
+    if(node->ty->kind == TY_ARRAY && !(node->has_index >= 0)) {
       return;
     }
 
@@ -345,52 +340,40 @@ void gen_calculator(Node *node) {
   printf("  pop rdi\n");
   printf("  pop rax\n");
 
-  if(is_lhs_ptr && node->rhs->kind == ND_NUM &&
-     node->lhs->ty->kind != TY_ARRAY) {
-    switch(node->kind) {
-    case ND_ADD:
-      printf("  sub rax, rdi\n");
-      break;
-    case ND_SUB:
-      printf("  add rax, rdi\n");
-      break;
-    }
-  } else {
-    switch(node->kind) {
-    case ND_ADD:
-      printf("  add rax, rdi\n");
-      break;
-    case ND_SUB:
-      printf("  sub rax, rdi\n");
-      break;
-    case ND_MUL:
-      printf("  imul rax, rdi\n");
-      break;
-    case ND_DIV:
-      printf("  cqo\n");
-      printf("  idiv rdi\n");
-      break;
-    case ND_EQ:
-      printf("  cmp rax, rdi\n");
-      printf("  sete al\n");
-      printf("  movzb rax, al\n");
-      break;
-    case ND_NE:
-      printf("  cmp rax, rdi\n");
-      printf("  setne al\n");
-      printf("  movzb rax, al\n");
-      break;
-    case ND_LT:
-      printf("  cmp rax, rdi\n");
-      printf("  setl al\n");
-      printf("  movzb rax, al\n");
-      break;
-    case ND_LE:
-      printf("  cmp rax, rdi\n");
-      printf("  setle al\n");
-      printf("  movzb rax, al\n");
-      break;
-    }
+  switch(node->kind) {
+  case ND_ADD:
+    printf("  add rax, rdi\n");
+    break;
+  case ND_SUB:
+    printf("  sub rax, rdi\n");
+    break;
+  case ND_MUL:
+    printf("  imul rax, rdi\n");
+    break;
+  case ND_DIV:
+    printf("  cqo\n");
+    printf("  idiv rdi\n");
+    break;
+  case ND_EQ:
+    printf("  cmp rax, rdi\n");
+    printf("  sete al\n");
+    printf("  movzb rax, al\n");
+    break;
+  case ND_NE:
+    printf("  cmp rax, rdi\n");
+    printf("  setne al\n");
+    printf("  movzb rax, al\n");
+    break;
+  case ND_LT:
+    printf("  cmp rax, rdi\n");
+    printf("  setl al\n");
+    printf("  movzb rax, al\n");
+    break;
+  case ND_LE:
+    printf("  cmp rax, rdi\n");
+    printf("  setle al\n");
+    printf("  movzb rax, al\n");
+    break;
   }
 }
 

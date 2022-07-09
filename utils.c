@@ -31,7 +31,13 @@ void update_lvar_offset(Node *node, HashMap *lvar_map, int max_offset) {
       int val = hashmap_get(lvar_map, node->name);
       if(val >= 0) {
         // printf("before name: %s %d\n", node->name, node->offset);
-        int new_offset = max_offset - node->offset + val;
+        int new_offset;
+        if(node->ty->kind == TY_ARRAY) {
+          new_offset =
+              max_offset - node->offset + size_of_type(node->ty->ptr_to);
+        } else {
+          new_offset = max_offset - node->offset + val;
+        }
         node->offset = new_offset;
         // printf("after name: %s %d\n", node->name, node->offset);
       }

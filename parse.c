@@ -5,7 +5,7 @@ static LVar *locals;
 static LVar *locals_head;
 Node *code[100];
 
-int func_offset = 0;
+int local_offset = 0;
 int lvar_count = 0;
 
 Node *new_node(NodeKind kind) {
@@ -63,7 +63,9 @@ void program() {
   int i = 0;
   while(!at_eof()) {
     Node *node = toplevel();
+    node->total_offset = local_offset;
     code[i++] = node;
+    local_offset = 0;
     // walk_nodes(node);
   }
   code[i] = NULL;
@@ -95,9 +97,8 @@ Node *toplevel() {
 
     if(equal(token, "{")) {
       node->kind = ND_FUNC;
-      func_offset = args_offset_total;
+      local_offset = args_offset_total;
       node->body = stmt(lvar_map);
-      func_offset = 0;
       node->locals = locals;
     } else {
       error_at(token->str, "toplevel に定義できる構文になっていません。");
@@ -108,7 +109,7 @@ Node *toplevel() {
   for(LVar *var = locals; var; var = var->next) {
     max_offset = max(max_offset, var->offset);
   }
-  update_lvar_offset(node, lvar_map, max_offset);
+  update_lvar_offset(node, lvar_map, local_offset);
 
   return node;
 }
@@ -313,7 +314,7 @@ Node *primary(HashMap *lvar_map) {
     Node *node = local_variable(tok, NULL, lvar_map);
     if(consume("[")) {
       int num = expect_number();
-      node->offset = node->offset - (num * size_of_type(node->ty->ptr_to));
+      node->offset = node->offset + (num * size_of_type(node->ty->ptr_to));
       expect("]");
       node->has_index = num;
     }
@@ -393,11 +394,25 @@ Node *local_variable(Token *tok, Type *ty, HashMap *lvar_map) {
     }
 
     if(!locals) {
-      lvar->offset = size_of_type(lvar->ty) + func_offset;
+      if(lvar->ty->kind == TY_ARRAY) {
+        // 先頭は配列の型のサイズ
+        lvar->offset = size_of_type(lvar->ty->ptr_to) + local_offset;
+        // オフセットは配列のサイズ分足す
+        local_offset += size_of_type(lvar->ty);
+      } else {
+        lvar->offset = size_of_type(lvar->ty) + local_offset;
+        local_offset = lvar->offset;
+      }
       locals = lvar;
       locals_head = locals;
     } else {
-      lvar->offset = locals_head->offset + size_of_type(lvar->ty);
+      if(lvar->ty->kind == TY_ARRAY) {
+        lvar->offset = local_offset + size_of_type(lvar->ty->ptr_to);
+        local_offset += size_of_type(lvar->ty);
+      } else {
+        lvar->offset = local_offset + size_of_type(lvar->ty);
+        local_offset = lvar->offset;
+      }
       locals_head->next = lvar;
       locals_head = lvar;
     }
@@ -423,7 +438,7 @@ Node *func_args_definition(int *args_count, int *args_offset_total,
       (*args_count)++;
       Node *param = primary(lvar_map);
       param->next = cur;
-      args_offset_total += param->offset;
+      *args_offset_total += param->offset;
       cur = param;
       consume(",");
     } else if(consume(")")) {
