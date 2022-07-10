@@ -229,8 +229,12 @@ void gen_expr(Node *node, bool is_dereference) {
   case ND_LVAR:
     gen_lvar_addr(node);
 
+    // TODO: 配列へのポインタの場合も後続処理をスキップする
     if(node->ty->kind == TY_ARRAY &&
        (is_dereference || node->is_derefernce || !(node->has_index >= 0))) {
+      return;
+    }
+    if(node->ty->ptr_to && node->ty->ptr_to->kind == TY_ARRAY) {
       return;
     }
 
@@ -269,7 +273,13 @@ void gen_expr(Node *node, bool is_dereference) {
       break;
     }
     }
-    gen_expr(node->rhs, is_dereference);
+
+    if(node->rhs->ty && node->rhs->ty->kind == TY_ARRAY &&
+       node->lhs->ty->kind == TY_PTR) {
+      gen_lvar_addr(node->rhs);
+    } else {
+      gen_expr(node->rhs, is_dereference);
+    }
 
     void set_reg(Type * ty, char **reg, char **prefix) {
       switch(ty->kind) {
@@ -379,8 +389,9 @@ void gen_calculator(Node *node, bool is_dereference) {
 }
 
 /**
- * @brief ベースポインタからのオフセットでローカル変数のアドレスを算出し、stack
- * push する
+ * @brief
+ * ベースポインタからのオフセットでローカル変数のアドレスを算出し、stack push
+ * する
  *
  * @param node
  */
@@ -396,6 +407,8 @@ void gen_lvar_addr(Node *node) {
   printf("  sub rax, %d\n", node->offset);
   printf("  push rax\n");
 
+  // TODO: ARRAY の変数宣言では、この命令が追加で必要だが理由を忘れた
+  // addressをpushするだけでなく、そのaddressにはaddressそのものをセットしておく
   if(node->ty->kind == TY_ARRAY && node->is_declaration) {
     printf("  pop rdi\n");
     printf("  mov [rax], rdi\n");

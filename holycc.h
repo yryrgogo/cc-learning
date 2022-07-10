@@ -237,3 +237,4 @@ void node_name(char *name);
 int max(int a, int b);
 char *node_kind_name(NodeKind kind);
 void walk_nodes(Node *node);
+void update_lvar_offset(Node *node, HashMap *lvar_map, int max_offset);

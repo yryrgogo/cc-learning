@@ -735,6 +735,17 @@ int main() {
 }
 "
 
+assert 6 "
+int main() {
+  int a[2];
+  a[0] = 6;
+  a[1] = 8;
+  int *p;
+  p = a;
+  return *p;
+}
+"
+
 assert 3 "
 int main() {
   int a[2];
