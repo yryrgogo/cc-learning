@@ -252,14 +252,32 @@ Node *add(HashMap *lvar_map) {
 }
 
 Node *mul(HashMap *lvar_map) {
-  Node *node = unary(lvar_map);
+  Node *node = array(lvar_map);
 
   for(;;) {
     if(consume("*"))
-      node = new_binary(ND_MUL, node, unary(lvar_map));
+      node = new_binary(ND_MUL, node, array(lvar_map));
     else if(consume("/"))
-      node = new_binary(ND_DIV, node, unary(lvar_map));
+      node = new_binary(ND_DIV, node, array(lvar_map));
     else
+      return node;
+  }
+}
+
+/**
+ * @brief a[1] といった添字による配列アクセスを *(a + 1) に置換する
+ *
+ * @param lvar_map
+ * @return Node*
+ */
+Node *array(HashMap *lvar_map) {
+  Node *node = unary(lvar_map);
+
+  for(;;) {
+    if(consume("[")) {
+      node = new_unary(ND_DEREF, new_binary(ND_ADD, node, expr(lvar_map)));
+      expect("]");
+    } else
       return node;
   }
 }
@@ -312,12 +330,6 @@ Node *primary(HashMap *lvar_map) {
     return node;
   } else if(tok) {
     Node *node = local_variable(tok, NULL, lvar_map);
-    if(consume("[")) {
-      int num = expect_number();
-      node->offset = node->offset + (num * size_of_type(node->ty->ptr_to));
-      expect("]");
-      node->has_index = num;
-    }
     return node;
   }
 

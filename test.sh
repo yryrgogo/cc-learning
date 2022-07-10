@@ -757,6 +757,26 @@ int main() {
 }
 "
 
+assert 2 "
+int main() {
+  int a[3];
+  a[0] = 0;
+  a[1] = 1;
+  a[2] = 2;
+  a[2];
+}
+"
+
+assert 2 "
+int main() {
+  int a[3];
+  a[0] = 0;
+  a[1] = 1;
+  a[2] = 2;
+  2[a];  // C ではこの書き方も有効
+}
+"
+
 # assert 500 "int main(){500;}"
 
 echo OK

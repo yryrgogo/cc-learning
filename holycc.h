@@ -166,6 +166,7 @@ Node *expr(HashMap *lvar_map);
 Node *assign(HashMap *lvar_map);
 Node *equality(HashMap *lvar_map);
 Node *relational(HashMap *lvar_map);
+Node *array(HashMap *lvar_map);
 Node *add(HashMap *lvar_map);
 Node *mul(HashMap *lvar_map);
 Node *unary(HashMap *lvar_map);

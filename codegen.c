@@ -340,12 +340,24 @@ void gen_calculator(Node *node, bool is_dereference) {
       is_lhs_ptr = true;
     }
   }
-
-  gen_expr(node->lhs, is_dereference);
-
   if((is_lhs_ptr) && node->rhs->kind == ND_NUM) {
     node->rhs->val = node->rhs->val * 4;
   }
+
+  bool is_rhs_ptr = false;
+  if(node->rhs->kind == ND_LVAR) {
+    if(node->rhs->ty->kind == TY_PTR) {
+      is_rhs_ptr = true;
+    }
+    if(node->rhs->ty->kind == TY_ARRAY && !node->rhs->has_index) {
+      is_rhs_ptr = true;
+    }
+  }
+  if((is_rhs_ptr) && node->lhs->kind == ND_NUM) {
+    node->lhs->val = node->lhs->val * 4;
+  }
+
+  gen_expr(node->lhs, is_dereference);
   gen_expr(node->rhs, is_dereference);
 
   printf("  pop rdi\n");
