@@ -182,6 +182,11 @@ Type *pointer_type(Type *ty, Type *cur);
 int size_of_type(Type *ty);
 void adjust_rsp();
 Type *pointed_type(Type *ty);
+Node *new_node(NodeKind kind);
+Node *new_num(int val);
+Node *new_unary(NodeKind kind, Node *lhs);
+Node *new_binary(NodeKind kind, Node *lhs, Node *rhs);
+Type *new_type(Token *tok, Type *ptr_to, size_t array_size);
 
 //
 // codegen.c

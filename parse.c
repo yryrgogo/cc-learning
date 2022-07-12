@@ -8,57 +8,6 @@ Node *code[100];
 int local_offset = 0;
 int lvar_count = 0;
 
-Node *new_node(NodeKind kind) {
-  Node *node = calloc(1, sizeof(Node));
-  node->kind = kind;
-  return node;
-}
-
-Node *new_num(int val) {
-  Node *node = new_node(ND_NUM);
-  Type *ty = calloc(1, sizeof(Type));
-  ty->kind = TY_INT;
-
-  node->val = val;
-  node->ty = ty;
-  return node;
-}
-
-Node *new_unary(NodeKind kind, Node *lhs) {
-  Node *node = new_node(kind);
-  node->lhs = lhs;
-  if(!node->ty)
-    node->ty = new_type(NULL, NULL, -1);
-  if(!node->lhs->ty)
-    node->lhs->ty = new_type(NULL, NULL, -1);
-  if(kind == ND_DEREF) {
-    node->lhs->is_derefernce = true;
-  }
-  return node;
-}
-
-Node *new_binary(NodeKind kind, Node *lhs, Node *rhs) {
-  Node *node = new_node(kind);
-  node->lhs = lhs;
-  node->rhs = rhs;
-  return node;
-}
-
-Type *new_type(Token *tok, Type *ptr_to, size_t array_size) {
-  Type *ty = calloc(1, sizeof(Type));
-
-  if(startswith(token->str, "int")) {
-    ty->kind = TY_INT;
-  }
-  if(ptr_to) {
-    ty->ptr_to = ptr_to;
-  }
-  if(array_size) {
-    ty->array_size = array_size;
-  }
-  return ty;
-}
-
 void program() {
   int i = 0;
   while(!at_eof()) {
@@ -561,4 +510,55 @@ Type *pointed_type(Type *ty) {
   } else {
     return ty;
   }
+}
+
+Node *new_node(NodeKind kind) {
+  Node *node = calloc(1, sizeof(Node));
+  node->kind = kind;
+  return node;
+}
+
+Node *new_num(int val) {
+  Node *node = new_node(ND_NUM);
+  Type *ty = calloc(1, sizeof(Type));
+  ty->kind = TY_INT;
+
+  node->val = val;
+  node->ty = ty;
+  return node;
+}
+
+Node *new_unary(NodeKind kind, Node *lhs) {
+  Node *node = new_node(kind);
+  node->lhs = lhs;
+  if(!node->ty)
+    node->ty = new_type(NULL, NULL, -1);
+  if(!node->lhs->ty)
+    node->lhs->ty = new_type(NULL, NULL, -1);
+  if(kind == ND_DEREF) {
+    node->lhs->is_derefernce = true;
+  }
+  return node;
+}
+
+Node *new_binary(NodeKind kind, Node *lhs, Node *rhs) {
+  Node *node = new_node(kind);
+  node->lhs = lhs;
+  node->rhs = rhs;
+  return node;
+}
+
+Type *new_type(Token *tok, Type *ptr_to, size_t array_size) {
+  Type *ty = calloc(1, sizeof(Type));
+
+  if(startswith(token->str, "int")) {
+    ty->kind = TY_INT;
+  }
+  if(ptr_to) {
+    ty->ptr_to = ptr_to;
+  }
+  if(array_size) {
+    ty->array_size = array_size;
+  }
+  return ty;
 }
