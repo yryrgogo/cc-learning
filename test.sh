@@ -778,6 +778,8 @@ int main() {
 }
 "
 
+assert 5 "int a; int main() { a = 5; return a; } "
+
 # assert 500 "int main(){500;}"
 
 echo OK

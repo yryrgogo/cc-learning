@@ -18,6 +18,10 @@ void gen(Node *node) {
     gen_func(node);
     break;
   }
+  case ND_GVAR: {
+    gen_gvar(node);
+    break;
+  }
   default: {
     error_at(NULL, "not implemented.");
   }
@@ -26,7 +30,39 @@ void gen(Node *node) {
   return;
 }
 
+// generate data section for global variables from node
+void gen_gvar(Node *node) {
+  char name[node->len + 1];
+  memcpy(name, node->name, node->len);
+  name[node->len] = '\0';
+  printf("%s:\n", name);
+
+  switch(node->ty->kind) {
+  case TY_CHAR: {
+    printf("  .byte %d\n", 0);
+    break;
+  }
+  case TY_INT: {
+    printf("  .long %d\n", size_of_type(node->ty));
+    break;
+  }
+  case TY_PTR: {
+    printf("  .zero %d\n", size_of_type(node->ty));
+    break;
+  }
+  case TY_ARRAY: {
+    printf("  .zero %d\n", size_of_type(node->ty));
+    break;
+  }
+  default: {
+    printf("  .zero %d\n", 0);
+    break;
+  }
+  }
+}
+
 void gen_func(Node *node) {
+  char *reg = "";
   rsp_offset = 0;
   char s[node->len + 1];
   memcpy(s, node->name, node->len);
@@ -48,7 +84,6 @@ void gen_func(Node *node) {
   // 引数を Stack に書き出す
   int args_count = node->args_num;
   for(Node *argv = node->args; argv; argv = argv->next) {
-    char *reg = "";
 
     switch(args_count) {
     case 1:
@@ -115,8 +150,8 @@ void gen_func(Node *node) {
 
 /**
  * @brief statement は expression が stack
- * に残した値を使って処理を組み立てる。gen_expr() のあとは pop rax で式の結果を
- * rax にセットし後続処理を行うことが多い
+ * に残した値を使って処理を組み立てる。gen_expr() のあとは pop rax
+ * で式の結果を rax にセットし後続処理を行うことが多い
  *
  * @param node
  */
@@ -221,34 +256,19 @@ void gen_stmt(Node *node) {
  * @param node
  */
 void gen_expr(Node *node, bool is_dereference) {
-  char *reg = "";
+
   switch(node->kind) {
   case ND_NUM:
     printf("  push %d\n", node->val);
     return;
+  case ND_GVAR:
+    gen_gvar_addr(node);
+    gen_var_preprocess(node, is_dereference);
+    return;
   case ND_LVAR:
     gen_lvar_addr(node);
-
-    // TODO: 配列へのポインタの場合も後続処理をスキップする
-    if(node->ty->kind == TY_ARRAY &&
-       (is_dereference || node->is_derefernce || !(node->has_index >= 0))) {
-      return;
-    }
-    if(node->ty->ptr_to && node->ty->ptr_to->kind == TY_ARRAY) {
-      return;
-    }
-
-    if(node->ty->kind == TY_INT) {
-      reg = "eax";
-    } else {
-      reg = "rax";
-    }
-
-    printf("  pop rax\n");
-    printf("  mov %s, [rax]\n", reg);
-    printf("  push rax\n");
+    gen_var_preprocess(node, is_dereference);
     return;
-
   case ND_ADDR:
     // TODO: &(*a) のような式はコンパイルできない
     gen_lvar_addr(node->lhs);
@@ -268,6 +288,9 @@ void gen_expr(Node *node, bool is_dereference) {
     case ND_LVAR:
       gen_lvar_addr(node->lhs);
       break;
+    case ND_GVAR:
+      gen_gvar_addr(node->lhs);
+      break;
     case ND_DEREF: {
       gen_lhs_deref(node->lhs);
       break;
@@ -281,32 +304,32 @@ void gen_expr(Node *node, bool is_dereference) {
       gen_expr(node->rhs, is_dereference);
     }
 
-    void set_reg(Type * ty, char **reg, char **prefix) {
-      switch(ty->kind) {
-      case TY_INT:
-        *prefix = "DWORD PTR";
-        *reg = "edi";
-        break;
-      case TY_PTR:
-        *prefix = "";
-        *reg = "rdi";
-        break;
-      case TY_ARRAY:
-        set_reg(pointed_type(ty), reg, prefix);
-        break;
-      }
-    }
-
+    char *reg = "";
     char *prefix = "";
     if(node->lhs->kind == ND_DEREF) {
-      set_reg(ty, &reg, &prefix);
+      set_register_name(ty, &reg, &prefix);
     } else {
-      set_reg(node->lhs->ty, &reg, &prefix);
+      set_register_name(node->lhs->ty, &reg, &prefix);
     }
 
     printf("  pop rdi\n");
     printf("  pop rax\n");
-    printf("  mov %s [rax], %s\n", prefix, reg);
+
+    char *acc_reg = "";
+    switch(node->lhs->kind) {
+    case ND_GVAR:
+      if(node->lhs->ty->kind == TY_INT) {
+        acc_reg = "eax";
+      } else {
+        acc_reg = "rax";
+      }
+      printf("  mov %s, %s\n", acc_reg, reg);
+      break;
+    default: {
+      printf("  mov %s [rax], %s\n", prefix, reg);
+      break;
+    }
+    }
 
     printf("  push rax\n");
     return;
@@ -321,6 +344,44 @@ void gen_expr(Node *node, bool is_dereference) {
       printf("  push rax\n");
     }
     return;
+  }
+}
+
+void gen_var_preprocess(Node *node, bool is_dereference) {
+  char *reg = "";
+  // TODO: 配列へのポインタの場合も後続処理をスキップする
+  if(node->ty->kind == TY_ARRAY &&
+     (is_dereference || node->is_derefernce || !(node->has_index >= 0))) {
+    return;
+  }
+  if(node->ty->ptr_to && node->ty->ptr_to->kind == TY_ARRAY) {
+    return;
+  }
+
+  if(node->ty->kind == TY_INT) {
+    reg = "eax";
+  } else {
+    reg = "rax";
+  }
+
+  printf("  pop rax\n");
+  printf("  mov %s, [rax]\n", reg);
+  printf("  push rax\n");
+}
+
+void set_register_name(Type *ty, char **reg, char **prefix) {
+  switch(ty->kind) {
+  case TY_INT:
+    *prefix = "DWORD PTR";
+    *reg = "edi";
+    break;
+  case TY_PTR:
+    *prefix = "";
+    *reg = "rdi";
+    break;
+  case TY_ARRAY:
+    set_register_name(pointed_type(ty), reg, prefix);
+    break;
   }
 }
 
@@ -426,6 +487,15 @@ void gen_lvar_addr(Node *node) {
     printf("  mov [rax], rdi\n");
     printf("  push rax\n");
   }
+}
+
+void gen_gvar_addr(Node *node) {
+  char name[node->len + 1];
+  memcpy(name, node->name, node->len);
+  name[node->len] = '\0';
+
+  printf("  mov rax, [rip + %s]\n", name);
+  printf("  push rax\n");
 }
 
 void gen_func_call(Node *node) {

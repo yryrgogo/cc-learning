@@ -17,6 +17,7 @@ void error_at(char *loc, char *fmt, ...);
 typedef struct Token Token;
 typedef struct Type Type;
 typedef struct LVar LVar;
+typedef struct GVar GVar;
 typedef struct Node Node;
 typedef struct HashEntry HashEntry;
 typedef struct HashMap HashMap;
@@ -42,6 +43,7 @@ typedef enum {
   TY_INT,   // int
   TY_PTR,   // pointer
   TY_ARRAY, // array
+  TY_CHAR,  // char
 } TypeKind;
 
 // Kind of Operator
@@ -55,7 +57,8 @@ typedef enum {
   ND_LT,     // <
   ND_LE,     // <=
   ND_ASSIGN, // =
-  ND_LVAR,   // ローカル変数
+  ND_LVAR,   // Local 変数
+  ND_GVAR,   // Global 変数
   ND_NUM,    // 整数
   ND_RETURN, // return
 
@@ -125,6 +128,14 @@ struct LVar {
   Type *ty;
 };
 
+struct GVar {
+  GVar *next;
+  char *name;
+  int len;
+
+  Type *ty;
+};
+
 // 抽象構文木のノードの型
 struct Node {
   NodeKind kind; // ノードの型
@@ -157,6 +168,7 @@ struct Node {
 
   // type
   Type *ty;
+  Type *return_ty;
 };
 
 void program();
@@ -172,6 +184,7 @@ Node *mul(HashMap *lvar_map);
 Node *unary(HashMap *lvar_map);
 Node *primary(HashMap *lvar_map);
 LVar *find_lvar(Token *tok);
+GVar *find_gvar(Token *tok);
 Node *func_args_definition(int *args_count, int *args_offset_total,
                            HashMap *lvar_map);
 Node *func_call(Token *tok, HashMap *lvar_map);
@@ -199,8 +212,12 @@ void gen_func(Node *node);
 void gen_func_call(Node *node);
 void gen_func_call_arg(Node *node, char *name);
 void gen_lvar_addr(Node *node);
+void gen_gvar_addr(Node *node);
 void gen_calculator(Node *node, bool is_dereference);
 Type *gen_lhs_deref(Node *node);
+void gen_gvar(Node *node);
+void gen_var_preprocess(Node *node, bool is_dereference);
+void set_register_name(Type *ty, char **reg, char **prefix);
 
 //
 // hashmap.c

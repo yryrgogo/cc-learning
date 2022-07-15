@@ -3,19 +3,19 @@
 extern Token *token;
 static LVar *locals;
 static LVar *locals_head;
+static GVar *globals;
+static GVar *globals_head;
 Node *code[100];
 
 int local_offset = 0;
 int lvar_count = 0;
 
 void program() {
+  globals = NULL;
   int i = 0;
   while(!at_eof()) {
     Node *node = toplevel();
-    node->total_offset = local_offset;
     code[i++] = node;
-    local_offset = 0;
-    // walk_nodes(node);
   }
   code[i] = NULL;
 }
@@ -34,31 +34,71 @@ Node *toplevel() {
 
   node->name = tok->str;
   node->len = tok->len;
+
+  if(consume("*")) {
+    Type *ptr = calloc(1, sizeof(Type));
+    ty = pointer_type(ty, ptr);
+  }
   node->ty = ty;
 
-  if(tok && consume("(")) {
-    int args_offset_total = 0;
-    int args_count = 0;
-    locals = NULL;
-    node->args =
-        func_args_definition(&args_count, &args_offset_total, lvar_map);
-    node->args_num = args_count;
+  if(tok) {
+    if(consume("(")) {
+      int args_offset_total = 0;
+      int args_count = 0;
+      locals = NULL;
+      node->args =
+          func_args_definition(&args_count, &args_offset_total, lvar_map);
+      node->args_num = args_count;
 
-    if(equal(token, "{")) {
-      node->kind = ND_FUNC;
-      local_offset = args_offset_total;
-      node->body = stmt(lvar_map);
-      node->locals = locals;
-    } else {
-      error_at(token->str, "toplevel に定義できる構文になっていません。");
+      if(equal(token, "{")) {
+        node->kind = ND_FUNC;
+        local_offset = args_offset_total;
+        node->body = stmt(lvar_map);
+        node->locals = locals;
+      } else {
+        error_at(token->str, "toplevel に定義できる構文になっていません。");
+      }
+
+      int max_offset = 0;
+      for(LVar *var = locals; var; var = var->next) {
+        max_offset = max(max_offset, var->offset);
+      }
+      update_lvar_offset(node, lvar_map, local_offset);
+      node->total_offset = local_offset;
+      local_offset = 0;
+    }
+    // global array
+    else if(consume("[")) {
+      node->kind = ND_LVAR;
+      // FIXME:
+      exit(1);
+    }
+    // global var
+    else {
+      node->kind = ND_GVAR;
+      // char gvar_key[node->len + 1];
+      // memcpy(gvar_key, node->name, node->len);
+      // gvar_key[node->len] = '\0';
+
+      GVar *gvar = find_gvar(tok);
+      if(!gvar) {
+        gvar = calloc(1, sizeof(GVar));
+        gvar->name = tok->str;
+        gvar->len = tok->len;
+        gvar->ty = ty;
+      }
+      if(!globals) {
+        globals = gvar;
+        globals_head = gvar;
+      } else {
+        globals_head->next = gvar;
+        globals_head = gvar;
+      }
+      if(consume("="))
+        node = new_binary(ND_ASSIGN, node, equality(NULL));
+      expect(";");
     }
   }
-
-  int max_offset = 0;
-  for(LVar *var = locals; var; var = var->next) {
-    max_offset = max(max_offset, var->offset);
-  }
-  update_lvar_offset(node, lvar_map, local_offset);
 
   return node;
 }
@@ -76,9 +116,6 @@ Node *stmt(HashMap *lvar_map) {
     node->kind = ND_BLOCK;
     Node head;
     Node *cur = &head;
-
-    int i = 13;
-    hashmap_put(lvar_map, "aa", i);
 
     bool has_stmt = false;
     while(!consume("}")) {
@@ -326,18 +363,19 @@ Type *pointer_type(Type *ty, Type *cur) {
 
 Node *local_variable(Token *tok, Type *ty, HashMap *lvar_map) {
   Node *node = calloc(1, sizeof(Node));
-  node->kind = ND_LVAR;
 
   // LVar は今のところアクティベーションレコードの領域の計算と ND_LVAR Node
   // のオフセットの計算にしか使っていない Is it predefined local variable or
   // not?
   LVar *lvar = find_lvar(tok);
 
-  char *lvar_key = calloc(1, sizeof(char) * (tok->len + 1));
-  memcpy(lvar_key, tok->str, tok->len);
-  lvar_key[tok->len] = '\0';
+  char *var_key = calloc(1, sizeof(char) * (tok->len + 1));
+  memcpy(var_key, tok->str, tok->len);
+  var_key[tok->len] = '\0';
 
-  if(!lvar) {
+  GVar *gvar = find_gvar(tok);
+
+  if(!lvar && !gvar) {
     lvar = calloc(1, sizeof(LVar));
     lvar->name = tok->str;
     lvar->len = tok->len;
@@ -378,13 +416,20 @@ Node *local_variable(Token *tok, Type *ty, HashMap *lvar_map) {
       locals_head = lvar;
     }
     lvar_count++;
-
-    hashmap_put(lvar_map, lvar_key, size_of_type(lvar->ty));
+    node->kind = ND_LVAR;
+    hashmap_put(lvar_map, var_key, size_of_type(lvar->ty));
   }
 
-  node->name = lvar_key;
-  node->offset = lvar->offset;
-  node->ty = lvar->ty;
+  if(lvar) {
+    node->offset = lvar->offset;
+    node->ty = lvar->ty;
+    node->kind = ND_LVAR;
+  } else if(gvar) {
+    node->ty = gvar->ty;
+    node->kind = ND_GVAR;
+  }
+  node->name = var_key;
+  node->len = tok->len;
 
   return node;
 }
@@ -454,33 +499,16 @@ Node *func_call_args(Node *node, HashMap *lvar_map) {
   return cur;
 }
 
-// Node *func_call_args(Node *node, HashMap *lvar_map) {
-//   Node head = {};
-//   Node *cur = &head;
-//   int count = 0;
-
-//   for(;;) {
-//     // arguments
-//     if(equal_token(TK_NUM) || equal_token(TK_IDENT) || equal(token, "&")) {
-//       Node *param = expr(lvar_map);
-//       cur->next = param;
-//       cur = param;
-//       count++;
-
-//       consume(",");
-//     } else if(consume(")")) {
-//       break;
-//     } else {
-//       break;
-//     }
-//   }
-//   node->args_num = count;
-
-//   return head.next;
-// }
-
 LVar *find_lvar(Token *tok) {
   for(LVar *var = locals; var; var = var->next) {
+    if(var->len == tok->len && !memcmp(tok->loc, var->name, var->len))
+      return var;
+  }
+  return NULL;
+}
+
+GVar *find_gvar(Token *tok) {
+  for(GVar *var = globals; var; var = var->next) {
     if(var->len == tok->len && !memcmp(tok->loc, var->name, var->len))
       return var;
   }
