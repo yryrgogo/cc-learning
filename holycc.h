@@ -44,6 +44,7 @@ typedef enum {
   TY_PTR,   // pointer
   TY_ARRAY, // array
   TY_CHAR,  // char
+  TY_BOOL,  // bool
 } TypeKind;
 
 // Kind of Operator
@@ -212,10 +213,11 @@ void gen_func(Node *node);
 void gen_func_call(Node *node);
 void gen_func_call_arg(Node *node, char *name);
 void gen_lvar_addr(Node *node);
-void gen_gvar_addr(Node *node);
+void gen_gvar(Node *node);
 void gen_calculator(Node *node, bool is_dereference);
 void *gen_lhs_deref(Node *node);
-void gen_gvar(Node *node);
+void gen_gvar_value(Node *node);
+void gen_gvar_assign(Node *node);
 void gen_var_preprocess(Node *node, bool is_dereference);
 void set_register_name(Type *ty, char **reg, char **prefix);
 Type *deref_type(Node *node);

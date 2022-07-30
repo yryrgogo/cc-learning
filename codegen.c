@@ -19,6 +19,8 @@ void gen(Node *node) {
     break;
   }
   case ND_GVAR: {
+    // TODO: data section が上部に集まらないとこれではエラーになる
+    printf(".data\n");
     gen_gvar(node);
     break;
   }
@@ -43,7 +45,7 @@ void gen_gvar(Node *node) {
     break;
   }
   case TY_INT: {
-    printf("  .long %d\n", size_of_type(node->ty));
+    printf("  .int %d\n", size_of_type(node->ty));
     break;
   }
   case TY_PTR: {
@@ -59,6 +61,7 @@ void gen_gvar(Node *node) {
     break;
   }
   }
+  printf("  .text\n");
 }
 
 void gen_func(Node *node) {
@@ -140,11 +143,6 @@ void gen_func(Node *node) {
 
   gen_stmt(node->body);
 
-  // Epilogue
-  printf("  mov rsp, rbp\n");
-  printf("  pop rbp\n");
-  printf("  ret\n");
-
   return;
 }
 
@@ -158,7 +156,16 @@ void gen_func(Node *node) {
 void gen_stmt(Node *node) {
   switch(node->kind) {
   case ND_RETURN:
-    gen_expr(node->lhs, false);
+    if(node->lhs->kind == ND_GVAR) {
+      Node *lhs = node->lhs;
+      char name[lhs->len + 1];
+      memcpy(name, lhs->name, lhs->len);
+      name[lhs->len] = '\0';
+      printf("  mov rax, [rip+%s]\n", name);
+      printf("  push rax\n");
+    } else {
+      gen_expr(node->lhs, false);
+    }
     printf("  pop rax\n");
     printf("  mov rsp, rbp\n");
     printf("  pop rbp\n");
@@ -262,7 +269,7 @@ void gen_expr(Node *node, bool is_dereference) {
     printf("  push %d\n", node->val);
     return;
   case ND_GVAR:
-    gen_gvar_addr(node);
+    gen_gvar_value(node);
     gen_var_preprocess(node, is_dereference);
     return;
   case ND_LVAR:
@@ -281,13 +288,16 @@ void gen_expr(Node *node, bool is_dereference) {
     printf("  push rax\n");
     return;
   case ND_ASSIGN: {
+    // グローバル変数のアドレスをraxにセットして取り出す方法がわからないため分けている
+    if(node->lhs->kind == ND_GVAR) {
+      gen_gvar_assign(node);
+      return;
+    }
+
     // TODO: switch のネストをリファクタ
     switch(node->lhs->kind) {
     case ND_LVAR:
       gen_lvar_addr(node->lhs);
-      break;
-    case ND_GVAR:
-      gen_gvar_addr(node->lhs);
       break;
     case ND_DEREF: {
       gen_lhs_deref(node->lhs);
@@ -345,6 +355,33 @@ void gen_expr(Node *node, bool is_dereference) {
   }
 }
 
+void gen_gvar_assign(Node *node) {
+  gen_expr(node->rhs, false);
+  printf("  pop rax\n");
+
+  Node *lhs = node->lhs;
+  char name[lhs->len + 1];
+  memcpy(name, lhs->name, lhs->len);
+  name[lhs->len] = '\0';
+
+  char *prefix = "";
+  char *register_name = "";
+
+  if(lhs->ty->kind == TY_INT) {
+    prefix = "DWORD PTR ";
+    register_name = "eax";
+  } else if(lhs->ty->kind == TY_CHAR) {
+    prefix = "BYTE PTR ";
+    register_name = "al";
+  } else {
+    prefix = "";
+    register_name = "rax";
+  }
+
+  printf("  mov %s[rip+%s], %s\n", prefix, name, register_name);
+  printf("  push [rip+%s]\n", name);
+}
+
 void gen_var_preprocess(Node *node, bool is_dereference) {
   char *reg = "";
   // TODO: 配列へのポインタの場合も後続処理をスキップする
@@ -398,6 +435,47 @@ Type *deref_type(Node *node) {
     return node->ty;
   }
 }
+
+/**
+ * @brief Node の Type を良い感じに返す関数があればと思ったが保留
+ *
+ */
+// Type *node_type(Node *node) {
+//   if(node->ty) {
+//     switch(node->ty) {
+//     case TY_ARRAY:
+//       return pointed_type(node->ty);
+//     case TY_PTR:
+//       return pointed_type(node->ty);
+//     default:
+//       return node->ty;
+//     }
+//   }
+
+//   switch(node->kind) {
+//   // TODO: ポインタの演算は lhs, rhs
+//   // のどちらにポインタがくるかわからないためこれじゃ判定できない
+//   case ND_ADD: {
+//     Type *lhs_ty = node_type(node->lhs);
+//     Type *rhs_ty = node_type(node->rhs);
+//     if (lhs_ty->kind == TY_PTR) {
+//     }
+//     else if (rhs_ty->kind == TY_PTR) {
+//       return TY_PTR;
+//     } else {
+//       return TY_INT;
+//     }
+//   }
+//   case ND_SUB:
+//     return node_type(node->lhs);
+//   case ND_MUL:
+//     return node_type(node->lhs);
+//   case ND_DIV:
+//     return node_type(node->lhs);
+//   case ND_EQ:
+//     return node_type(node->lhs);
+//   }
+// }
 
 /**
  * @brief rax, rdi を使って演算を行う
@@ -503,7 +581,7 @@ void gen_lvar_addr(Node *node) {
   }
 }
 
-void gen_gvar_addr(Node *node) {
+void gen_gvar_value(Node *node) {
   char name[node->len + 1];
   memcpy(name, node->name, node->len);
   name[node->len] = '\0';

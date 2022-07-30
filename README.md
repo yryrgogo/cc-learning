@@ -14,6 +14,47 @@ The code bases is no longer a 9cc transcript from the middle, so please don't re
 
 ## Memo
 
+### Stack
+
+#### RSP
+
+https://www.sigbus.info/compilerbook#%E3%82%B9%E3%83%86%E3%83%83%E3%83%9714-%E9%96%A2%E6%95%B0%E3%81%AE%E5%91%BC%E3%81%B3%E5%87%BA%E3%81%97%E3%81%AB%E5%AF%BE%E5%BF%9C%E3%81%99%E3%82%8B
+> 関数呼び出しをする前にRSPが16の倍数になっていなければいけません。pushやpopはRSPを8バイト単位で変更するので、call命令を発行するときに必ずしもRSPが16の倍数になっているとは限りません。この約束が守られていない場合、RSPが16の倍数になっていることを前提にしている関数が、半分の確率で落ちる謎の現象に悩まされることにmなります。関数を呼ぶ前にRSPを調整するようにして、RSPを16の倍数になるように調整するようにしましょう。
+
+### Assembler
+
+x86-64
+
+- the x86-64 integer arithmetic instruction normally accepts only two registers, so the result is stored by overwriting the value of the first argument register
+
+#### function
+
+- the first argument is placed in the RDI register and the second argument is placed in the RSI register
+- the return value is put into RAX register
+
+#### instructions
+
+| instruction | explain |
+| --- | --- |
+| mov | copy the value of a register |
+| movzb | レジスタの値をゼロクリアした上で指定された値をコピーしてくる <br /> AL レジスタのように RAX の下位8ビットのみを指す8ビットレジスタを使うと、上位56ビットの値は前の値のままになるため、movzb を使ってゼロクリアする必要がある |
+| call | push the address of the next instruction of call to stack<br /> jump to the address given as the argument of call |
+| ret | pop one address from the stack top and jump to the address |
+| cmp | x86-64では比較命令の結果は「フラグレジスタ」にセットされる <br /> フラグレジスタは整数演算や比較演算命令が実行されるたびに更新されるレジスタ。結果が0かどうかや桁あふれが発生したかどうか、結果が0未満かどうかといったビットを持つ |
+| sete | `==` <br > 直前の cmp 命令で調べた2つのレジスタの値が同じだった場合に、指定されたレジスタに1をセット、それ以外の場合は0をセット <br /> 8ビットレジスタしか引数にとれない |
+| setne | `!=` <br /> |
+| setle | `<=` |
+| setl | `<` |
+
+### CLI
+
+#### objdump
+
+オプションを調べる。
+
+`objdump -S foo`
+`objdump -M intel -d foo -j .text`
+
 ### 2022/06/01
 
 "ステップ14: 関数の呼び出しに対応する" の下記がわからないため調査中。
@@ -263,8 +304,6 @@ return7 --> lvar8
 %% gen_graph
 ```
 
-### 2022/06/19
-
 switch の break 忘れてバグらせハマりがち。
 ND_DEREF の codegen は左辺と右辺で異なるため、その対応を行った。これにより `*y = 5;` のようなポインタ型への代入もコンパイル可能になった。
 
@@ -292,35 +331,13 @@ int main() {
 }
 ```
 
+### 2022/07/30
 
-## 注意事項
+大分メモをサボっていた。https://zenn.dev/holygo/scraps/d742cc28493b96 にはちょいちょい書いていたが、ここ2週間は別のことをしていた。
+6/29からの差分としては
+・配列の実装
+・配列とポインタ型の暗黙の型変換の実装（配列のインデックスによる参照は、コンパイラではポインタ型への演算に書き換えられている）
+・グローバル変数
+・char 型の実装
 
-### RSP
-
-https://www.sigbus.info/compilerbook#%E3%82%B9%E3%83%86%E3%83%83%E3%83%9714-%E9%96%A2%E6%95%B0%E3%81%AE%E5%91%BC%E3%81%B3%E5%87%BA%E3%81%97%E3%81%AB%E5%AF%BE%E5%BF%9C%E3%81%99%E3%82%8B
-> 関数呼び出しをする前にRSPが16の倍数になっていなければいけません。pushやpopはRSPを8バイト単位で変更するので、call命令を発行するときに必ずしもRSPが16の倍数になっているとは限りません。この約束が守られていない場合、RSPが16の倍数になっていることを前提にしている関数が、半分の確率で落ちる謎の現象に悩まされることにmなります。関数を呼ぶ前にRSPを調整するようにして、RSPを16の倍数になるように調整するようにしましょう。
-
-## Assembler
-
-x86-64
-
-- the x86-64 integer arithmetic instruction normally accepts only two registers, so the result is stored by overwriting the value of the first argument register
-
-### function
-
-- the first argument is placed in the RDI register and the second argument is placed in the RSI register
-- the return value is put into RAX register
-
-### instructions
-
-| instruction | explain |
-| --- | --- |
-| mov | copy the value of a register |
-| movzb | レジスタの値をゼロクリアした上で指定された値をコピーしてくる <br /> AL レジスタのように RAX の下位8ビットのみを指す8ビットレジスタを使うと、上位56ビットの値は前の値のままになるため、movzb を使ってゼロクリアする必要がある |
-| call | push the address of the next instruction of call to stack<br /> jump to the address given as the argument of call |
-| ret | pop one address from the stack top and jump to the address |
-| cmp | x86-64では比較命令の結果は「フラグレジスタ」にセットされる <br /> フラグレジスタは整数演算や比較演算命令が実行されるたびに更新されるレジスタ。結果が0かどうかや桁あふれが発生したかどうか、結果が0未満かどうかといったビットを持つ |
-| sete | `==` <br > 直前の cmp 命令で調べた2つのレジスタの値が同じだった場合に、指定されたレジスタに1をセット、それ以外の場合は0をセット <br /> 8ビットレジスタしか引数にとれない |
-| setne | `!=` <br /> |
-| setle | `<=` |
-| setl | `<` |
+といったところか？大変だったのは、配列のインデックスによる参照を行うには、Stack におけるローカル変数の格納順（メモリの割り当て順）をそれまでの実装と逆にする必要があった点。初期の実装はたぶん簡単のために逆になっていたのだが、それだと実際の C の挙動と逆で不都合があり、直すことになった。

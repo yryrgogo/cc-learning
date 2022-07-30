@@ -16,25 +16,25 @@ assert() {
   echo ""
 }
 
-assert 0 "int main() { 0; }"
-assert 42 "int main() {42;}"
-assert 21 "int main() {5+20-4;}"
-assert 41 "int main() { 12 + 34 - 5 ;}"
-assert 47 'int main() {5+6*7;}'
-assert 15 'int main() {5*(9-6);}'
-assert 4 'int main() {(3+5)/2;}'
-assert 10 'int main() {-10+20;}'
-assert 90 'int main() {+10-20-(-100);}'
-assert 10 'int main() {- -10;}'
-assert 10 'int main() {- - +10;}'
-assert 10 'int main() {int a;a = 10;a;}'
-assert 10 'int main() {int abc;abc = 10;abc;}'
+assert 0 "int main() { return 0; }"
+assert 42 "int main() { return 42;}"
+assert 21 "int main() { return 5+20-4;}"
+assert 41 "int main() { return 12 + 34 - 5 ;}"
+assert 47 'int main() {return 5+6*7;}'
+assert 15 'int main() {return 5*(9-6);}'
+assert 4 'int main() {return (3+5)/2;}'
+assert 10 'int main() {return -10+20;}'
+assert 90 'int main() {return +10-20-(-100);}'
+assert 10 'int main() {return - -10;}'
+assert 10 'int main() {return - - +10;}'
+assert 10 'int main() {int a;a = 10;return a;}'
+assert 10 'int main() {int abc;abc = 10;return abc;}'
 assert 8 "int main() {
   int a;
   int b;
   a = 3;
   b = 5;
-  a + b;
+  return a + b;
   }"
 
 assert 5 "
@@ -62,17 +62,17 @@ int main() {
 "
 
 # if
-assert 11 "int main() {if (5) 11;}"
-assert 5 "int main() {if (0) 11; else 5;}"
-assert 2 "int main() {if (0) 11; else if (1) 2; else 0;}"
-assert 0 "int main() {if (0) 11; else if (0) 2; else 0;}"
-assert 10 "int main() {int i; i = 4; if (i < 5) 10;}"
+assert 11 "int main() {if (5) return 11;}"
+assert 5 "int main() {if (0) return 11; else return 5;}"
+assert 2 "int main() {if (0) return 11; else if (1) return 2; else return 0;}"
+assert 0 "int main() {if (0) return 11; else if (0) return 2; else return 0;}"
+assert 10 "int main() {int i; i = 4; if (i < 5) return 10;}"
 assert 11 "
 int main() {
 if (1)
-  if (1) 11;
-else if (0) 2;
-else 0;
+  if (1) return 11;
+else if (0) return 2;
+else return 0;
 }
 "
 
@@ -81,7 +81,7 @@ int main() {
 int a = 6;
 if (a == 6)
   a = a + 3;
-a;
+return a;
 }
 "
 
@@ -91,7 +91,7 @@ int main() {
 int a = 0;
 while (a != 6)
   a = a + 3;
-a;
+return a;
 }
 "
 assert 12 "
@@ -100,7 +100,7 @@ int main() {
   a = 0;
   while (a != 12)
     a = a + 3;
-  a;
+  return a;
 }
 "
 
@@ -111,7 +111,7 @@ int main() {
   a = 0;
   for (int i = 0; i < 5; i = i + 1)
     a = a + 1;
-  a;
+  return a;
 }
 "
 
@@ -121,7 +121,7 @@ int main() {
   a = 0;
   for (int i = 0; i < 12; i = i + 1)
     a = a + 2;
-  a;
+  return a;
 }
 "
 
@@ -133,7 +133,7 @@ int main() {
   {
     a = a + 1;
   }
-  a;
+  return a;
 }
 "
 
@@ -148,44 +148,44 @@ int main() {
     a = 2;
     a = 1;
   }
-  a;
+  return a;
 }
 "
 
 # Function Call no arguments
-assert 0 " int main() { arg0(); 0; } "
+assert 0 " int main() { arg0(); return 0; } "
 
 # Function Call with arguments
-assert 0 "int main() { arg1(1); 0; } "
+assert 0 "int main() { arg1(1); return 0; } "
 
 assert 0 "
 int main() {
     arg2(1, 2);
-    0;
+    return 0;
 }
 "
 assert 0 "
 int main() {
     arg3(1, 2, 3);
-    0;
+    return 0;
 }
 "
 assert 0 "
 int main() {
     arg4(1, 2, 3, 4);
-    0;
+    return 0;
 }
 "
 assert 0 "
 int main() {
     arg5(1, 2, 3, 4, 5);
-    0;
+    return 0;
 }
 "
 assert 0 "
 int main() {
     arg6(1, 2, 3, 4, 5, 6);
-    0;
+    return 0;
 }
 "
 
@@ -199,7 +199,7 @@ int foo(int a, int b) {
 }
 
 int main() {
-  foo(1, 3 + 18);
+  return foo(1, 3 + 18);
 }
 "
 
@@ -213,7 +213,7 @@ int foo() {
 int main() {
   int result;
   result = foo();
-  result;
+  return result;
 }
 "
 
@@ -223,7 +223,7 @@ int bar() {
 }
 
 int main() {
-  bar();
+  return bar();
 }
 "
 
@@ -239,7 +239,7 @@ int foo() {
 int main() {
   int r;
   r = foo();
-  r;
+  return r;
 }
 "
 
@@ -251,7 +251,7 @@ int foo(int a) {
 int main() {
   int b;
   b = foo(6);
-  b;
+  return b;
 }
 "
 
@@ -264,7 +264,7 @@ int main() {
   int result;
   result = foo(1, 2);
   55;
-  result + 3;
+  return result + 3;
 }
 "
 
@@ -277,7 +277,7 @@ int main() {
   int result;
   result = foo(1, 2, 3);
   55;
-  result + 33;
+  return result + 33;
 }
 "
 
@@ -291,7 +291,7 @@ int foo(int abc, int def, int ghi, int jkl) {
 int main() {
   int result;
   result = foo(1, 2, 3, 4);
-  result;
+  return result;
 }
 "
 
@@ -305,7 +305,7 @@ int foo(int a, int b, int c, int d, int e) {
 int main() {
   int result;
   result = foo(1, 2, 3, 4, 5);
-  result;
+  return result;
 }
 "
 
@@ -319,7 +319,7 @@ int foo(int a, int b, int c, int d, int e, int f) {
 int main() {
   int result;
   result = foo(1, 2, 3, 4, 5, 6);
-  result;
+  return result;
 }
 "
 
@@ -349,7 +349,7 @@ int fibonacci(int n){
 int main() {
   int result;
   result = fibonacci(10);
-  result;
+  return result;
 }
 "
 
@@ -371,7 +371,7 @@ int main()
 			c = 11;
     }
   }
-  c;
+  return c;
 }
 "
 
@@ -390,7 +390,7 @@ int main()
 {
   int result;
   result = foo(0, 2, 1);
-  result;
+  return result;
 }
 "
 
@@ -412,7 +412,7 @@ int main()
 {
   int result;
   result = foo(0, 2, 10);
-  result;
+  return result;
 }
 "
 
@@ -434,7 +434,7 @@ int main()
 {
   int result;
   result = foo(0, 2, 10);
-  result;
+  return result;
 }
 "
 
@@ -455,7 +455,7 @@ int main()
 {
   int result;
   result = foo(5, 15);
-  result;
+  return result;
 }
 "
 
@@ -464,7 +464,7 @@ int main()
 {
   if (0 == 0){
   }
-  5;
+  return 5;
 }
 "
 
@@ -473,7 +473,7 @@ int foo()
 {
   if (0 == 0){
   }
-  5;
+  return 5;
 }
 
 int main()
@@ -481,7 +481,7 @@ int main()
   1;
   2;
   3;
-  33;
+  return 33;
 }
 "
 
@@ -493,7 +493,7 @@ int bar() {
 int main() {
   int result;
   result = bar();
-  result;
+  return result;
 }
 "
 
@@ -504,7 +504,7 @@ int main()
     5;
   }else{
   }
-  7;
+  return 7;
 }
 "
 
@@ -523,7 +523,7 @@ int main()
     if (n == 0){
     }
   }
-  14;
+  return 14;
 }
 "
 
@@ -537,7 +537,7 @@ int main()
 {
   int a;
   a = 10;
-  bar(a - 1);
+  return bar(a - 1);
 }
 "
 
@@ -552,7 +552,7 @@ int rec(int n, int a)
 
 int main()
 {
-  rec(3, 5);
+  return rec(3, 5);
 }
 "
 
@@ -567,7 +567,7 @@ int rec(int a, int b)
 
 int main()
 {
-  rec(100, 20);
+  return rec(100, 20);
 }
 "
 
@@ -589,7 +589,7 @@ int main()
 {
   int result;
   result = foo(5, 20, 3);
-  result;
+  return result;
 }
 "
 
@@ -611,7 +611,7 @@ int main()
 {
   int result;
   result = fibonacci(0, 1, 10);
-  result;
+  return result;
 }
 "
 
@@ -621,11 +621,11 @@ int main (){
   a = 10;
   int *addr;
   addr = &a;
-  *addr;
+  return *addr;
 }
 "
 
-assert 7 " int main() { int x; int *y; y = &x; *y = 7; x;} "
+assert 7 " int main() { int x; int *y; y = &x; *y = 7; return x;} "
 assert 3 " int main(){ int x; int *y; y = &x; *y = 3; return x; } "
 
 assert 13 "
@@ -639,7 +639,7 @@ int main() {
   int **z;
   z = &y;
 
-  **z;
+  return **z;
 }
 "
 
@@ -652,7 +652,7 @@ int main(){
   int *p;
   p = &a;
   p = p + 1;
-  *p;
+  return *p;
 }
 "
 
@@ -670,20 +670,20 @@ int main(){
   p = &a;
   p = p + 2;
 
-  *p;
+  return *p;
 }
 "
 
-assert 11 " int main(){ int *p; alloc4(&p, 11, 22, 44, 88); *(p + 0); } "
-assert 22 " int main(){ int *p; alloc4(&p, 11, 22, 44, 88); *(p + 1); } "
-assert 44 " int main(){ int *p; alloc4(&p, 11, 22, 44, 88); *(p + 2); } "
-assert 88 " int main(){ int *p; alloc4(&p, 11, 22, 44, 88); *(p + 3); } "
-assert 22 " int main(){ int *p; alloc4(&p, 11, 22, 44, 88); p=p+3; *(p - 2); } "
+assert 11 " int main(){ int *p; alloc4(&p, 11, 22, 44, 88); return *(p + 0); } "
+assert 22 " int main(){ int *p; alloc4(&p, 11, 22, 44, 88); return *(p + 1); } "
+assert 44 " int main(){ int *p; alloc4(&p, 11, 22, 44, 88); return *(p + 2); } "
+assert 88 " int main(){ int *p; alloc4(&p, 11, 22, 44, 88); return *(p + 3); } "
+assert 22 " int main(){ int *p; alloc4(&p, 11, 22, 44, 88); p=p+3; return *(p - 2); } "
 
-assert 4 "int main() { sizeof 4;}"
-assert 4 "int main() { int a; a = 10; sizeof a;}"
-assert 8 "int main() { int x; x = 10; int *y; y = &x; sizeof y;}"
-assert 8 "int main() { int x; x = 10; int *y; y = &x; sizeof(y);}"
+assert 4 "int main() { return sizeof 4;}"
+assert 4 "int main() { int a; a = 10; return sizeof a;}"
+assert 8 "int main() { int x; x = 10; int *y; y = &x; return sizeof y;}"
+assert 8 "int main() { int x; x = 10; int *y; y = &x; return sizeof(y);}"
 
 assert 3 " int main() { int a[2]; a[0] = 1; a[1] = 2; return a[0] + a[1]; } "
 
@@ -691,30 +691,30 @@ assert 15 "int main() {
   int a[10];
   a[1] = 7;
   a[2] = 8;
-  a[1] + a[2];
+  return a[1] + a[2];
 }"
 
-assert 40 "int main() { int a[10]; sizeof a; }"
-assert 80 "int main() { int *a[10]; sizeof a; }"
-assert 80 "int main() { int **a[10]; sizeof a; }"
-assert 80 "int main() { int *****a[10]; sizeof a; }"
+assert 40 "int main() { int a[10]; return sizeof a; }"
+assert 80 "int main() { int *a[10]; return sizeof a; }"
+assert 80 "int main() { int **a[10]; return sizeof a; }"
+assert 80 "int main() { int *****a[10]; return sizeof a; }"
 
 assert 1 "
 int main(){
   int a[2];
   *a = 1;
-  *a;
+  return *a;
 }
 "
 
-assert 1 " int main(){ int a[2]; *a = 1; *(a + 1) = 2; *a; } "
+assert 1 " int main(){ int a[2]; *a = 1; *(a + 1) = 2; return *a; } "
 
 assert 2 "
 int main(){
   int a[2];
   *a = 1;
   *(a + 1) = 2;
-  *(a + 1);
+  return *(a + 1);
 }
 "
 
@@ -759,7 +759,7 @@ int main() {
 }
 "
 
-C では 2[a] の書き方も有効
+# C では 2[a] の書き方も有効
 assert 2 "
 int main() {
   int a[3];
@@ -770,7 +770,7 @@ int main() {
 }
 "
 
-assert 5 " int main() { char x[3]; x[0] = 5; x[0];} "
+assert 5 " int main() { char x[3]; x[0] = 5; return x[0];} "
 assert 9 "
 int main() {
   char x[3];
@@ -790,7 +790,7 @@ int main() {
 } "
 
 # TODO: Global Variable Assign
-# assert 5 "int a; int main() { a = 5; return a; } "
+assert 5 "int a; int main() { a = 5; return a; } "
 
 # assert 500 "int main(){500;}"
 
