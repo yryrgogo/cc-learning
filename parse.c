@@ -41,63 +41,61 @@ Node *toplevel() {
   }
   node->ty = ty;
 
-  if(tok) {
-    if(consume("(")) {
-      int args_offset_total = 0;
-      int args_count = 0;
-      locals = NULL;
-      node->args =
-          func_args_definition(&args_count, &args_offset_total, lvar_map);
-      node->args_num = args_count;
+  if(consume("(")) {
+    int args_offset_total = 0;
+    int args_count = 0;
+    locals = NULL;
+    node->args =
+        func_args_definition(&args_count, &args_offset_total, lvar_map);
+    node->args_num = args_count;
 
-      if(equal(token, "{")) {
-        node->kind = ND_FUNC;
-        local_offset = args_offset_total;
-        node->body = stmt(lvar_map);
-        node->locals = locals;
-      } else {
-        error_at(token->str, "toplevel に定義できる構文になっていません。");
-      }
+    if(equal(token, "{")) {
+      node->kind = ND_FUNC;
+      local_offset = args_offset_total;
+      node->body = stmt(lvar_map);
+      node->locals = locals;
+    } else {
+      error_at(token->str, "toplevel に定義できる構文になっていません。");
+    }
 
-      int max_offset = 0;
-      for(LVar *var = locals; var; var = var->next) {
-        max_offset = max(max_offset, var->offset);
-      }
-      update_lvar_offset(node, lvar_map, local_offset);
-      node->total_offset = local_offset;
-      local_offset = 0;
+    int max_offset = 0;
+    for(LVar *var = locals; var; var = var->next) {
+      max_offset = max(max_offset, var->offset);
     }
-    // global array
-    else if(consume("[")) {
-      node->kind = ND_LVAR;
-      // FIXME:
-      exit(1);
-    }
-    // global var
-    else {
-      node->kind = ND_GVAR;
-      // char gvar_key[node->len + 1];
-      // memcpy(gvar_key, node->name, node->len);
-      // gvar_key[node->len] = '\0';
+    update_lvar_offset(node, lvar_map, local_offset);
+    node->total_offset = local_offset;
+    local_offset = 0;
+  }
+  // global array
+  else if(consume("[")) {
+    node->kind = ND_LVAR;
+    // FIXME:
+    exit(1);
+  }
+  // global var
+  else {
+    node->kind = ND_GVAR;
+    // char gvar_key[node->len + 1];
+    // memcpy(gvar_key, node->name, node->len);
+    // gvar_key[node->len] = '\0';
 
-      GVar *gvar = find_gvar(tok);
-      if(!gvar) {
-        gvar = calloc(1, sizeof(GVar));
-        gvar->name = tok->str;
-        gvar->len = tok->len;
-        gvar->ty = ty;
-      }
-      if(!globals) {
-        globals = gvar;
-        globals_head = gvar;
-      } else {
-        globals_head->next = gvar;
-        globals_head = gvar;
-      }
-      if(consume("="))
-        node = new_binary(ND_ASSIGN, node, equality(NULL));
-      expect(";");
+    GVar *gvar = find_gvar(tok);
+    if(!gvar) {
+      gvar = calloc(1, sizeof(GVar));
+      gvar->name = tok->str;
+      gvar->len = tok->len;
+      gvar->ty = ty;
     }
+    if(!globals) {
+      globals = gvar;
+      globals_head = gvar;
+    } else {
+      globals_head->next = gvar;
+      globals_head = gvar;
+    }
+    if(consume("="))
+      node = new_binary(ND_ASSIGN, node, equality(NULL));
+    expect(";");
   }
 
   return node;
@@ -328,6 +326,8 @@ Node *ident_declaration(HashMap *lvar_map) {
 
   if(startswith(token->str, "int")) {
     ty->kind = TY_INT;
+  } else if(startswith(token->str, "char")) {
+    ty->kind = TY_CHAR;
   } else {
     error_at(NULL, "not implemented.");
   }
@@ -518,6 +518,8 @@ GVar *find_gvar(Token *tok) {
 int size_of_type(Type *ty) {
   if(ty->kind == TY_INT) {
     return 4;
+  } else if(ty->kind == TY_CHAR) {
+    return 1;
   } else if(ty->kind == TY_PTR && !ty->array_size) {
     return 8;
   } else if(ty->kind == TY_PTR && ty->array_size) {
@@ -559,10 +561,7 @@ Node *new_num(int val) {
 Node *new_unary(NodeKind kind, Node *lhs) {
   Node *node = new_node(kind);
   node->lhs = lhs;
-  if(!node->ty)
-    node->ty = new_type(NULL, NULL, -1);
-  if(!node->lhs->ty)
-    node->lhs->ty = new_type(NULL, NULL, -1);
+
   if(kind == ND_DEREF) {
     node->lhs->is_derefernce = true;
   }
@@ -579,7 +578,7 @@ Node *new_binary(NodeKind kind, Node *lhs, Node *rhs) {
 Type *new_type(Token *tok, Type *ptr_to, size_t array_size) {
   Type *ty = calloc(1, sizeof(Type));
 
-  if(startswith(token->str, "int")) {
+  if(startswith(tok->str, "int")) {
     ty->kind = TY_INT;
   }
   if(ptr_to) {

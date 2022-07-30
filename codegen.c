@@ -281,8 +281,6 @@ void gen_expr(Node *node, bool is_dereference) {
     printf("  push rax\n");
     return;
   case ND_ASSIGN: {
-    Type *ty = calloc(1, sizeof(Type));
-
     // TODO: switch のネストをリファクタ
     switch(node->lhs->kind) {
     case ND_LVAR:
@@ -307,7 +305,7 @@ void gen_expr(Node *node, bool is_dereference) {
     char *reg = "";
     char *prefix = "";
     if(node->lhs->kind == ND_DEREF) {
-      set_register_name(ty, &reg, &prefix);
+      set_register_name(deref_type(node->lhs), &reg, &prefix);
     } else {
       set_register_name(node->lhs->ty, &reg, &prefix);
     }
@@ -379,9 +377,25 @@ void set_register_name(Type *ty, char **reg, char **prefix) {
     *prefix = "";
     *reg = "rdi";
     break;
+  case TY_CHAR:
+    *prefix = "BYTE PTR";
+    *reg = "dil";
+    break;
   case TY_ARRAY:
     set_register_name(pointed_type(ty), reg, prefix);
     break;
+  }
+}
+
+Type *deref_type(Node *node) {
+  if(node->kind == ND_DEREF) {
+    return deref_type(node->lhs);
+  } else if(node->kind == ND_ADD) {
+    return deref_type(node->lhs);
+  } else if(node->ty->kind == TY_PTR) {
+    return pointed_type(node->ty);
+  } else {
+    return node->ty;
   }
 }
 
@@ -472,7 +486,7 @@ void gen_lvar_addr(Node *node) {
   if(node->kind != ND_LVAR) {
     printf("%s 代入の左辺値が変数ではありません。", __FILE__);
   }
-  if(node->ty->kind == TY_INT && node->is_declaration) {
+  if(node->ty && node->ty->kind == TY_INT && node->is_declaration) {
     rsp_offset += 4;
   }
 
@@ -482,7 +496,7 @@ void gen_lvar_addr(Node *node) {
 
   // TODO: ARRAY の変数宣言では、この命令が追加で必要だが理由を忘れた
   // addressをpushするだけでなく、そのaddressにはaddressそのものをセットしておく
-  if(node->ty->kind == TY_ARRAY && node->is_declaration) {
+  if(node->ty && node->ty->kind == TY_ARRAY && node->is_declaration) {
     printf("  pop rdi\n");
     printf("  mov [rax], rdi\n");
     printf("  push rax\n");
@@ -548,11 +562,11 @@ void gen_func_call_arg(Node *node, char *register_name) {
  *
  * @param node
  */
-Type *gen_lhs_deref(Node *node) {
+void *gen_lhs_deref(Node *node) {
   switch(node->kind) {
   case ND_LVAR:
     gen_lvar_addr(node);
-    if(node->ty->kind == TY_ARRAY) {
+    if(node->ty && node->ty->kind == TY_ARRAY) {
       return NULL;
     }
     printf("  pop rax\n");

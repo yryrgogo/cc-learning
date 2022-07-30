@@ -630,7 +630,6 @@ assert 3 " int main(){ int x; int *y; y = &x; *y = 3; return x; } "
 
 assert 13 "
 int main() {
-
   int x;
   x = 5;
   int *y;
@@ -686,14 +685,7 @@ assert 4 "int main() { int a; a = 10; sizeof a;}"
 assert 8 "int main() { int x; x = 10; int *y; y = &x; sizeof y;}"
 assert 8 "int main() { int x; x = 10; int *y; y = &x; sizeof(y);}"
 
-assert 3 "
-int main() {
-  int a[2];
-  a[0] = 1;
-  a[1] = 2;
-  return a[0] + a[1];
-}
-"
+assert 3 " int main() { int a[2]; a[0] = 1; a[1] = 2; return a[0] + a[1]; } "
 
 assert 15 "int main() {
   int a[10];
@@ -767,7 +759,7 @@ int main() {
 }
 "
 
-# C では 2[a] の書き方も有効
+C では 2[a] の書き方も有効
 assert 2 "
 int main() {
   int a[3];
@@ -778,7 +770,27 @@ int main() {
 }
 "
 
-assert 5 "int a; int main() { a = 5; return a; } "
+assert 5 " int main() { char x[3]; x[0] = 5; x[0];} "
+assert 9 "
+int main() {
+  char x[3];
+  x[0] = 5;
+  x[1] = 3;
+  x[2] = 1;
+  return x[0] + x[1] + x[2];
+} "
+
+assert 4 "
+int main() {
+  char a;
+  char b;
+  a = 1;
+  b = 3;
+  return a + b;
+} "
+
+# TODO: Global Variable Assign
+# assert 5 "int a; int main() { a = 5; return a; } "
 
 # assert 500 "int main(){500;}"
 
