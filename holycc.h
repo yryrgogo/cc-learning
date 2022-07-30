@@ -21,6 +21,7 @@ typedef struct GVar GVar;
 typedef struct Node Node;
 typedef struct HashEntry HashEntry;
 typedef struct HashMap HashMap;
+typedef struct Vector Vector;
 
 // Kind of Token
 typedef enum {
@@ -231,6 +232,23 @@ void gen_gvar_assign(Node *node);
 void gen_var_preprocess(Node *node, bool is_dereference);
 void set_register_name(Type *ty, char **reg, char **prefix);
 Type *deref_type(Node *node);
+
+//
+// vector.c
+//
+struct Vector {
+  void **data;
+  int capacity;
+  int len;
+};
+
+Vector *new_vec(void);
+void vec_push(Vector *v, void *elem);
+void vec_pushi(Vector *v, int val);
+void *vec_pop(Vector *v);
+void *vec_last(Vector *v);
+bool vec_contains(Vector *v, void *elem);
+bool vec_union(Vector *v, void *elem);
 
 //
 // hashmap.c
