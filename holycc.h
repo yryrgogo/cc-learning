@@ -36,6 +36,7 @@ typedef enum {
   TK_WHILE,   // while
   TK_TYPE,    // int
   TK_SIZEOF,  // sizeof
+  TK_STR,     // str
 } TokenKind;
 
 // Kind of Type
@@ -58,24 +59,26 @@ typedef enum {
   ND_LT,     // <
   ND_LE,     // <=
   ND_ASSIGN, // =
-  ND_LVAR,   // Local 変数
-  ND_GVAR,   // Global 変数
-  ND_NUM,    // 整数
-  ND_RETURN, // return
-
-  ND_BLOCK, // {}
-  ND_IF,    // if
-  ND_ELSE,  // else
-  ND_FOR,   // for
-  ND_WHILE, // while NOTE: NF_FOR
-            // にまとめられるらしいが今はわからんので分けている
-  ND_FUNC, // function
-  ND_CALL, // function call
-
-  ND_NOP, // no operation
 
   ND_ADDR,  // &
   ND_DEREF, // *
+
+  ND_LVAR, // Local 変数
+  ND_GVAR, // Global 変数
+
+  ND_RETURN, // return
+  ND_BLOCK,  // {}
+  ND_IF,     // if
+  ND_ELSE,   // else
+  ND_FOR,    // for
+  ND_WHILE,  // while NOTE: NF_FOR
+            // にまとめられるらしいが今はわからんので分けている
+  ND_FUNC, // function
+  ND_CALL, // function call
+  ND_NOP,  // no operation
+
+  ND_NUM, // 整数
+  ND_STR, // 文字列
 } NodeKind;
 
 struct Token {
@@ -93,31 +96,6 @@ struct Type {
   Type *ptr_to;
   size_t array_size;
 };
-
-//
-// tokenize.c
-//
-Token *tokenize(char *p);
-bool equal(Token *tok, char *op);
-bool equal_token(TokenKind tk);
-bool consume(char *op);
-bool consume_token(TokenKind tk);
-Token *consume_ident();
-Token *consume_type();
-int consume_num();
-void expect(char *op);
-int expect_number();
-bool at_eof();
-Token *new_token(TokenKind kind, Token *cur, char *str, int len);
-Type *new_type(Token *tok, Type *ptr_to, size_t array_size);
-bool startswith(char *p, char *q);
-bool is_alnum(char c);
-// static bool is_keyword(Token *tok);
-// static int read_punct(char *p);
-
-//
-// parse.c
-//
 
 // ローカル変数の型
 struct LVar {
@@ -143,8 +121,13 @@ struct Node {
   Node *next;    // 次のノード
   Node *lhs;     // 左辺
   Node *rhs;     // 右辺
-  int val;       // kind が ND_NUM の場合のみ使う
-  int offset;    // kind が ND_LVAR の場合のみ使う
+
+  int val; // kind が ND_NUM の場合のみ使う
+
+  char *str; // kind が ND_STR の場合のみ使う
+
+  int offset; // kind が ND_LVAR の場合のみ使う
+
   int total_offset;
 
   bool is_declaration;
@@ -172,6 +155,32 @@ struct Node {
   Type *return_ty;
 };
 
+//
+// tokenize.c
+//
+Token *tokenize(char *p);
+bool equal(Token *tok, char *op);
+bool equal_token(TokenKind tk);
+bool consume(char *op);
+bool consume_token(TokenKind tk);
+Token *consume_ident();
+Token *consume_type();
+int consume_num();
+void expect(char *op);
+int expect_number();
+char *expect_string();
+bool at_eof();
+Token *new_token(TokenKind kind, Token *cur, char *str, int len);
+Type *new_type(Token *tok, Type *ptr_to, size_t array_size);
+bool startswith(char *p, char *q);
+bool is_alnum(char c);
+// static bool is_keyword(Token *tok);
+// static int read_punct(char *p);
+
+//
+// parse.c
+//
+
 void program();
 Node *toplevel();
 Node *stmt(HashMap *lvar_map);
@@ -198,6 +207,7 @@ void adjust_rsp();
 Type *pointed_type(Type *ty);
 Node *new_node(NodeKind kind);
 Node *new_num(int val);
+Node *new_str(char *str);
 Node *new_unary(NodeKind kind, Node *lhs);
 Node *new_binary(NodeKind kind, Node *lhs, Node *rhs);
 Type *new_type(Token *tok, Type *ptr_to, size_t array_size);

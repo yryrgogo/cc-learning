@@ -1,6 +1,7 @@
 #include "holycc.h"
 
 extern Token *token;
+
 static LVar *locals;
 static LVar *locals_head;
 static GVar *globals;
@@ -293,6 +294,7 @@ Node *unary(HashMap *lvar_map) {
 }
 
 // primary = num
+//         | str
 //         | type ident
 //         | ident ("(" ")")?
 //         | "(" expr ")"
@@ -315,6 +317,11 @@ Node *primary(HashMap *lvar_map) {
   } else if(tok) {
     Node *node = local_variable(tok, NULL, lvar_map);
     return node;
+  }
+
+  if(consume("\"")) {
+    new_str(expect_string());
+    expect("\"");
   }
 
   return new_num(expect_number());
@@ -554,6 +561,16 @@ Node *new_num(int val) {
   ty->kind = TY_INT;
 
   node->val = val;
+  node->ty = ty;
+  return node;
+}
+
+Node *new_str(char *str) {
+  Node *node = new_node(ND_STR);
+  Type *ty = calloc(1, sizeof(Type));
+  ty->kind = TY_CHAR;
+
+  node->str = str;
   node->ty = ty;
   return node;
 }

@@ -4,8 +4,8 @@
 char *user_input;
 
 extern Token *token;
-extern Node *code[100];
 extern LVar *locals;
+extern Node *code[100];
 
 void error_at(char *loc, char *fmt, ...) {
   va_list ap;

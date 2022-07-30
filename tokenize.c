@@ -65,6 +65,14 @@ int expect_number() {
   return val;
 }
 
+char *expect_string() {
+  if(token->kind != TK_STR)
+    error_at(token->str, "expected a string");
+  char *str = token->str;
+  token = token->next;
+  return str;
+}
+
 bool at_eof() { return token->kind == TK_EOF; }
 
 bool startswith(char *p, char *q) { return memcmp(p, q, strlen(q)) == 0; }
@@ -138,6 +146,19 @@ Token *tokenize(char *p) {
 
     // Single-letter punctuator
     if(strchr("+-*/()<>{}[]=;,&", *p)) {
+      cur = new_token(TK_PUNCT, cur, p++, 1);
+      continue;
+    }
+
+    if(strchr("\"", *p)) {
+      cur = new_token(TK_PUNCT, cur, p++, 1);
+      char *q = p;
+      while(*q && *q != '\"')
+        q++;
+      if(*q != '\"')
+        error_at(p, "expected \"");
+      cur = new_token(TK_STR, cur, p, q - p);
+      p = q;
       cur = new_token(TK_PUNCT, cur, p++, 1);
       continue;
     }
