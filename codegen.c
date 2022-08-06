@@ -161,6 +161,7 @@ void gen_stmt(Node *node) {
       char name[lhs->len + 1];
       memcpy(name, lhs->name, lhs->len);
       name[lhs->len] = '\0';
+
       printf("  mov rax, [rip+%s]\n", name);
       printf("  push rax\n");
     } else {
@@ -267,6 +268,9 @@ void gen_expr(Node *node, bool is_dereference) {
   switch(node->kind) {
   case ND_NUM:
     printf("  push %d\n", node->val);
+    return;
+  case ND_STR:
+    printf("  push %d\n", 1);
     return;
   case ND_GVAR:
     gen_gvar_value(node);
@@ -437,47 +441,6 @@ Type *deref_type(Node *node) {
 }
 
 /**
- * @brief Node の Type を良い感じに返す関数があればと思ったが保留
- *
- */
-// Type *node_type(Node *node) {
-//   if(node->ty) {
-//     switch(node->ty) {
-//     case TY_ARRAY:
-//       return pointed_type(node->ty);
-//     case TY_PTR:
-//       return pointed_type(node->ty);
-//     default:
-//       return node->ty;
-//     }
-//   }
-
-//   switch(node->kind) {
-//   // TODO: ポインタの演算は lhs, rhs
-//   // のどちらにポインタがくるかわからないためこれじゃ判定できない
-//   case ND_ADD: {
-//     Type *lhs_ty = node_type(node->lhs);
-//     Type *rhs_ty = node_type(node->rhs);
-//     if (lhs_ty->kind == TY_PTR) {
-//     }
-//     else if (rhs_ty->kind == TY_PTR) {
-//       return TY_PTR;
-//     } else {
-//       return TY_INT;
-//     }
-//   }
-//   case ND_SUB:
-//     return node_type(node->lhs);
-//   case ND_MUL:
-//     return node_type(node->lhs);
-//   case ND_DIV:
-//     return node_type(node->lhs);
-//   case ND_EQ:
-//     return node_type(node->lhs);
-//   }
-// }
-
-/**
  * @brief rax, rdi を使って演算を行う
  *
  * @param node
@@ -586,8 +549,13 @@ void gen_gvar_value(Node *node) {
   memcpy(name, node->name, node->len);
   name[node->len] = '\0';
 
-  printf("  mov rax, [rip + %s]\n", name);
-  printf("  push rax\n");
+  if(node->ty->kind == TY_PTR) {
+    printf("  lea rax, [rip + %s]\n", name);
+    printf("  push rax\n");
+  } else {
+    printf("  mov rax, [rip + %s]\n", name);
+    printf("  push rax\n");
+  }
 }
 
 void gen_func_call(Node *node) {
