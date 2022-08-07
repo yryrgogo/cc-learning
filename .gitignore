@@ -2,3 +2,5 @@
 *.s
 tmp
 holycc
+run_test
+old

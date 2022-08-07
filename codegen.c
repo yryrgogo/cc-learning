@@ -264,7 +264,6 @@ void gen_stmt(Node *node) {
  * @param node
  */
 void gen_expr(Node *node, bool is_dereference) {
-
   switch(node->kind) {
   case ND_NUM:
     printf("  push %d\n", node->val);
