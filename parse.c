@@ -1,19 +1,23 @@
 #include "holycc.h"
 
-extern Token *token;
-
 static LVar *locals;
 static LVar *locals_head;
 static GVar *globals;
 static GVar *globals_head;
+
 Node *code[100];
+Token *token;
+extern HashMap *str_literal_map;
+HashMap *str_literal_map;
 
 int local_offset = 0;
 int lvar_count = 0;
 
 void program() {
+  str_literal_map = calloc(1, sizeof(HashMap));
   globals = NULL;
   int i = 0;
+
   while(!at_eof()) {
     Node *node = toplevel();
     code[i++] = node;
@@ -306,6 +310,9 @@ Node *primary(HashMap *lvar_map) {
     return node;
   } else if(equal_token(TK_TYPE)) {
     Node *node = ident_declaration(lvar_map);
+    if(consume("=")) {
+      node = new_binary(ND_ASSIGN, node, expr(lvar_map));
+    }
     return node;
   }
 
@@ -536,6 +543,7 @@ int size_of_type(Type *ty) {
   } else {
     error_at(NULL, "sizeof は int, ptr, array のサイズを返すことができます。");
     exit(1);
+
     return -1;
   }
 }
@@ -543,6 +551,7 @@ int size_of_type(Type *ty) {
 Type *pointed_type(Type *ty) {
   if(ty->ptr_to) {
     Type *last_ty = pointed_type(ty->ptr_to);
+
     return last_ty;
   } else {
     return ty;
@@ -552,6 +561,7 @@ Type *pointed_type(Type *ty) {
 Node *new_node(NodeKind kind) {
   Node *node = calloc(1, sizeof(Node));
   node->kind = kind;
+
   return node;
 }
 
@@ -562,6 +572,7 @@ Node *new_num(int val) {
 
   node->val = val;
   node->ty = ty;
+
   return node;
 }
 
@@ -572,6 +583,9 @@ Node *new_str(char *str) {
 
   node->str = str;
   node->ty = ty;
+
+  hashmap_put(str_literal_map, str, 1);
+
   return node;
 }
 
