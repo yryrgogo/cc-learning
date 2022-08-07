@@ -1,7 +1,7 @@
 #include "holycc.h"
 
 // 現在着目しているトークン
-Token *token;
+extern Token *token;
 
 // 次のトークンが期待している記号のときには、トークンを1つ読み進めて
 // 真を返す。それ以外の場合には偽を返す。
@@ -68,7 +68,11 @@ int expect_number() {
 char *expect_string() {
   if(token->kind != TK_STR)
     error_at(token->str, "expected a string");
-  char *str = token->str;
+
+  char str[token->len + 1];
+  memcpy(str, token->str, token->len);
+  str[token->len] = '\0';
+
   token = token->next;
   return str;
 }
