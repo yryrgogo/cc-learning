@@ -66,6 +66,23 @@ char *read_file(char *path) {
   return buf;
 }
 
+void write_graph() {
+  FILE *fp = fopen("graph.md", "w");
+
+  fprintf(fp, "```mermaid\n");
+  fprintf(fp, "flowchart TB\n");
+  fprintf(fp, "\n");
+
+  for(int i = 0; code[i]; i++) {
+    gen_graph(fp, code[i]);
+    fprintf(fp, "\n");
+  }
+
+  fprintf(fp, "```\n");
+
+  fclose(fp);
+}
+
 int main(int argc, char **argv) {
   if(argc != 2) {
     error_at(NULL, "引数の個数が正しくありません");
@@ -79,19 +96,7 @@ int main(int argc, char **argv) {
 
   program();
 
-  // if(startswith(argv[2], "1")) {
-  //   return 0;
-  //   printf("```mermaid\n");
-  //   printf("flowchart TB\n");
-  //   printf("\n");
-
-  //   for(int i = 0; code[i]; i++) {
-  //     gen_graph(code[i]);
-  //     printf("\n");
-  //   }
-
-  //   printf("```\n");
-  // }
+  write_graph();
 
   // // アセンブリの前半部分を出力
   printf(".intel_syntax noprefix\n");
