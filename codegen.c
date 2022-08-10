@@ -537,8 +537,15 @@ void gen_lvar_addr(Node *node) {
   // TODO: ARRAY の変数宣言では、この命令が追加で必要だが理由を忘れた
   // addressをpushするだけでなく、そのaddressにはaddressそのものをセットしておく
   if(node->ty && node->ty->kind == TY_ARRAY && node->is_declaration) {
-    printf("  pop rdi\n");
-    printf("  mov [rax], rdi\n");
+    char *prefix = "";
+    char *reg = "";
+    if(node->ty->ptr_to->kind != TY_PTR) {
+      set_register_name(node->ty->ptr_to, &reg, &prefix);
+    } else {
+      set_register_name(node->ty->ptr_to->ptr_to, &reg, &prefix);
+    }
+    
+    printf("  mov %s [rax], %s\n", prefix, reg);
     printf("  push rax\n");
   }
 }

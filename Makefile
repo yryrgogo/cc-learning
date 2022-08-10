@@ -11,7 +11,9 @@ test: holycc
 				./test.sh
 
 debug: holycc
-				./debug.sh
+				./holycc ./test/debug_source.c > tmp.s
+				cc -o tmp tmp.s ./sample/call_func.c pointer_calc.o
+				./tmp
 
 graph: holycc
 				./graph.sh

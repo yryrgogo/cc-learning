@@ -28,5 +28,5 @@ int arg6(int n1, int n2, int n3, int n4, int n5, int n6) {
   printf("%d/%d/%d/%d/%d/%d!!\n", n1, n2, n3, n4, n5, n6);
 }
 
-void *arg_str(char *str) { printf("%s\n", str); }
-void *printchar(char str) { printf("a: %c\n", str); }
+void *argstr(char *str) { printf("%s\n", str); }
+void *printchar(char str) { printf("char: %c\n", str); }

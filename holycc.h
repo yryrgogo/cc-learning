@@ -1,13 +1,13 @@
 #define __STDC_WANT_LIB_EXT1__ 1
 #include <assert.h>
 #include <ctype.h>
+#include <errno.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
 
 void error_at(char *loc, char *fmt, ...);
 
@@ -279,10 +279,14 @@ char *format(char *fmt, ...);
 //
 // graphgen.c
 //
-void gen_graph(Node *node);
-void gen_func_node(Node *node);
-void gen_graph_stmt(Node *node, char *name);
-void gen_graph_expr(Node *node, char *name);
+void gen_graph(FILE *fp, Node *node);
+void gen_edge(FILE *fp, char *parent_name, char *name);
+void gen_num_edge(FILE *fp, char *new_name, char *parent_name);
+void gen_block_edge(FILE *fp, char *new_name, char *parent_name);
+void gen_lvar_edge(FILE *fp, char *new_name, char *parent_name);
+void gen_func_node(FILE *fp, Node *node);
+void gen_graph_stmt(FILE *fp, Node *node, char *name);
+void gen_graph_expr(FILE *fp, Node *node, char *name);
 void get_no(char *no);
 void node_name(char *name);
 
