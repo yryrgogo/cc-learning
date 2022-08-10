@@ -5,6 +5,7 @@ char *user_input;
 
 extern LVar *locals;
 extern Node *code[100];
+extern Token *token;
 
 // 入力ファイル名
 char *filename;
@@ -66,6 +67,24 @@ char *read_file(char *path) {
   return buf;
 }
 
+void write_token() {
+  FILE *fp = fopen("token.txt", "w");
+
+  Token *tok = token;
+  int i = 0;
+  while(tok->kind != TK_EOF) {
+
+    char *name = calloc(1, sizeof(char) * (tok->len + 1));
+    memcpy(name, tok->str, tok->len);
+    name[tok->len] = '\0';
+    fprintf(fp, "%d : %s : %d\n", i, name, tok->kind);
+    tok = tok->next;
+    i++;
+  }
+
+  fclose(fp);
+}
+
 void write_graph() {
   FILE *fp = fopen("graph.md", "w");
 
@@ -89,10 +108,12 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  char *path = argv[1];
-  user_input = read_file(path);
+  // char *path = argv[1];
+  // user_input = read_file(path);
+  user_input = argv[1];
 
   tokenize(user_input);
+  write_token();
 
   program();
 
