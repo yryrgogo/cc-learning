@@ -65,16 +65,13 @@ int expect_number() {
   return val;
 }
 
-char *expect_string() {
+Token *expect_string() {
   if(token->kind != TK_STR)
     error_at(token->str, "expected a string");
 
-  char str[token->len + 1];
-  memcpy(str, token->str, token->len);
-  str[token->len] = '\0';
-
+  Token *t = token;
   token = token->next;
-  return str;
+  return t;
 }
 
 bool at_eof() { return token->kind == TK_EOF; }

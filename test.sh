@@ -7,12 +7,7 @@ test() {
   ./run_test
 }
 
-is_debug=$1
-if [ "$is_debug" = "1" ]; then
-  test debug_test
-else
-  test basic_test
-  test pointer_array_test
-  test global_test
-  test char_test
-fi
+test basic_test
+test pointer_array_test
+test global_test
+test char_test

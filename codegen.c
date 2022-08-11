@@ -1,5 +1,7 @@
 #include "holycc.h"
 
+extern HashMap *str_literal_map;
+
 int rsp_offset = 0;
 
 static int count(void) {
@@ -268,34 +270,48 @@ void gen_expr(Node *node, bool is_dereference) {
   case ND_NUM:
     printf("  push %d\n", node->val);
     return;
-  case ND_STR:
-    printf("  push %d\n", 1);
+  case ND_STR: {
+    int LABEL_LEN = 3;
+    int num = hashmap_get(str_literal_map, node->str);
+    char *label = calloc(1, sizeof(char) * LABEL_LEN);
+    sprintf(label, "L%d", num);
+    printf("  lea rax, [rip+%s]\n", label);
+    printf("  push rax\n");
     return;
-  case ND_GVAR:
+  }
+  case ND_GVAR: {
     gen_gvar_value(node);
     gen_var_preprocess(node, is_dereference);
     return;
-  case ND_LVAR:
+  }
+  case ND_LVAR: {
     gen_lvar_addr(node);
     gen_var_preprocess(node, is_dereference);
     return;
+  }
   case ND_ADDR:
     // TODO: &(*a) のような式はコンパイルできない
     gen_lvar_addr(node->lhs);
     return;
-  case ND_DEREF:
+  case ND_DEREF: {
     gen_expr(node->lhs, true);
 
     printf("  pop rax\n");
     printf("  mov rax, [rax]\n");
     printf("  push rax\n");
     return;
+  }
   case ND_ASSIGN: {
     // グローバル変数のアドレスをraxにセットして取り出す方法がわからないため分けている
     if(node->lhs->kind == ND_GVAR) {
       gen_gvar_assign(node);
       return;
     }
+
+    // if (node->lhs->ty->kind == TY_PTR && node->lhs->ty->ptr_to->kind ==
+    // TY_CHAR){
+    //   return;
+    // }
 
     // TODO: switch のネストをリファクタ
     switch(node->lhs->kind) {
@@ -417,6 +433,10 @@ void set_register_name(Type *ty, char **reg, char **prefix) {
     *prefix = "";
     *reg = "rdi";
     break;
+  case TY_STR:
+    *prefix = "";
+    *reg = "rdi";
+    break;
   case TY_CHAR:
     *prefix = "BYTE PTR";
     *reg = "dil";
@@ -530,9 +550,14 @@ void gen_lvar_addr(Node *node) {
     rsp_offset += 4;
   }
 
-  printf("  mov rax, rbp\n");
-  printf("  sub rax, %d\n", node->offset);
-  printf("  push rax\n");
+  if(node->ty && node->ty->kind == TY_STR) {
+    printf("  lea rax, [rip+%s]\n", node->label);
+    printf("  push rax\n");
+  } else {
+    printf("  mov rax, rbp\n");
+    printf("  sub rax, %d\n", node->offset);
+    printf("  push rax\n");
+  }
 
   // TODO: ARRAY の変数宣言では、この命令が追加で必要だが理由を忘れた
   // addressをpushするだけでなく、そのaddressにはaddressそのものをセットしておく
@@ -544,7 +569,7 @@ void gen_lvar_addr(Node *node) {
     } else {
       set_register_name(node->ty->ptr_to->ptr_to, &reg, &prefix);
     }
-    
+
     printf("  mov %s [rax], %s\n", prefix, reg);
     printf("  push rax\n");
   }
@@ -556,10 +581,10 @@ void gen_gvar_value(Node *node) {
   name[node->len] = '\0';
 
   if(node->ty->kind == TY_PTR) {
-    printf("  lea rax, [rip + %s]\n", name);
+    printf("  lea rax, [rip+%s]\n", name);
     printf("  push rax\n");
   } else {
-    printf("  mov rax, [rip + %s]\n", name);
+    printf("  mov rax, [rip+%s]\n", name);
     printf("  push rax\n");
   }
 }

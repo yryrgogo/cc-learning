@@ -1,4 +1,1 @@
-int main() {
-  char *s = "abc";
-  return 0;
-}
+int main() { int x = y + +5; return 0; }

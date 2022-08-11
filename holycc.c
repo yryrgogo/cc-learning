@@ -6,6 +6,9 @@ char *user_input;
 extern LVar *locals;
 extern Node *code[100];
 extern Token *token;
+extern HashMap *str_literal_map;
+
+#define TOMBSTONE ((void *)-1)
 
 // 入力ファイル名
 char *filename;
@@ -73,11 +76,10 @@ void write_token() {
   Token *tok = token;
   int i = 0;
   while(tok->kind != TK_EOF) {
-
     char *name = calloc(1, sizeof(char) * (tok->len + 1));
     memcpy(name, tok->str, tok->len);
     name[tok->len] = '\0';
-    fprintf(fp, "%d : %s : %d\n", i, name, tok->kind);
+    fprintf(fp, "%d\t:\t%s\t:\t%d\n", i, name, tok->kind);
     tok = tok->next;
     i++;
   }
@@ -108,9 +110,9 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  // char *path = argv[1];
-  // user_input = read_file(path);
-  user_input = argv[1];
+  char *path = argv[1];
+  user_input = read_file(path);
+  // user_input = argv[1];
 
   tokenize(user_input);
   write_token();
@@ -122,6 +124,15 @@ int main(int argc, char **argv) {
   // // アセンブリの前半部分を出力
   printf(".intel_syntax noprefix\n");
   printf(".globl main\n");
+
+  for(int i = 0; i < str_literal_map->capacity; i++) {
+    if(str_literal_map->buckets[i].key &&
+       str_literal_map->buckets[i].key != TOMBSTONE) {
+      printf("L%d:\n", str_literal_map->buckets[i].val);
+      printf("  .string \"%s\"\n", str_literal_map->buckets[i].key);
+      printf("  .text\n");
+    }
+  }
 
   // // 抽象構文木を下りながらコード生成
   for(int i = 0; code[i]; i++) {

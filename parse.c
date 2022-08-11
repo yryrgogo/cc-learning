@@ -327,8 +327,9 @@ Node *primary(HashMap *lvar_map) {
   }
 
   if(consume("\"")) {
-    new_str(expect_string());
+    Node *node = new_str(expect_string());
     expect("\"");
+    return node;
   }
 
   return new_num(expect_number());
@@ -418,7 +419,7 @@ Node *local_variable(Token *tok, Type *ty, HashMap *lvar_map) {
       }
       locals = lvar;
       locals_head = locals;
-    } else {
+    } else if(lvar->ty) {
       if(lvar->ty->kind == TY_ARRAY) {
         lvar->offset = local_offset + size_of_type(lvar->ty->ptr_to);
         local_offset += size_of_type(lvar->ty);
@@ -428,6 +429,8 @@ Node *local_variable(Token *tok, Type *ty, HashMap *lvar_map) {
       }
       locals_head->next = lvar;
       locals_head = lvar;
+    } else {
+      error_at(tok->str, "ローカル変数の型が存在しません。");
     }
     lvar_count++;
     node->kind = ND_LVAR;
@@ -534,6 +537,8 @@ int size_of_type(Type *ty) {
     return 4;
   } else if(ty->kind == TY_CHAR) {
     return 1;
+  } else if(ty->kind == TY_STR) {
+    return 8;
   } else if(ty->kind == TY_PTR && !ty->array_size) {
     return 8;
   } else if(ty->kind == TY_PTR && ty->array_size) {
@@ -576,15 +581,21 @@ Node *new_num(int val) {
   return node;
 }
 
-Node *new_str(char *str) {
+Node *new_str(Token *tok) {
   Node *node = new_node(ND_STR);
   Type *ty = calloc(1, sizeof(Type));
-  ty->kind = TY_CHAR;
+  ty->kind = TY_STR;
+
+  char *str = malloc(sizeof(char) * tok->len + 1);
+  memcpy(str, tok->str, tok->len);
+  str[tok->len] = '\0';
 
   node->str = str;
   node->ty = ty;
 
-  hashmap_put(str_literal_map, str, 1);
+  static int label_count = 0;
+  hashmap_put(str_literal_map, str, label_count);
+  label_count++;
 
   return node;
 }

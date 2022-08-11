@@ -1,5 +1,4 @@
-int testchar(char expected, char actual) {
-  printchar(actual);
+int testchar(char *expected, char *actual) {
   if(expected == actual) {
     pass();
     return 0;
@@ -10,26 +9,11 @@ int testchar(char expected, char actual) {
   return 0;
 }
 
-char case92() {
-  char x[3];
-  x[0] = 5;
-  return x[0];
-}
-char case93() {
-  char x[3];
-  x[0] = 5;
-  x[1] = 3;
-  x[2] = 1;
-  return x[0] + x[1] + x[2];
-}
-char case94() {
-  char a = 1;
-  char b = 3;
-  return a;
+int case92() {
+  char *x = "hello literal!";
+  char *y = "hello literal!";
+  testchar(x, y);
+  return 0;
 }
 
-int main() {
-  testchar(5, case92());
-  testchar(8, case93());
-  testchar(4, case94());
-}
+int main() { case92(); }

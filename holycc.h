@@ -47,6 +47,7 @@ typedef enum {
   TY_PTR,   // pointer
   TY_ARRAY, // array
   TY_CHAR,  // char
+  TY_STR,   // string
   TY_BOOL,  // bool
 } TypeKind;
 
@@ -155,6 +156,9 @@ struct Node {
   // type
   Type *ty;
   Type *return_ty;
+
+  // string
+  char *label; // string literal のラベル
 };
 
 //
@@ -170,7 +174,7 @@ Token *consume_type();
 int consume_num();
 void expect(char *op);
 int expect_number();
-char *expect_string();
+Token *expect_string();
 bool at_eof();
 Token *new_token(TokenKind kind, Token *cur, char *str, int len);
 Type *new_type(Token *tok, Type *ptr_to, size_t array_size);
@@ -209,7 +213,7 @@ void adjust_rsp();
 Type *pointed_type(Type *ty);
 Node *new_node(NodeKind kind);
 Node *new_num(int val);
-Node *new_str(char *str);
+Node *new_str(Token *tok);
 Node *new_unary(NodeKind kind, Node *lhs);
 Node *new_binary(NodeKind kind, Node *lhs, Node *rhs);
 Type *new_type(Token *tok, Type *ptr_to, size_t array_size);
