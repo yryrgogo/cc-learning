@@ -17,4 +17,19 @@ int case92() {
   return 0;
 }
 
-int main() { case92(); }
+int case93() {
+  /*
+    block comment test
+abc
+    123456
+    x + y = z;
+    int a = 1;
+    printf("%d", a); */
+
+  return 0;
+}
+
+int main() {
+  case92();
+  case93();
+}

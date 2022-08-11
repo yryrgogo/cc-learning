@@ -145,6 +145,15 @@ Token *tokenize(char *p) {
       continue;
     }
 
+    // ブロックコメントをスキップ
+    if(strncmp(p, "/*", 2) == 0) {
+      p += 2;
+      while(*p && strncmp(p, "*/", 2) != 0)
+        p++;
+      p += 2;
+      continue;
+    }
+
     // Multi-letter punctuator
     if(startswith(p, "==") || startswith(p, "!=") || startswith(p, ">=") ||
        startswith(p, "<=")) {
