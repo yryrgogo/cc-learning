@@ -137,6 +137,14 @@ Token *tokenize(char *p) {
       continue;
     }
 
+    // 行コメントをスキップ
+    if(strncmp(p, "//", 2) == 0) {
+      p += 2;
+      while(*p && *p != '\n')
+        p++;
+      continue;
+    }
+
     // Multi-letter punctuator
     if(startswith(p, "==") || startswith(p, "!=") || startswith(p, ">=") ||
        startswith(p, "<=")) {
