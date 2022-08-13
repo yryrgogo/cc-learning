@@ -39,6 +39,7 @@ typedef enum {
   TK_TYPE,    // int
   TK_SIZEOF,  // sizeof
   TK_STR,     // str
+  TK_CHAR,    // char
 } TokenKind;
 
 // Kind of Type
@@ -80,8 +81,9 @@ typedef enum {
   ND_CALL, // function call
   ND_NOP,  // no operation
 
-  ND_NUM, // 整数
-  ND_STR, // 文字列
+  ND_NUM,  // 整数
+  ND_CHAR, // 文字列
+  ND_STR,  // 文字列
 } NodeKind;
 
 struct Token {
@@ -125,8 +127,8 @@ struct Node {
   Node *lhs;     // 左辺
   Node *rhs;     // 右辺
 
-  int val; // kind が ND_NUM の場合のみ使う
-
+  int val;   // kind が ND_NUM の場合のみ使う
+  char ch;   // kind が ND_CHAR の場合のみ使う
   char *str; // kind が ND_STR の場合のみ使う
 
   int offset; // kind が ND_LVAR の場合のみ使う
@@ -174,6 +176,7 @@ Token *consume_type();
 int consume_num();
 void expect(char *op);
 int expect_number();
+Token *expect_char();
 Token *expect_string();
 bool at_eof();
 Token *new_token(TokenKind kind, Token *cur, char *str, int len);
@@ -213,6 +216,7 @@ void adjust_rsp();
 Type *pointed_type(Type *ty);
 Node *new_node(NodeKind kind);
 Node *new_num(int val);
+Node *new_char(Token *tok);
 Node *new_str(Token *tok);
 Node *new_unary(NodeKind kind, Node *lhs);
 Node *new_binary(NodeKind kind, Node *lhs, Node *rhs);

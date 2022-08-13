@@ -1,1 +1,4 @@
-int main() { int x = y + +5; return 0; }
+int main() {
+  int x = 5;
+  return x;
+}

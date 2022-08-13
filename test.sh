@@ -7,7 +7,7 @@ test() {
   ./run_test
 }
 
-test basic_test
-test pointer_array_test
-test global_test
+# test basic_test
+# test pointer_array_test
+# test global_test
 test char_test

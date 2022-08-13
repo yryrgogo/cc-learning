@@ -1,4 +1,5 @@
 *.o
+*.out
 *.s
 tmp
 holycc
@@ -6,3 +7,4 @@ run_test
 old
 graph.md
 token.txt
+a

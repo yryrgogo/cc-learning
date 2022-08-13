@@ -74,6 +74,15 @@ Token *expect_string() {
   return t;
 }
 
+Token *expect_char() {
+  if(token->kind != TK_CHAR)
+    error_at(token->str, "expected a char");
+
+  Token *t = token;
+  token = token->next;
+  return t;
+}
+
 bool at_eof() { return token->kind == TK_EOF; }
 
 bool startswith(char *p, char *q) { return memcmp(p, q, strlen(q)) == 0; }
@@ -179,6 +188,16 @@ Token *tokenize(char *p) {
       p = q;
       cur = new_token(TK_PUNCT, cur, p++, 1);
       continue;
+    } else if(strchr("'", *p)) {
+      cur = new_token(TK_PUNCT, cur, p++, 1);
+      char *q = p;
+      q++;
+      if(*q != '\'')
+        error_at(p, "expected '");
+      cur = new_token(TK_CHAR, cur, p, 1);
+      p = q;
+      cur = new_token(TK_PUNCT, cur, p++, 1);
+      continue;
     }
 
     // Type
@@ -230,9 +249,9 @@ Token *tokenize(char *p) {
       continue;
     }
 
-    if('a' <= *p && *p <= 'z') {
+    if(('a' <= *p && *p <= 'z') || ('A' <= *p && *p <= 'Z') || *p == '_') {
       int i = 0;
-      while(('a' <= *p && *p <= 'z') || ('0' <= *p && *p <= '9')) {
+      while(('a' <= *p && *p <= 'z') || ('A' <= *p && &p <= 'Z') || *p == '_' || ('0' <= *p && *p <= '9')) {
         p++;
         i++;
       }

@@ -15,6 +15,7 @@ The code bases is no longer a 9cc transcript from the middle, so please don't re
 ## Todo
 
 - [ ] 関数の戻り値に `char`, `char *`, `int *` なども設定可能にする
+- [ ] 関数の引数に変数以外を渡せない（プリミティブな値をそのまま渡せない）
 - [ ] printf をリンクする
 - [ ] セルフホストする
 

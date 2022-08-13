@@ -330,6 +330,10 @@ Node *primary(HashMap *lvar_map) {
     Node *node = new_str(expect_string());
     expect("\"");
     return node;
+  } else if(consume("\'")) {
+    Node *node = new_char(expect_char());
+    expect("\'");
+    return node;
   }
 
   return new_num(expect_number());
@@ -576,6 +580,18 @@ Node *new_num(int val) {
   ty->kind = TY_INT;
 
   node->val = val;
+  node->ty = ty;
+
+  return node;
+}
+
+Node *new_char(Token *tok) {
+  Node *node = new_node(ND_CHAR);
+  Type *ty = calloc(1, sizeof(Type));
+  ty->kind = TY_CHAR;
+
+  char ch = tok->str[0];
+  node->ch = ch;
   node->ty = ty;
 
   return node;

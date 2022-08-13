@@ -270,6 +270,9 @@ void gen_expr(Node *node, bool is_dereference) {
   case ND_NUM:
     printf("  push %d\n", node->val);
     return;
+  case ND_CHAR:
+    printf("  push %d\n", node->ch);
+    return;
   case ND_STR: {
     int LABEL_LEN = 3;
     int num = hashmap_get(str_literal_map, node->str);
@@ -307,11 +310,6 @@ void gen_expr(Node *node, bool is_dereference) {
       gen_gvar_assign(node);
       return;
     }
-
-    // if (node->lhs->ty->kind == TY_PTR && node->lhs->ty->ptr_to->kind ==
-    // TY_CHAR){
-    //   return;
-    // }
 
     // TODO: switch のネストをリファクタ
     switch(node->lhs->kind) {
@@ -402,7 +400,10 @@ void gen_gvar_assign(Node *node) {
 }
 
 void gen_var_preprocess(Node *node, bool is_dereference) {
+  char *ins = "mov";
   char *reg = "";
+  char *prefix = "";
+
   // TODO: 配列へのポインタの場合も後続処理をスキップする
   if(node->ty->kind == TY_ARRAY &&
      (is_dereference || node->is_derefernce || !(node->has_index >= 0))) {
@@ -414,12 +415,16 @@ void gen_var_preprocess(Node *node, bool is_dereference) {
 
   if(node->ty->kind == TY_INT) {
     reg = "eax";
+  } else if(node->ty->kind == TY_CHAR) {
+    ins = "movsx";
+    reg = "eax";
+    prefix = "BYTE PTR ";
   } else {
     reg = "rax";
   }
 
   printf("  pop rax\n");
-  printf("  mov %s, [rax]\n", reg);
+  printf("  %s %s, %s[rax]\n", ins, reg, prefix);
   printf("  push rax\n");
 }
 
@@ -559,8 +564,8 @@ void gen_lvar_addr(Node *node) {
     printf("  push rax\n");
   }
 
-  // TODO: ARRAY の変数宣言では、この命令が追加で必要だが理由を忘れた
   // addressをpushするだけでなく、そのaddressにはaddressそのものをセットしておく
+  // TODO: ARRAY の変数宣言では、この命令が追加で必要だが理由を忘れた
   if(node->ty && node->ty->kind == TY_ARRAY && node->is_declaration) {
     char *prefix = "";
     char *reg = "";
