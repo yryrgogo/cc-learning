@@ -44,8 +44,9 @@ typedef enum {
   ND_NEG, // unary -
   ND_EQ,
   ND_NE,
-  ND_LT, // <
-  ND_LE, // <=
+  ND_LT,        // <
+  ND_LE,        // <=
+  ND_EXPR_STMT, // Expression statement
   ND_NUM,
 } NodeKind;
 
@@ -53,6 +54,7 @@ typedef enum {
 typedef struct Node Node;
 struct Node {
   NodeKind kind;
+  Node *next;
   Node *lhs;
   Node *rhs;
   int val;
