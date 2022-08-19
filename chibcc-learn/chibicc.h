@@ -71,6 +71,7 @@ typedef enum {
   ND_LE, // <=
   ND_ASSIGN,
   ND_RETURN,
+  ND_BLOCK,
   ND_EXPR_STMT, // Expression statement
   ND_VAR,
   ND_NUM,
@@ -83,6 +84,10 @@ struct Node {
   Node *next;
   Node *lhs;
   Node *rhs;
+
+  // Block
+  Node *body;
+
   Obj *var;
   int val;
 };
