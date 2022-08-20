@@ -29,7 +29,7 @@ static void gen_addr(Node *node) {
     return;
   }
 
-  error("not an lvalue");
+  error_tok(node->tok, "not an lvalue");
 }
 
 static void gen_expr(Node *node) {
@@ -92,7 +92,7 @@ static void gen_expr(Node *node) {
     return;
   }
 
-  printf("invalid expression");
+  error_tok(node->tok, "invalid expression");
 }
 
 static void gen_stmt(Node *node) {
@@ -112,7 +112,8 @@ static void gen_stmt(Node *node) {
   }
   case ND_FOR: {
     int c = count();
-    if (node->init) gen_stmt(node->init);
+    if(node->init)
+      gen_stmt(node->init);
     printf(".L.begin.%d:\n", c);
     if(node->cond) {
       gen_expr(node->cond);
@@ -139,7 +140,7 @@ static void gen_stmt(Node *node) {
     return;
   }
 
-  error("invalid statement");
+  error_tok(node->tok, "invalid statement");
 }
 
 static void assign_lvar_offsets(Function *prog) {

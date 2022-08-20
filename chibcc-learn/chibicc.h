@@ -84,6 +84,7 @@ typedef struct Node Node;
 struct Node {
   NodeKind kind;
   Node *next;
+  Token *tok; // Representative token
 
   Node *lhs;
   Node *rhs;
