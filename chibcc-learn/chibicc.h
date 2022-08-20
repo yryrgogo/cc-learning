@@ -72,7 +72,7 @@ typedef enum {
   ND_ASSIGN,
   ND_RETURN,
   ND_IF,
-  ND_FOR,
+  ND_FOR, // "for" or "while"
   ND_BLOCK,
   ND_EXPR_STMT, // Expression statement
   ND_VAR,
