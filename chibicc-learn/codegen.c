@@ -151,6 +151,12 @@ static void gen_stmt(Node *node) {
   case ND_EXPR_STMT:
     gen_expr(node->lhs);
     return;
+    // NOTE: 自分の実装と異なり、chibicc は default case
+    // がない。その代わり、明示的に expression statement
+    // のノードを生成して、BLOCK の直下には必ず statement
+    // が並ぶようにしている。自分の実装は expression statement がなく、BLOCK の
+    // body に直接 expression も入れられるようになっているが、C
+    // の構文としてそれは適切でないということね
   }
 
   error_tok(node->tok, "invalid statement");

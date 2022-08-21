@@ -51,6 +51,10 @@ static Node *new_num(int val, Token *tok) {
   return node;
 }
 
+// NOTE: Obj *var
+// は全てのローカル変数の連結リストになっている。全て繋がっている必要はないが、先頭に
+// Node の要素となる変数がきているため、その後の処理で next
+// を呼ばない限りこの実装で問題は起きない。厳密でないといえばそうかもしれないが、実装をシンプルにしてやりたいことを達成していてすごい
 static Node *new_var_node(Obj *var, Token *tok) {
   Node *node = new_node(ND_VAR, tok);
   node->var = var;
@@ -107,15 +111,20 @@ static Node *declaration(Token **rest, Token *tok) {
     Type *ty = declarator(&tok, tok, basety);
     Obj *var = new_lvar(get_ident(ty->name), ty);
 
+    // = の前に複数の変数が宣言されている場合はここで continue。そのまま =
+    // がなく ; なら while を抜ける
     if(!equal(tok, "="))
       continue;
 
     Node *lhs = new_var_node(var, ty->name);
     Node *rhs = assign(&tok, tok->next);
+    // 代入式は , で複数定義できる。ただし型宣言は先頭のみ
     Node *node = new_binary(ND_ASSIGN, lhs, rhs, tok);
+    // NOTE: なぜ EXPR_STMT にしているのだろう？ -> BLOCK は statement から構成され、expr が直接並ぶことはない。ND_BLOCK を codegen する際はまず gen_stmt が走る
     cur = cur->next = new_unary(ND_EXPR_STMT, node, tok);
   }
 
+  // TODO: なぜ BLOCK にしているのだろう？
   Node *node = new_node(ND_BLOCK, tok);
   node->body = head.next;
   *rest = tok->next;
@@ -409,7 +418,8 @@ static Node *primary(Token **rest, Token *tok) {
   if(tok->kind == TK_IDENT) {
     Obj *var = find_var(tok);
     if(!var)
-      // NOTE: 変数の宣言・定義は declaration でまとめて行っているため、ここで変数が見つからないということはあり得ない実装になっている
+      // NOTE: 変数の宣言・定義は declaration
+      // でまとめて行っているため、ここで変数が見つからないということはあり得ない実装になっている
       error_tok(tok, "undefined variable");
     *rest = tok->next;
     return new_var_node(var, tok);
