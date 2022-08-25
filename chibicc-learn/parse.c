@@ -120,7 +120,9 @@ static Node *declaration(Token **rest, Token *tok) {
     Node *rhs = assign(&tok, tok->next);
     // 代入式は , で複数定義できる。ただし型宣言は先頭のみ
     Node *node = new_binary(ND_ASSIGN, lhs, rhs, tok);
-    // NOTE: なぜ EXPR_STMT にしているのだろう？ -> BLOCK は statement から構成され、expr が直接並ぶことはない。ND_BLOCK を codegen する際はまず gen_stmt が走る
+    // NOTE: なぜ EXPR_STMT にしているのだろう？ -> BLOCK は statement
+    // から構成され、expr が直接並ぶことはない。ND_BLOCK を codegen する際はまず
+    // gen_stmt が走る
     cur = cur->next = new_unary(ND_EXPR_STMT, node, tok);
   }
 
@@ -416,6 +418,15 @@ static Node *primary(Token **rest, Token *tok) {
   }
 
   if(tok->kind == TK_IDENT) {
+    // Function call
+    if(equal(tok->next, "(")) {
+      Node *node = new_node(ND_FUNCALL, tok);
+      node->funcname = strndup(tok->loc, tok->len);
+      *rest = skip(tok->next->next, ")");
+      return node;
+    }
+
+    // Variable
     Obj *var = find_var(tok);
     if(!var)
       // NOTE: 変数の宣言・定義は declaration
