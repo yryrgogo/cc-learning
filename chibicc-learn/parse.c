@@ -16,6 +16,7 @@ static Node *equality(Token **rest, Token *tok);
 static Node *relational(Token **rest, Token *tok);
 static Node *add(Token **rest, Token *tok);
 static Node *mul(Token **rest, Token *tok);
+static Node *postfix(Token **rest, Token *tok);
 static Node *unary(Token **rest, Token *tok);
 static Node *primary(Token **rest, Token *tok);
 
@@ -119,7 +120,7 @@ static Type *type_suffix(Token **rest, Token *tok, Type *ty) {
 
   if(equal(tok, "[")) {
     int sz = get_number(tok->next);
-    tok = skip(tok->next->next);
+    tok = skip(tok->next->next, "]");
     // NOTE: これで多次元配列や関数の配列に対応できるのか
     ty = type_suffix(rest, tok, ty);
     return array_of(ty, sz);
@@ -137,7 +138,8 @@ static Type *declarator(Token **rest, Token *tok, Type *ty) {
   if(tok->kind != TK_IDENT)
     error_tok(tok, "expected a variable name");
 
-  // NOTE: なぜtype_suffixを呼ぶのか謎だったが、関数定義や配列かどうかを判別できるポイントはここだから、だった
+  // NOTE:
+  // なぜtype_suffixを呼ぶのか謎だったが、関数定義や配列かどうかを判別できるポイントはここだから、だった
   ty = type_suffix(rest, tok->next, ty);
   ty->name = tok;
   return ty;
@@ -440,7 +442,7 @@ Node *mul(Token **rest, Token *tok) {
 }
 
 // unary = ("+" | "-" | "*" | "&") unary
-//       | primary
+//       | postfix
 Node *unary(Token **rest, Token *tok) {
   if(equal(tok, "+"))
     return unary(rest, tok->next);
@@ -454,7 +456,23 @@ Node *unary(Token **rest, Token *tok) {
   if(equal(tok, "*"))
     return new_unary(ND_DEREF, unary(rest, tok->next), tok);
 
-  return primary(rest, tok);
+  return postfix(rest, tok);
+}
+
+// postfix = primary ("[" expr "]")*
+static Node *postfix(Token **rest, Token *tok) {
+  Node *node = primary(&tok, tok);
+
+  while(equal(tok, "[")) {
+    Token *start = tok;
+    Node *idx = expr(&tok, tok->next);
+    tok = skip(tok, "]");
+    // 配列のインデックスによるアクセスは、ポインタ演算して dereference
+    // するのと一緒（エイリアスみたいなもの）
+    node = new_unary(ND_DEREF, new_add(node, idx, start), start);
+  }
+  *rest = tok;
+  return node;
 }
 
 // funcall = ident "(" (assign ("," assign)*)? ")"
