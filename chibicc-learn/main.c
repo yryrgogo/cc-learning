@@ -6,8 +6,10 @@ int main(int argc, char **argv) {
     return 1;
   }
 
+  // Tokenize and parse.
   Token *tok = tokenize(argv[1]);
-  Function *prog = parse(tok);
+  Obj *prog = parse(tok);
+
   // Traverse the AST to emit assembly.
   codegen(prog);
 

@@ -44,20 +44,21 @@ Token *tokenize(char *p);
 // parse.c
 //
 
-// Local variable
+// variable or function
 typedef struct Obj Obj;
 struct Obj {
   Obj *next;
   char *name;
   Type *ty;
-  int offset;
-};
+  bool is_local; // local or global/function
 
-// Function
-typedef struct Function Function;
-struct Function {
-  Function *next;
-  char *name;
+  // Local variable
+  int offset;
+
+  // Global variable or function
+  bool is_function;
+
+  // Function
   Obj *params;
   Node *body;
   Obj *locals;
@@ -117,7 +118,7 @@ struct Node {
   int val;
 };
 
-Function *parse(Token *tok);
+Obj *parse(Token *tok);
 
 //
 // type.c
@@ -169,4 +170,4 @@ void add_type(Node *node);
 // codegen.c
 //
 
-void codegen(Function *node);
+void codegen(Obj *node);
